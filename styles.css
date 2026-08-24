@@ -1,0 +1,106 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f8;
+    color: #263238;
+}
+
+/* INICIO */
+
+.inicio {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tarjeta-inicio {
+    background: white;
+    padding: 45px;
+    width: 420px;
+    max-width: 90%;
+    text-align: center;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.tarjeta-inicio h1 {
+    margin-bottom: 10px;
+}
+
+.tarjeta-inicio p {
+    color: #607d8b;
+    margin-bottom: 30px;
+}
+
+/* LOGIN */
+
+.login {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tarjeta-login {
+    background: white;
+    padding: 40px;
+    width: 400px;
+    max-width: 90%;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.tarjeta-login h1 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.tarjeta-login p {
+    color: #607d8b;
+    margin-bottom: 30px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label {
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+input {
+    padding: 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #1f6f8b;
+}
+
+.boton {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #1f6f8b;
+    color: white;
+    text-decoration: none;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.boton:hover {
+    opacity: 0.9;
+}
