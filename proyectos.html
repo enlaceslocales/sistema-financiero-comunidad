@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Proyectos | Sistema Financiero</title>
+
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+
+    <style>
+
+        .proyectos-contenedor {
+            padding: 24px;
+        }
+
+        .proyectos-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .proyectos-header h1 {
+            margin: 0;
+        }
+
+        .proyectos-header p {
+            margin: 5px 0 0;
+            color: #6b7280;
+        }
+
+        .proyectos-acciones {
+            display: flex;
+            gap: 10px;
+        }
+
+        .boton-principal {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .boton-azul {
+            background: #2563eb;
+            color: white;
+        }
+
+        .boton-secundario {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .resumen-proyectos {
+            display: grid;
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .tarjeta-resumen {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow:
+                0 2px 8px rgba(0,0,0,.06);
+        }
+
+        .tarjeta-resumen span {
+            display: block;
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .tarjeta-resumen strong {
+            font-size: 24px;
+        }
+
+        .filtros-proyectos {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+            gap: 15px;
+            box-shadow:
+                0 2px 8px rgba(0,0,0,.05);
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .campo label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .campo input,
+        .campo select,
+        .campo textarea {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            padding: 9px 10px;
+            font-family: inherit;
+        }
+
+        .campo textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .tabla-contenedor {
+            background: white;
+            border-radius: 12px;
+            overflow-x: auto;
+            box-shadow:
+                0 2px 8px rgba(0,0,0,.05);
+        }
+
+        .tabla-proyectos {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tabla-proyectos th,
+        .tabla-proyectos td {
+            padding: 13px 14px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .tabla-proyectos th {
+            background: #f9fafb;
+            font-size: 13px;
+            color: #374151;
+        }
+
+        .tabla-proyectos td {
+            font-size: 14px;
+        }
+
+        .estado {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .estado-postulado {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .estado-adjudicado {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .estado-ejecucion {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .estado-rendido {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .estado-cerrado {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .estado-rechazado {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .boton-tabla {
+            border: none;
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 7px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .boton-tabla:hover {
+            background: #dbeafe;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .modal-contenido {
+            background: white;
+            width: 100%;
+            max-width: 760px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 14px;
+            padding: 24px;
+            box-sizing: border-box;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .cerrar-modal {
+            border: none;
+            background: transparent;
+            font-size: 25px;
+            cursor: pointer;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .campo-completo {
+            grid-column: 1 / -1;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .detalle-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .detalle-item {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .detalle-item small {
+            display: block;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .detalle-item strong {
+            display: block;
+            color: #111827;
+        }
+
+        .detalle-completo {
+            grid-column: 1 / -1;
+        }
+
+        .tabla-cargando {
+            text-align: center !important;
+            padding: 30px !important;
+            color: #6b7280;
+        }
+
+        @media (max-width: 900px) {
+
+            .resumen-proyectos {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+            .filtros-proyectos {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .proyectos-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .resumen-proyectos {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid,
+            .detalle-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .campo-completo,
+            .detalle-completo {
+                grid-column: auto;
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="proyectos-contenedor">
+
+        <div class="proyectos-header">
+
+            <div>
+                <h1>Proyectos</h1>
+
+                <p>
+                    Gestión de proyectos, financiamiento y rendiciones.
+                </p>
+            </div>
+
+            <div class="proyectos-acciones">
+
+                <button
+                    type="button"
+                    id="nuevoProyectoButton"
+                    class="boton-principal boton-azul"
+                >
+                    + Nuevo proyecto
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             RESUMEN
+             ===================================================== -->
+
+        <div class="resumen-proyectos">
+
+            <div class="tarjeta-resumen">
+                <span>Total proyectos</span>
+                <strong id="totalProyectos">0</strong>
+            </div>
+
+            <div class="tarjeta-resumen">
+                <span>Adjudicados</span>
+                <strong id="proyectosAdjudicados">0</strong>
+            </div>
+
+            <div class="tarjeta-resumen">
+                <span>En ejecución</span>
+                <strong id="proyectosEjecucion">0</strong>
+            </div>
+
+            <div class="tarjeta-resumen">
+                <span>Monto adjudicado</span>
+                <strong id="montoAdjudicado">$0</strong>
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             FILTROS
+             ===================================================== -->
+
+        <div class="filtros-proyectos">
+
+            <div class="campo">
+
+                <label for="periodoSelect">
+                    Período
+                </label>
+
+                <select id="periodoSelect">
+
+                    <option value="">
+                        Todos los períodos
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="estadoSelect">
+                    Estado
+                </label>
+
+                <select id="estadoSelect">
+
+                    <option value="">
+                        Todos los estados
+                    </option>
+
+                    <option value="postulado">
+                        Postulado
+                    </option>
+
+                    <option value="adjudicado">
+                        Adjudicado
+                    </option>
+
+                    <option value="en_ejecucion">
+                        En ejecución
+                    </option>
+
+                    <option value="rendido">
+                        Rendido
+                    </option>
+
+                    <option value="cerrado">
+                        Cerrado
+                    </option>
+
+                    <option value="rechazado">
+                        Rechazado
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="buscarProyecto">
+                    Buscar
+                </label>
+
+                <input
+                    type="search"
+                    id="buscarProyecto"
+                    placeholder="Nombre o código..."
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             TABLA
+             ===================================================== -->
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-proyectos">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Proyecto</th>
+                        <th>Código</th>
+                        <th>Período</th>
+                        <th>Financiador</th>
+                        <th>Estado</th>
+                        <th>Monto adjudicado</th>
+                        <th>Acciones</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="tablaProyectos">
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="tabla-cargando"
+                        >
+                            Cargando proyectos...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         MODAL NUEVO / EDITAR PROYECTO
+         ========================================================= -->
+
+    <div
+        id="modalProyecto"
+        class="modal"
+    >
+
+        <div class="modal-contenido">
+
+            <div class="modal-header">
+
+                <h2 id="tituloModalProyecto">
+                    Nuevo proyecto
+                </h2>
+
+                <button
+                    type="button"
+                    id="cerrarModalProyecto"
+                    class="cerrar-modal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="formProyecto">
+
+                <input
+                    type="hidden"
+                    id="proyectoId"
+                >
+
+
+                <div class="form-grid">
+
+                    <div class="campo">
+
+                        <label for="proyectoPeriodo">
+                            Período *
+                        </label>
+
+                        <select
+                            id="proyectoPeriodo"
+                            required
+                        >
+
+                            <option value="">
+                                Seleccione un período
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label for="proyectoEstado">
+                            Estado *
+                        </label>
+
+                        <select
+                            id="proyectoEstado"
+                            required
+                        >
+
+                            <option value="postulado">
+                                Postulado
+                            </option>
+
+                            <option value="adjudicado">
+                                Adjudicado
+                            </option>
+
+                            <option value="en_ejecucion">
+                                En ejecución
+                            </option>
+
+                            <option value="rendido">
+                                Rendido
+                            </option>
+
+                            <option value="cerrado">
+                                Cerrado
+                            </option>
+
+                            <option value="rechazado">
+                                Rechazado
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="campo campo-completo">
+
+                        <label for="proyectoNombre">
+                            Nombre del proyecto *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="proyectoNombre"
+                            required
+                            maxlength="250"
+                        >
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label for="proyectoCodigo">
+                            Código
+                        </label>
+
+                        <input
+                            type="text"
+                            id="proyectoCodigo"
+                            maxlength="100"
+                        >
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label for="proyectoFinanciador">
+                            Organismo financiador
+                        </label>
+
+                        <input
+                            type="text"
+                            id="proyectoFinanciador"
+                            maxlength="250"
+                        >
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label for="proyectoMonto">
+                            Monto adjudicado
+                        </label>
+
+                        <input
+                            type="number"
+                            id="proyectoMonto"
+                            min="0"
+                            step="1"
+                            value="0"
+                        >
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label for="proyectoResponsable">
+                            Responsable
+                        </label>
+
+                        <input
+                            type="text"
+                            id="proyectoResponsable"
+                            maxlength="250"
+                        >
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label for="proyectoPostulacion">
+                            Fecha de postulación
+                        </label>
+
+                        <input
+                            type="date"
+                            id="proyectoPostulacion"
+                        >
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label for="proyectoAdjudicacion">
+                            Fecha de adjudicación
+                        </label>
+
+                        <input
+                            type="date"
+                            id="proyectoAdjudicacion"
+                        >
+
+                    </div>
+
+
+                    <div class="campo campo-completo">
+
+                        <label for="proyectoDescripcion">
+                            Descripción
+                        </label>
+
+                        <textarea
+                            id="proyectoDescripcion"
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="campo campo-completo">
+
+                        <label for="proyectoObservaciones">
+                            Observaciones
+                        </label>
+
+                        <textarea
+                            id="proyectoObservaciones"
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        id="cancelarProyecto"
+                        class="boton-principal boton-secundario"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="guardarProyectoButton"
+                        class="boton-principal boton-azul"
+                    >
+                        Guardar proyecto
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         MODAL DETALLE
+         ========================================================= -->
+
+    <div
+        id="modalDetalleProyecto"
+        class="modal"
+    >
+
+        <div class="modal-contenido">
+
+            <div class="modal-header">
+
+                <h2>
+                    Detalle del proyecto
+                </h2>
+
+                <button
+                    type="button"
+                    id="cerrarDetalleProyecto"
+                    class="cerrar-modal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="detalle-grid">
+
+                <div class="detalle-item">
+                    <small>Nombre</small>
+                    <strong id="detalleNombre">—</strong>
+                </div>
+
+                <div class="detalle-item">
+                    <small>Código</small>
+                    <strong id="detalleCodigo">—</strong>
+                </div>
+
+                <div class="detalle-item">
+                    <small>Período</small>
+                    <strong id="detallePeriodo">—</strong>
+                </div>
+
+                <div class="detalle-item">
+                    <small>Estado</small>
+                    <strong id="detalleEstado">—</strong>
+                </div>
+
+                <div class="detalle-item">
+                    <small>Organismo financiador</small>
+                    <strong id="detalleFinanciador">—</strong>
+                </div>
+
+                <div class="detalle-item">
+                    <small>Monto adjudicado</small>
+                    <strong id="detalleMonto">—</strong>
+                </div>
+
+                <div class="detalle-item">
+                    <small>Fecha de postulación</small>
+                    <strong id="detallePostulacion">—</strong>
+                </div>
+
+                <div class="detalle-item">
+                    <small>Fecha de adjudicación</small>
+                    <strong id="detalleAdjudicacion">—</strong>
+                </div>
+
+                <div class="detalle-item">
+                    <small>Responsable</small>
+                    <strong id="detalleResponsable">—</strong>
+                </div>
+
+                <div class="detalle-item detalle-completo">
+                    <small>Descripción</small>
+                    <strong id="detalleDescripcion">—</strong>
+                </div>
+
+                <div class="detalle-item detalle-completo">
+                    <small>Observaciones</small>
+                    <strong id="detalleObservaciones">—</strong>
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    id="cerrarDetalleProyectoBoton"
+                    class="boton-principal boton-secundario"
+                >
+                    Cerrar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="config.js"></script>
+
+<script src="proyectos.js"></script>
+</body>
+</html>

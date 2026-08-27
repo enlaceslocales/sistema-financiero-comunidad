@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Pago de cuotas | Sistema Financiero</title>
+
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+    <!-- =====================================================
+         BARRA LATERAL
+         ===================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                SF
+            </div>
+
+            <div class="logo-text">
+
+                <strong>
+                    Sistema Financiero
+                </strong>
+
+                <span>
+                    Comunidad Juan Cheuquelen
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="menu">
+
+            <!-- INICIO -->
+
+            <a
+                href="dashboard.html"
+                class="menu-item"
+            >
+
+                <span class="menu-icon">
+                    ⌂
+                </span>
+
+                <span>
+                    Inicio
+                </span>
+
+            </a>
+
+
+            <!-- SOCIOS -->
+
+            <a
+                href="socios.html"
+                class="menu-item"
+                id="menuSocios"
+            >
+
+                <span class="menu-icon">
+                    ♙
+                </span>
+
+                <span>
+                    Socios
+                </span>
+
+            </a>
+
+
+            <!-- CUOTAS -->
+
+            <a
+                href="cuotas.html"
+                class="menu-item"
+                id="menuCuotas"
+            >
+
+                <span class="menu-icon">
+                    ▣
+                </span>
+
+                <span>
+                    Cuotas
+                </span>
+
+            </a>
+
+
+            <!-- PAGOS -->
+
+            <a
+                href="pagos-cuotas.html"
+                class="menu-item activo"
+                id="menuPagos"
+            >
+
+                <span class="menu-icon">
+                    $
+                </span>
+
+                <span>
+                    Pagos de cuotas
+                </span>
+
+            </a>
+
+
+            <!-- FINANZAS -->
+
+            <a
+                href="#"
+                class="menu-item"
+                id="menuFinanzas"
+            >
+
+                <span class="menu-icon">
+                    ◈
+                </span>
+
+                <span>
+                    Finanzas
+                </span>
+
+            </a>
+
+
+            <!-- REPORTES -->
+
+            <a
+                href="#"
+                class="menu-item"
+                id="menuReportes"
+            >
+
+                <span class="menu-icon">
+                    ▥
+                </span>
+
+                <span>
+                    Reportes
+                </span>
+
+            </a>
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button
+                id="logoutButton"
+                class="cerrar-sesion"
+                type="button"
+            >
+
+                <span>
+                    ↪
+                </span>
+
+                Cerrar sesión
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         CONTENIDO
+         ===================================================== -->
+
+    <main class="contenido">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    Pagos de cuotas
+                </h1>
+
+                <p>
+                    Registro y seguimiento de pagos de socios
+                </p>
+
+            </div>
+
+
+            <div class="usuario">
+
+                <div class="usuario-icono">
+                    ♙
+                </div>
+
+                <div>
+
+                    <strong id="nombreUsuario">
+                        Usuario
+                    </strong>
+
+                    <span id="rolUsuario">
+                        Cargando...
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             ENCABEZADO
+             ================================================= -->
+
+        <section class="dashboard-header">
+
+            <div>
+
+                <span class="etiqueta">
+                    CONTROL DE PAGOS
+                </span>
+
+                <h2>
+                    Registro de pagos
+                </h2>
+
+                <p>
+                    Registre y consulte los pagos asociados a las cuotas de los socios.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             RESUMEN
+             ================================================= -->
+
+        <section class="tarjetas-cuotas">
+
+
+            <div class="tarjeta-cuota">
+
+                <div class="cuota-icono cuota-pendiente">
+                    !
+                </div>
+
+                <div>
+
+                    <span>
+                        Cuotas pendientes
+                    </span>
+
+                    <strong id="totalPendientes">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="tarjeta-cuota">
+
+                <div class="cuota-icono cuota-parcial">
+                    ◐
+                </div>
+
+                <div>
+
+                    <span>
+                        Cuotas parciales
+                    </span>
+
+                    <strong id="totalParciales">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="tarjeta-cuota">
+
+                <div class="cuota-icono cuota-pagada">
+                    ✓
+                </div>
+
+                <div>
+
+                    <span>
+                        Cuotas pagadas
+                    </span>
+
+                    <strong id="totalPagadas">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="tarjeta-cuota">
+
+                <div class="cuota-icono saldo-icono">
+                    $
+                </div>
+
+                <div>
+
+                    <span>
+                        Total recaudado
+                    </span>
+
+                    <strong id="totalRecaudado">
+                        $0
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             FILTROS
+             ================================================= -->
+
+        <section class="panel-card">
+
+            <div class="filtros-socios">
+
+
+                <div class="campo-filtro">
+
+                    <label for="periodoSelect">
+                        Período financiero
+                    </label>
+
+                    <select id="periodoSelect">
+
+                        <option value="">
+                            Cargando períodos...
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="campo-busqueda">
+
+                    <label for="buscarSocio">
+                        Buscar socio
+                    </label>
+
+                    <input
+                        type="search"
+                        id="buscarSocio"
+                        placeholder="Buscar por nombre o RUT..."
+                    >
+
+                </div>
+
+
+                <div class="campo-filtro">
+
+                    <label for="filtroEstado">
+                        Estado
+                    </label>
+
+                    <select id="filtroEstado">
+
+                        <option value="todos">
+                            Todos
+                        </option>
+
+                        <option value="pendiente">
+                            Pendientes
+                        </option>
+
+                        <option value="parcial">
+                            Parciales
+                        </option>
+
+                        <option value="pagada">
+                            Pagadas
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             LISTADO
+             ================================================= -->
+
+        <section class="seccion-dashboard">
+
+            <div class="titulo-seccion">
+
+                <div>
+
+                    <h3>
+                        Cuotas por cobrar
+                    </h3>
+
+                    <p id="contadorCuotas">
+                        Cargando cuotas...
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel-card">
+
+                <div class="tabla-contenedor">
+
+                    <table class="tabla-socios">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Socio
+                                </th>
+
+                                <th>
+                                    Período
+                                </th>
+
+                                <th>
+                                    Cuota
+                                </th>
+
+                                <th>
+                                    Pagado
+                                </th>
+
+                                <th>
+                                    Saldo
+                                </th>
+
+                                <th>
+                                    Estado
+                                </th>
+
+                                <th>
+                                    Acción
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="tablaPagos">
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    class="tabla-cargando"
+                                >
+
+                                    Cargando cuotas...
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL REGISTRAR PAGO
+     ===================================================== -->
+
+<div
+    id="modalPago"
+    class="modal"
+    style="display: none;"
+>
+
+    <div class="modal-contenido">
+
+
+        <div class="modal-header">
+
+            <div>
+
+                <span class="etiqueta">
+                    REGISTRO DE PAGO
+                </span>
+
+                <h2>
+                    Registrar pago
+                </h2>
+
+            </div>
+
+
+            <button
+                id="cerrarModalPago"
+                class="modal-cerrar"
+                type="button"
+            >
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <!-- INFORMACIÓN CUOTA -->
+
+        <div class="panel-card">
+
+            <div class="resumen-linea">
+
+                <span>
+                    Socio
+                </span>
+
+                <strong id="pagoSocio">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div class="resumen-linea">
+
+                <span>
+                    Período
+                </span>
+
+                <strong id="pagoPeriodo">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div class="resumen-linea">
+
+                <span>
+                    Monto cuota
+                </span>
+
+                <strong id="pagoMontoCuota">
+                    $0
+                </strong>
+
+            </div>
+
+
+            <div class="resumen-linea">
+
+                <span>
+                    Pagado anteriormente
+                </span>
+
+                <strong id="pagoPagado">
+                    $0
+                </strong>
+
+            </div>
+
+
+            <div class="resumen-linea">
+
+                <span>
+                    Saldo pendiente
+                </span>
+
+                <strong id="pagoSaldo">
+                    $0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- FORMULARIO -->
+
+        <form id="formPago">
+
+            <input
+                type="hidden"
+                id="pagoCuotaId"
+            >
+
+
+            <div class="form-grid">
+
+
+                <div class="campo-formulario">
+
+                    <label for="pagoMonto">
+                        Monto a pagar *
+                    </label>
+
+                    <input
+                        type="number"
+                        id="pagoMonto"
+                        min="1"
+                        step="1"
+                        placeholder="0"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="campo-formulario">
+
+                    <label for="medioPago">
+                        Medio de pago *
+                    </label>
+
+                    <select
+                        id="medioPago"
+                        required
+                    >
+
+                        <option value="">
+                            Seleccione
+                        </option>
+
+                        <option value="efectivo">
+                            Efectivo
+                        </option>
+
+                        <option value="transferencia">
+                            Transferencia
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="campo-formulario">
+
+                    <label for="cuentaPago">
+                        Cuenta de destino *
+                    </label>
+
+                    <select
+                        id="cuentaPago"
+                        required
+                    >
+
+                        <option value="">
+                            Cargando cuentas...
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="campo-formulario">
+
+                    <label for="fechaPago">
+                        Fecha de pago *
+                    </label>
+
+                    <input
+                        type="date"
+                        id="fechaPago"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="campo-formulario">
+
+                    <label for="numeroComprobante">
+                        Número de comprobante
+                    </label>
+
+                    <input
+                        type="text"
+                        id="numeroComprobante"
+                        placeholder="Opcional"
+                    >
+
+                </div>
+
+
+                <div class="campo-formulario">
+
+                    <label for="bancoOrigen">
+                        Banco de origen
+                    </label>
+
+                    <input
+                        type="text"
+                        id="bancoOrigen"
+                        placeholder="Opcional"
+                    >
+
+                </div>
+
+
+                <div class="campo-formulario campo-completo">
+
+                    <label for="observacionPago">
+                        Observación
+                    </label>
+
+                    <textarea
+                        id="observacionPago"
+                        rows="3"
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-acciones">
+
+                <button
+                    type="button"
+                    id="cancelarPago"
+                    class="boton-secundario"
+                >
+
+                    Cancelar
+
+                </button>
+
+
+                <button
+                    type="submit"
+                    id="guardarPago"
+                    class="boton"
+                >
+
+                    Registrar pago
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL HISTORIAL
+     ===================================================== -->
+
+<div
+    id="modalHistorial"
+    class="modal"
+    style="display: none;"
+>
+
+    <div class="modal-contenido">
+
+
+        <div class="modal-header">
+
+            <div>
+
+                <span class="etiqueta">
+                    HISTORIAL
+                </span>
+
+                <h2>
+                    Pagos realizados
+                </h2>
+
+            </div>
+
+
+            <button
+                id="cerrarHistorial"
+                class="modal-cerrar"
+                type="button"
+            >
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <!-- CONTENIDO DEL HISTORIAL -->
+
+        <div
+            id="historialContenido"
+            class="tabla-contenedor"
+        >
+
+            Cargando...
+
+        </div>
+
+
+        <!-- ACCIONES DEL HISTORIAL -->
+
+        <div
+            id="accionesHistorial"
+            class="modal-acciones"
+            style="display: none;"
+        >
+
+            <button
+                type="button"
+                id="imprimirHistorial"
+                class="boton"
+            >
+
+                🖨 Imprimir historial
+
+            </button>
+
+
+            <button
+                type="button"
+                id="cerrarHistorialInferior"
+                class="boton-secundario"
+            >
+
+                Cerrar
+
+            </button>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SCRIPTS
+     ===================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="config.js"></script>
+
+<script src="pagos-cuotas.js"></script>
+
+
+</body>
+
+</html>

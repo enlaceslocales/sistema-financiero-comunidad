@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Cuotas | Sistema Financiero</title>
+
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+    <!-- =====================================================
+         BARRA LATERAL
+         ===================================================== -->
+
+    <aside class="sidebar">
+
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                SF
+            </div>
+
+            <div class="logo-text">
+
+                <strong>
+                    Sistema Financiero
+                </strong>
+
+                <span>
+                    Comunidad Juan Cheuquelen
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="menu">
+
+
+            <!-- INICIO -->
+
+            <a
+                href="dashboard.html"
+                class="menu-item"
+            >
+
+                <span class="menu-icon">
+                    ⌂
+                </span>
+
+                <span>
+                    Inicio
+                </span>
+
+            </a>
+
+
+            <!-- SOCIOS -->
+
+            <a
+                href="socios.html"
+                class="menu-item"
+                id="menuSocios"
+            >
+
+                <span class="menu-icon">
+                    ♙
+                </span>
+
+                <span>
+                    Socios
+                </span>
+
+            </a>
+
+
+            <!-- CUOTAS -->
+
+            <a
+                href="cuotas.html"
+                class="menu-item activo"
+                id="menuCuotas"
+            >
+
+                <span class="menu-icon">
+                    ▣
+                </span>
+
+                <span>
+                    Cuotas
+                </span>
+
+            </a>
+
+
+            <!-- FINANZAS -->
+
+            <a
+                href="#"
+                class="menu-item"
+                id="menuFinanzas"
+            >
+
+                <span class="menu-icon">
+                    ◈
+                </span>
+
+                <span>
+                    Finanzas
+                </span>
+
+            </a>
+
+
+            <!-- REPORTES -->
+
+            <a
+                href="#"
+                class="menu-item"
+                id="menuReportes"
+            >
+
+                <span class="menu-icon">
+                    ▥
+                </span>
+
+                <span>
+                    Reportes
+                </span>
+
+            </a>
+
+
+
+        </nav>
+
+
+        <!-- CERRAR SESIÓN -->
+
+        <div class="sidebar-bottom">
+
+            <button
+                id="logoutButton"
+                class="cerrar-sesion"
+            >
+
+                <span>
+                    ↪
+                </span>
+
+                Cerrar sesión
+
+            </button>
+
+        </div>
+
+
+    </aside>
+
+
+    <!-- =====================================================
+         CONTENIDO PRINCIPAL
+         ===================================================== -->
+
+    <main class="contenido">
+
+
+        <!-- =================================================
+             TOPBAR
+             ================================================= -->
+
+        <header class="topbar">
+
+
+            <div>
+
+                <h1>
+                    Cuotas
+                </h1>
+
+                <p>
+                    Administración y seguimiento de cuotas
+                </p>
+
+            </div>
+
+
+            <div class="usuario">
+
+
+                <div class="usuario-icono">
+                    ♙
+                </div>
+
+
+                <div>
+
+                    <strong id="nombreUsuario">
+                        Usuario
+                    </strong>
+
+                    <span id="rolUsuario">
+                        Cargando...
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+        </header>
+
+
+        <!-- =================================================
+             ENCABEZADO
+             ================================================= -->
+
+        <section class="dashboard-header">
+
+    <div>
+
+        <span class="etiqueta">
+            CONTROL DE CUOTAS
+        </span>
+
+        <h2>
+            Cuotas de socios
+        </h2>
+
+        <p>
+            Consulte el estado de las cuotas correspondientes al período financiero seleccionado.
+        </p>
+
+    </div>
+
+
+    <div class="acciones-header">
+
+       <button
+    id="irPagosCuotasButton"
+    class="boton-secundario"
+    type="button"
+>
+    Pagos de cuotas
+</button>
+
+        <button
+            id="nuevaCuotaButton"
+            class="boton"
+            type="button"
+        >
+            + Nueva cuota
+        </button>
+
+    </div>
+
+</section>
+
+
+        <!-- =================================================
+             RESUMEN DE CUOTAS
+             ================================================= -->
+
+        <section class="tarjetas-cuotas">
+
+
+            <!-- PAGADAS -->
+
+            <div class="tarjeta-cuota">
+
+                <div class="cuota-icono cuota-pagada">
+                    ✓
+                </div>
+
+                <div>
+
+                    <span>
+                        Pagadas
+                    </span>
+
+                    <strong id="totalCuotasPagadas">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- PENDIENTES -->
+
+            <div class="tarjeta-cuota">
+
+                <div class="cuota-icono cuota-pendiente">
+                    !
+                </div>
+
+                <div>
+
+                    <span>
+                        Pendientes
+                    </span>
+
+                    <strong id="totalCuotasPendientes">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- PARCIALES -->
+
+            <div class="tarjeta-cuota">
+
+                <div class="cuota-icono cuota-parcial">
+                    ◐
+                </div>
+
+                <div>
+
+                    <span>
+                        Parciales
+                    </span>
+
+                    <strong id="totalCuotasParciales">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             FILTROS
+             ================================================= -->
+
+        <section class="panel-card">
+
+
+            <div class="filtros-socios">
+
+
+                <!-- PERÍODO -->
+
+                <div class="campo-filtro">
+
+                    <label for="periodoSelect">
+                        Período financiero
+                    </label>
+
+                    <select id="periodoSelect">
+
+                        <option value="">
+                            Cargando períodos...
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- BÚSQUEDA -->
+
+                <div class="campo-busqueda">
+
+                    <label for="buscarCuota">
+                        Buscar socio
+                    </label>
+
+                    <input
+                        type="search"
+                        id="buscarCuota"
+                        placeholder="Buscar por nombre o RUT..."
+                    >
+
+                </div>
+
+
+                <!-- ESTADO -->
+
+                <div class="campo-filtro">
+
+                    <label for="filtroEstadoCuota">
+                        Estado
+                    </label>
+
+                    <select id="filtroEstadoCuota">
+
+                        <option value="todos">
+                            Todos
+                        </option>
+
+                        <option value="pendiente">
+                            Pendientes
+                        </option>
+
+                        <option value="parcial">
+                            Parciales
+                        </option>
+
+                        <option value="pagada">
+                            Pagadas
+                        </option>
+
+                        <option value="anulada">
+                            Anuladas
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             LISTADO
+             ================================================= -->
+
+        <section class="seccion-dashboard">
+
+
+            <div class="titulo-seccion">
+
+
+                <div>
+
+                    <h3>
+                        Listado de cuotas
+                    </h3>
+
+                    <p id="contadorCuotas">
+                        Cargando cuotas...
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="panel-card">
+
+
+                <div class="tabla-contenedor">
+
+
+                    <table class="tabla-socios">
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Socio
+                                </th>
+
+                                <th>
+                                    Período
+                                </th>
+
+                                <th>
+                                    Categoría
+                                </th>
+
+                                <th>
+                                    Emisión
+                                </th>
+
+                                <th>
+                                    Vencimiento
+                                </th>
+
+                                <th>
+                                    Monto
+                                </th>
+
+                                <th>
+                                    Estado
+                                </th>
+
+                                <th>
+                                    Acciones
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="tablaCuotas">
+
+                            <tr>
+
+                                <td
+                                    colspan="8"
+                                    class="tabla-cargando"
+                                >
+
+                                    Cargando cuotas...
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+
+                    </table>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+</div>
+
+
+<!-- =====================================================
+     MODAL CUOTA
+     ===================================================== -->
+
+<div
+    id="modalCuota"
+    class="modal"
+    style="display: none;"
+>
+
+
+    <div class="modal-contenido">
+
+
+        <!-- HEADER -->
+
+        <div class="modal-header">
+
+
+            <div>
+
+                <span class="etiqueta">
+                    REGISTRO DE CUOTA
+                </span>
+
+                <h2 id="modalTituloCuota">
+                    Nueva cuota
+                </h2>
+
+            </div>
+
+
+            <button
+                id="cerrarModalCuota"
+                class="modal-cerrar"
+                type="button"
+            >
+
+                ×
+
+            </button>
+
+
+        </div>
+
+
+        <!-- FORMULARIO -->
+
+        <form id="formCuota">
+
+
+            <input
+                type="hidden"
+                id="cuotaId"
+            >
+
+
+            <div class="form-grid">
+
+
+                <!-- SOCIO -->
+
+                <div class="campo-formulario">
+
+                    <label for="socioSelect">
+                        Socio *
+                    </label>
+
+                    <select
+                        id="socioSelect"
+                        required
+                    >
+
+                        <option value="">
+                            Seleccione un socio
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- PERÍODO -->
+
+                <div class="campo-formulario">
+
+                    <label for="periodoCuotaSelect">
+                        Período financiero *
+                    </label>
+
+                    <select
+                        id="periodoCuotaSelect"
+                        required
+                    >
+
+                        <option value="">
+                            Seleccione un período
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- CATEGORÍA -->
+
+                <div class="campo-formulario">
+
+                    <label for="categoriaSelect">
+                        Categoría
+                    </label>
+
+                    <select
+                        id="categoriaSelect"
+                    >
+
+                        <option value="">
+                            Sin categoría
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- MONTO -->
+
+                <div class="campo-formulario">
+
+                    <label for="montoCuota">
+                        Monto *
+                    </label>
+
+                    <input
+                        type="number"
+                        id="montoCuota"
+                        min="1"
+                        step="1"
+                        placeholder="0"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- FECHA EMISIÓN -->
+
+                <div class="campo-formulario">
+
+                    <label for="fechaEmision">
+                        Fecha de emisión
+                    </label>
+
+                    <input
+                        type="date"
+                        id="fechaEmision"
+                    >
+
+                </div>
+
+
+                <!-- FECHA VENCIMIENTO -->
+
+                <div class="campo-formulario">
+
+                    <label for="fechaVencimiento">
+                        Fecha de vencimiento
+                    </label>
+
+                    <input
+                        type="date"
+                        id="fechaVencimiento"
+                    >
+
+                </div>
+
+
+                <!-- ESTADO -->
+
+                <div class="campo-formulario">
+
+                    <label for="estadoCuota">
+                        Estado
+                    </label>
+
+                    <select id="estadoCuota">
+
+                        <option value="pendiente">
+                            Pendiente
+                        </option>
+
+                        <option value="parcial">
+                            Parcial
+                        </option>
+
+                        <option value="pagada">
+                            Pagada
+                        </option>
+
+                        <option value="anulada">
+                            Anulada
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- OBSERVACIONES -->
+
+                <div class="campo-formulario campo-completo">
+
+                    <label for="observacionesCuota">
+                        Observaciones
+                    </label>
+
+                    <textarea
+                        id="observacionesCuota"
+                        rows="3"
+                    ></textarea>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- ACCIONES -->
+
+            <div class="modal-acciones">
+
+
+                <button
+                    type="button"
+                    id="cancelarCuota"
+                    class="boton-secundario"
+                >
+
+                    Cancelar
+
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="boton"
+                    id="guardarCuota"
+                >
+
+                    Guardar cuota
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     SCRIPTS
+     ===================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="config.js"></script>
+
+<script src="cuotas.js"></script>
+
+
+</body>
+
+</html>

@@ -2,37 +2,754 @@
 <html lang="es">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Panel | Sistema Financiero</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="styles.css">
+    <title>Dashboard | Sistema Financiero</title>
+
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+
 </head>
+
 
 <body>
 
-    <main class="inicio">
 
-        <div class="tarjeta-inicio">
+<div class="app">
 
-            <h1>Panel principal</h1>
 
-            <p>
-                Bienvenido al Sistema Financiero
-            </p>
+    <!-- =====================================================
+         BARRA LATERAL
+         ===================================================== -->
 
-            <button id="logoutButton" class="boton">
-                Cerrar sesión
-            </button>
+    <aside class="sidebar">
+
+
+        <!-- LOGO -->
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                SF
+            </div>
+
+            <div class="logo-text">
+
+                <strong>
+                    Sistema Financiero
+                </strong>
+
+                <span>
+                    Comunidad Juan Cheuquelen
+                </span>
+
+            </div>
 
         </div>
 
+
+        <!-- =================================================
+             MENÚ PRINCIPAL
+             ================================================= -->
+
+        <nav
+            class="menu"
+            aria-label="Menú principal"
+        >
+
+
+            <!-- INICIO -->
+
+            <a
+                href="dashboard.html"
+                class="menu-item activo"
+                id="menuInicio"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ⌂
+                </span>
+
+                <span>
+                    Inicio
+                </span>
+
+            </a>
+
+
+            <!-- SOCIOS -->
+
+            <a
+                href="socios.html"
+                class="menu-item"
+                id="menuSocios"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ♙
+                </span>
+
+                <span>
+                    Socios
+                </span>
+
+            </a>
+
+
+            <!-- CUOTAS -->
+
+            <a
+                href="cuotas.html"
+                class="menu-item"
+                id="menuCuotas"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ▣
+                </span>
+
+                <span>
+                    Cuotas
+                </span>
+
+            </a>
+
+
+            <!-- FINANZAS -->
+
+            <a
+                href="finanzas.html"
+                class="menu-item"
+                id="menuFinanzas"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ◈
+                </span>
+
+                <span>
+                    Finanzas
+                </span>
+
+            </a>
+
+
+            <!-- PROYECTOS -->
+
+            <a
+                href="proyectos.html"
+                class="menu-item"
+                id="menuProyectos"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ◫
+                </span>
+
+                <span>
+                    Proyectos
+                </span>
+
+            </a>
+
+
+            <!-- REPORTES -->
+
+            <a
+                href="reportes.html"
+                class="menu-item"
+                id="menuReportes"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ▥
+                </span>
+
+                <span>
+                    Reportes
+                </span>
+
+            </a>
+
+        </nav>
+
+
+        <!-- =================================================
+             PARTE INFERIOR
+             ================================================= -->
+
+        <div class="sidebar-bottom">
+
+
+            <button
+                type="button"
+                id="logoutButton"
+                class="cerrar-sesion"
+            >
+
+                <span aria-hidden="true">
+                    ↪
+                </span>
+
+                Cerrar sesión
+
+            </button>
+
+
+        </div>
+
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         CONTENIDO PRINCIPAL
+         ================================================= -->
+
+    <main class="contenido">
+
+
+        <!-- =================================================
+             TOPBAR
+             ================================================= -->
+
+        <header class="topbar">
+
+
+            <div>
+
+                <h1>
+                    Panel principal
+                </h1>
+
+                <p>
+                    Resumen financiero
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 USUARIO ACTUAL
+                 ================================================= -->
+
+            <div class="usuario">
+
+
+                <div
+                    class="usuario-icono"
+                    aria-hidden="true"
+                >
+                    ♙
+                </div>
+
+
+                <div>
+
+                    <strong id="nombreUsuario">
+                        Usuario
+                    </strong>
+
+                    <span id="rolUsuario">
+                        Cargando...
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+        </header>
+
+
+
+        <!-- =================================================
+             ENCABEZADO DEL DASHBOARD
+             ================================================= -->
+
+        <section class="dashboard-header">
+
+
+            <div>
+
+
+                <span class="etiqueta">
+                    SISTEMA FINANCIERO
+                </span>
+
+
+                <h2 id="bienvenidaTitulo">
+                    Bienvenido
+                </h2>
+
+
+                <p id="bienvenidaTexto">
+                    Cargando información...
+                </p>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 SELECTOR DE PERÍODO
+                 ================================================= -->
+
+            <div class="selector-periodo">
+
+
+                <label for="periodoSelect">
+                    Período financiero
+                </label>
+
+
+                <select id="periodoSelect">
+
+
+                    <option value="">
+                        Cargando...
+                    </option>
+
+
+                </select>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             TARJETAS FINANCIERAS
+             ================================================= -->
+
+        <section
+            class="tarjetas-financieras"
+            aria-label="Resumen financiero"
+        >
+
+
+            <!-- =================================================
+                 INGRESOS
+                 ================================================= -->
+
+            <div
+                class="tarjeta-financiera ingreso-fondo"
+            >
+
+
+                <div class="tarjeta-financiera-top">
+
+
+                    <div
+                        class="tarjeta-icono ingreso-icono"
+                        aria-hidden="true"
+                    >
+                        ↑
+                    </div>
+
+
+                    <span class="tarjeta-label">
+                        Ingresos
+                    </span>
+
+
+                </div>
+
+
+                <strong id="totalIngresos">
+                    $0
+                </strong>
+
+
+                <span class="tarjeta-descripcion">
+                    Total de ingresos del período
+                </span>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 EGRESOS
+                 ================================================= -->
+
+            <div
+                class="tarjeta-financiera egreso-fondo"
+            >
+
+
+                <div class="tarjeta-financiera-top">
+
+
+                    <div
+                        class="tarjeta-icono egreso-icono"
+                        aria-hidden="true"
+                    >
+                        ↓
+                    </div>
+
+
+                    <span class="tarjeta-label">
+                        Egresos
+                    </span>
+
+
+                </div>
+
+
+                <strong id="totalEgresos">
+                    $0
+                </strong>
+
+
+                <span class="tarjeta-descripcion">
+                    Total de egresos del período
+                </span>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 SALDO
+                 ================================================= -->
+
+            <div
+                class="tarjeta-financiera saldo-fondo"
+            >
+
+
+                <div class="tarjeta-financiera-top">
+
+
+                    <div
+                        class="tarjeta-icono saldo-icono"
+                        aria-hidden="true"
+                    >
+                        $
+                    </div>
+
+
+                    <span class="tarjeta-label">
+                        Saldo
+                    </span>
+
+
+                </div>
+
+
+                <strong id="saldoActual">
+                    $0
+                </strong>
+
+
+                <span class="tarjeta-descripcion">
+                    Saldo disponible del período
+                </span>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             ESTADO DE CUOTAS
+             ================================================= -->
+
+        <section class="seccion-dashboard">
+
+
+            <div class="titulo-seccion">
+
+
+                <div>
+
+
+                    <h3>
+                        Estado de cuotas
+                    </h3>
+
+
+                    <p>
+                        Situación de las cuotas del período seleccionado
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="tarjetas-cuotas">
+
+
+                <!-- PAGADAS -->
+
+                <div class="tarjeta-cuota">
+
+
+                    <div
+                        class="cuota-icono cuota-pagada"
+                        aria-hidden="true"
+                    >
+                        ✓
+                    </div>
+
+
+                    <div>
+
+
+                        <span>
+                            Pagadas
+                        </span>
+
+
+                        <strong id="cuotasPagadas">
+                            0
+                        </strong>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- PENDIENTES -->
+
+                <div class="tarjeta-cuota">
+
+
+                    <div
+                        class="cuota-icono cuota-pendiente"
+                        aria-hidden="true"
+                    >
+                        !
+                    </div>
+
+
+                    <div>
+
+
+                        <span>
+                            Pendientes
+                        </span>
+
+
+                        <strong id="cuotasPendientes">
+                            0
+                        </strong>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- PARCIALES -->
+
+                <div class="tarjeta-cuota">
+
+
+                    <div
+                        class="cuota-icono cuota-parcial"
+                        aria-hidden="true"
+                    >
+                        ◐
+                    </div>
+
+
+                    <div>
+
+
+                        <span>
+                            Parciales
+                        </span>
+
+
+                        <strong id="cuotasParciales">
+                            0
+                        </strong>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             INFORMACIÓN DEL PERÍODO
+             ================================================= -->
+
+        <section class="seccion-dashboard">
+
+
+            <div class="panel-card">
+
+
+                <div class="panel-card-header">
+
+
+                    <div>
+
+
+                        <h3>
+                            Resumen del período
+                        </h3>
+
+
+                        <p id="resumenPeriodo">
+                            Seleccione un período para visualizar la información.
+                        </p>
+
+
+                    </div>
+
+
+
+                    <div
+                        class="estado-periodo"
+                        id="estadoPeriodo"
+                    >
+                        —
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- =================================================
+                     AÑO
+                     ================================================= -->
+
+                <div class="resumen-linea">
+
+
+                    <span>
+                        Año financiero
+                    </span>
+
+
+                    <strong id="anioPeriodo">
+                        —
+                    </strong>
+
+
+                </div>
+
+
+
+                <!-- =================================================
+                     RESULTADO
+                     ================================================= -->
+
+                <div class="resumen-linea">
+
+
+                    <span>
+                        Resultado financiero
+                    </span>
+
+
+                    <strong id="resultadoPeriodo">
+                        —
+                    </strong>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script>
-    <script src="app.js"></script>
+
+</div>
+
+
+
+<!-- =========================================================
+     SUPABASE
+     ========================================================= -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+
+<!-- =========================================================
+     CONFIGURACIÓN
+     ========================================================= -->
+
+<script src="config.js"></script>
+
+
+<!-- =========================================================
+     CONTROL PRINCIPAL DEL DASHBOARD
+     ========================================================= -->
+
+<script src="app.js"></script>
+
 
 </body>
 

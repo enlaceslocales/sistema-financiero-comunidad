@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    >
+
+    <title>Reportes | Sistema Financiero</title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+>
+
+<link
+    rel="stylesheet"
+    href="reportes.css"
+>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     CONTENEDOR PRINCIPAL
+     ========================================================= -->
+
+<div class="app">
+
+
+    <!-- =====================================================
+         MENÚ LATERAL
+         ===================================================== -->
+
+    <aside class="sidebar">
+
+
+        <!-- ENCABEZADO -->
+
+        <div class="sidebar-header">
+
+            <div class="sidebar-titulo">
+                Sistema Financiero
+            </div>
+
+            <div class="sidebar-subtitulo">
+                Gestión financiera
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             NAVEGACIÓN
+             ================================================= -->
+
+        <nav class="sidebar-menu">
+
+
+            <!-- INICIO -->
+
+            <a
+                href="dashboard.html"
+                class="menu-item"
+            >
+
+                <span class="menu-icon">
+                    ⌂
+                </span>
+
+                <span>
+                    Inicio
+                </span>
+
+            </a>
+
+
+            <!-- SOCIOS -->
+
+            <a
+                href="socios.html"
+                class="menu-item"
+            >
+
+                <span class="menu-icon">
+                    ♙
+                </span>
+
+                <span>
+                    Socios
+                </span>
+
+            </a>
+
+
+            <!-- CUOTAS -->
+
+            <a
+                href="cuotas.html"
+                class="menu-item"
+            >
+
+                <span class="menu-icon">
+                    ▣
+                </span>
+
+                <span>
+                    Cuotas
+                </span>
+
+            </a>
+
+
+            <!-- PAGOS DE CUOTAS -->
+
+            <a
+                href="pago-cuotas.html"
+                class="menu-item"
+            >
+
+                <span class="menu-icon">
+                    $
+                </span>
+
+                <span>
+                    Pagos de cuotas
+                </span>
+
+            </a>
+
+
+            <!-- FINANZAS -->
+
+            <a
+                href="#"
+                class="menu-item"
+                id="menuFinanzas"
+            >
+
+                <span class="menu-icon">
+                    ◈
+                </span>
+
+                <span>
+                    Finanzas
+                </span>
+
+            </a>
+
+
+            <!-- REPORTES -->
+
+            <a
+                href="reportes.html"
+                class="menu-item activo"
+                id="menuReportes"
+            >
+
+                <span class="menu-icon">
+                    ▥
+                </span>
+
+                <span>
+                    Reportes
+                </span>
+
+            </a>
+
+
+        </nav>
+
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         CONTENIDO PRINCIPAL
+         ===================================================== -->
+
+    <main class="main-content">
+
+
+        <div class="reportes-contenedor">
+
+
+            <!-- =================================================
+                 CABECERA
+                 ================================================= -->
+
+            <div class="reportes-header">
+
+
+                <div>
+
+                    <h1>
+                        Reportes financieros
+                    </h1>
+
+                    <p>
+                        Consulta, analiza y exporta la información
+                        financiera registrada en el sistema.
+                    </p>
+
+                </div>
+
+
+                <div class="reportes-header-acciones">
+
+
+                    <button
+                        type="button"
+                        id="volverButton"
+                        class="boton boton-secundario"
+                    >
+                        ← Volver
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="exportarExcelButton"
+                        class="boton boton-excel"
+                    >
+                        📊 Excel
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="exportarPdfButton"
+                        class="boton boton-pdf"
+                    >
+                        📄 PDF
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 FILTROS
+                 ================================================= -->
+
+            <section class="panel reporte-filtros">
+
+
+                <div class="panel-titulo">
+
+
+                    <div>
+
+                        <h2>
+                            Filtros del reporte
+                        </h2>
+
+                        <p>
+                            Selecciona el período y tipo de información
+                            que deseas consultar.
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="filtros-grid">
+
+
+                    <!-- AÑO -->
+
+                    <div class="form-grupo">
+
+                        <label for="filtroAnio">
+                            Año
+                        </label>
+
+                        <select id="filtroAnio">
+
+                            <option value="">
+                                Todos los años
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <!-- CATEGORÍA -->
+
+                    <div class="form-grupo">
+
+                        <label for="filtroCategoria">
+                            Categoría
+                        </label>
+
+                        <select id="filtroCategoria">
+
+                            <option value="todos">
+                                Todas las categorías
+                            </option>
+
+                            <option value="proyectos">
+                                Proyectos
+                            </option>
+
+                            <option value="pago_cuota">
+                                Pago de cuotas
+                            </option>
+
+                            <option value="ingreso">
+                                Ingresos
+                            </option>
+
+                            <option value="egreso">
+                                Egresos
+                            </option>
+
+                            <option value="ajuste">
+                                Ajustes
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <!-- FECHA DESDE -->
+
+                    <div class="form-grupo">
+
+                        <label for="filtroDesde">
+                            Fecha desde
+                        </label>
+
+                        <input
+                            type="date"
+                            id="filtroDesde"
+                        >
+
+                    </div>
+
+
+
+                    <!-- FECHA HASTA -->
+
+                    <div class="form-grupo">
+
+                        <label for="filtroHasta">
+                            Fecha hasta
+                        </label>
+
+                        <input
+                            type="date"
+                            id="filtroHasta"
+                        >
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- ACCIONES -->
+
+                <div class="filtros-acciones">
+
+
+                    <button
+                        type="button"
+                        id="generarReporteButton"
+                        class="boton boton-azul"
+                    >
+                        🔎 Generar reporte
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="limpiarFiltrosButton"
+                        class="boton boton-secundario"
+                    >
+                        Limpiar filtros
+                    </button>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 MENSAJE DE ERROR
+                 ================================================= -->
+
+            <div
+                id="mensajeError"
+                class="mensaje-error"
+                style="display:none;"
+            ></div>
+
+
+
+            <!-- =================================================
+                 CONTENIDO DEL REPORTE
+                 ================================================= -->
+
+            <section
+                id="contenidoReporte"
+                style="display:none;"
+            >
+
+
+                <!-- =================================================
+                     RESUMEN FINANCIERO
+                     ================================================= -->
+
+                <div class="resumen-grid">
+
+
+                    <div class="tarjeta-resumen">
+
+                        <span>
+                            Total ingresos
+                        </span>
+
+                        <strong id="resumenIngresos">
+                            $0
+                        </strong>
+
+                        <small>
+                            Movimientos de ingreso
+                        </small>
+
+                    </div>
+
+
+
+                    <div class="tarjeta-resumen">
+
+                        <span>
+                            Total egresos
+                        </span>
+
+                        <strong id="resumenEgresos">
+                            $0
+                        </strong>
+
+                        <small>
+                            Movimientos de egreso
+                        </small>
+
+                    </div>
+
+
+
+                    <div class="tarjeta-resumen">
+
+                        <span>
+                            Saldo
+                        </span>
+
+                        <strong id="resumenSaldo">
+                            $0
+                        </strong>
+
+                        <small>
+                            Ingresos menos egresos
+                        </small>
+
+                    </div>
+
+
+
+                    <div class="tarjeta-resumen">
+
+                        <span>
+                            Movimientos
+                        </span>
+
+                        <strong id="resumenMovimientos">
+                            0
+                        </strong>
+
+                        <small>
+                            Registros considerados
+                        </small>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- =================================================
+                     RESUMEN POR CATEGORÍA
+                     ================================================= -->
+
+                <section class="panel">
+
+
+                    <div class="panel-titulo">
+
+                        <div>
+
+                            <h2>
+                                Resumen por categoría
+                            </h2>
+
+                            <p>
+                                Distribución de los movimientos según
+                                su origen.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="tabla-contenedor">
+
+
+                        <table class="tabla-reporte">
+
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Categoría
+                                    </th>
+
+                                    <th>
+                                        Ingresos
+                                    </th>
+
+                                    <th>
+                                        Egresos
+                                    </th>
+
+                                    <th>
+                                        Saldo
+                                    </th>
+
+                                    <th>
+                                        Movimientos
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="tablaResumenCategorias">
+
+                                <tr>
+
+                                    <td
+                                        colspan="5"
+                                        class="tabla-vacia"
+                                    >
+                                        No se han generado datos.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+
+                        </table>
+
+
+                    </div>
+
+
+                </section>
+
+
+
+                <!-- =================================================
+                     DETALLE DE MOVIMIENTOS
+                     ================================================= -->
+
+                <section class="panel">
+
+
+                    <div class="panel-titulo">
+
+
+                        <div>
+
+                            <h2>
+                                Detalle de movimientos
+                            </h2>
+
+                            <p id="textoCantidadMovimientos">
+                                0 movimientos encontrados.
+                            </p>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="tabla-contenedor">
+
+
+                        <table
+                            class="tabla-reporte tabla-movimientos"
+                        >
+
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Fecha
+                                    </th>
+
+                                    <th>
+                                        Categoría
+                                    </th>
+
+                                    <th>
+                                        Tipo
+                                    </th>
+
+                                    <th>
+                                        Cuenta
+                                    </th>
+
+                                    <th>
+                                        Monto
+                                    </th>
+
+                                    <th>
+                                        Descripción
+                                    </th>
+
+                                    <th>
+                                        Observación
+                                    </th>
+
+                                    <th>
+                                        Subtipo
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+
+                            <tbody id="tablaMovimientos">
+
+                                <tr>
+
+                                    <td
+                                        colspan="8"
+                                        class="tabla-vacia"
+                                    >
+                                        No se han generado datos.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+
+                        </table>
+
+
+                    </div>
+
+
+                </section>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 ESTADO DE CARGA
+                 ================================================= -->
+
+            <div
+                id="cargandoReporte"
+                class="cargando-reporte"
+                style="display:none;"
+            >
+
+                <div class="spinner"></div>
+
+                <span>
+                    Generando reporte...
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+    </main>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     LIBRERÍA SUPABASE
+     ========================================================= -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+
+
+<!-- =========================================================
+     LIBRERÍA XLSX
+     ========================================================= -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
+></script>
+
+
+
+<!-- =========================================================
+     LIBRERÍA JSPDF
+     ========================================================= -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"
+></script>
+
+
+
+<!-- =========================================================
+     LIBRERÍA JSPDF AUTOTABLE
+     ========================================================= -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"
+></script>
+
+
+
+<!-- =========================================================
+     CONFIGURACIÓN SUPABASE
+     ========================================================= -->
+
+<script src="config.js"></script>
+
+
+
+<!-- =========================================================
+     JAVASCRIPT DEL MÓDULO
+     ========================================================= -->
+
+<script src="reportes.js"></script>
+
+
+</body>
+
+</html>

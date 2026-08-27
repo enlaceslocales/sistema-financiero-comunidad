@@ -1,0 +1,1083 @@
+/* =========================================================
+   SISTEMA FINANCIERO
+   MÓDULO REPORTES
+   Estilo integrado con styles.css
+   ========================================================= */
+
+
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+   ========================================================= */
+
+.main-content {
+
+    width: calc(100% - 250px);
+
+    margin-left: 250px;
+
+    min-height: 100vh;
+
+    padding: 30px 34px 50px;
+
+    background: var(--fondo);
+
+}
+
+
+.reportes-contenedor {
+
+    width: 100%;
+
+    max-width: 100%;
+
+    margin: 0 auto;
+
+}
+
+
+/* =========================================================
+   CABECERA DEL MÓDULO
+   ========================================================= */
+
+.reportes-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 25px;
+
+    margin-bottom: 25px;
+
+    padding: 25px;
+
+    background: var(--blanco);
+
+    border: 1px solid var(--borde);
+
+    border-radius: var(--radio);
+
+    box-shadow: var(--sombra);
+
+}
+
+
+.reportes-header h1 {
+
+    margin: 0 0 7px;
+
+    color: var(--texto);
+
+    font-size: 22px;
+
+    font-weight: 700;
+
+    letter-spacing: -0.4px;
+
+}
+
+
+.reportes-header p {
+
+    margin: 0;
+
+    color: var(--texto-secundario);
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+}
+
+
+/* =========================================================
+   ACCIONES DE CABECERA
+   ========================================================= */
+
+.reportes-header-acciones {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+
+}
+
+
+.reportes-header-acciones .boton {
+
+    margin-top: 0;
+
+    min-height: 42px;
+
+    padding: 10px 16px;
+
+    white-space: nowrap;
+
+}
+
+
+/* =========================================================
+   BOTÓN EXCEL
+   ========================================================= */
+
+.boton-excel {
+
+    background: var(--verde);
+
+    color: var(--blanco);
+
+}
+
+
+.boton-excel:hover {
+
+    background: #2E9D6E;
+
+    box-shadow:
+        0 6px 16px rgba(54, 179, 126, 0.22);
+
+}
+
+
+/* =========================================================
+   BOTÓN PDF
+   ========================================================= */
+
+.boton-pdf {
+
+    background: var(--rojo);
+
+    color: var(--blanco);
+
+}
+
+
+.boton-pdf:hover {
+
+    background: #D94E66;
+
+    box-shadow:
+        0 6px 16px rgba(232, 93, 117, 0.22);
+
+}
+
+
+/* =========================================================
+   BOTÓN AZUL
+   ========================================================= */
+
+.boton-azul {
+
+    background: var(--primario);
+
+    color: var(--blanco);
+
+}
+
+
+.boton-azul:hover {
+
+    background: var(--primario-hover);
+
+}
+
+
+/* =========================================================
+   PANEL
+   ========================================================= */
+
+.panel {
+
+    width: 100%;
+
+    margin-bottom: 25px;
+
+    background: var(--blanco);
+
+    border: 1px solid var(--borde);
+
+    border-radius: var(--radio);
+
+    box-shadow: var(--sombra);
+
+    overflow: hidden;
+
+}
+
+
+/* =========================================================
+   TÍTULO DEL PANEL
+   ========================================================= */
+
+.panel-titulo {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 20px;
+
+    padding: 22px;
+
+    border-bottom: 1px solid var(--borde);
+
+}
+
+
+.panel-titulo h2 {
+
+    margin: 0 0 6px;
+
+    color: var(--texto);
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+}
+
+
+.panel-titulo p {
+
+    margin: 0;
+
+    color: var(--texto-secundario);
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+}
+
+
+/* =========================================================
+   FILTROS
+   ========================================================= */
+
+.reporte-filtros {
+
+    overflow: visible;
+
+}
+
+
+.filtros-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 17px;
+
+    padding: 22px;
+
+}
+
+
+.form-grupo {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    min-width: 0;
+
+}
+
+
+.form-grupo label {
+
+    margin: 0;
+
+    color: var(--texto-secundario);
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+
+.form-grupo input,
+
+.form-grupo select {
+
+    width: 100%;
+
+    min-height: 43px;
+
+    padding: 10px 12px;
+
+    border: 1px solid var(--borde);
+
+    border-radius: 9px;
+
+    background: #FCFCFE;
+
+    color: var(--texto);
+
+    font-size: 13px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+
+}
+
+
+.form-grupo input:hover,
+
+.form-grupo select:hover {
+
+    border-color: #D7D4E5;
+
+}
+
+
+.form-grupo input:focus,
+
+.form-grupo select:focus {
+
+    background: var(--blanco);
+
+    border-color: var(--primario);
+
+    box-shadow:
+        0 0 0 3px rgba(99, 91, 219, 0.10);
+
+}
+
+
+/* =========================================================
+   ACCIONES DE FILTROS
+   ========================================================= */
+
+.filtros-acciones {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 0 22px 22px;
+
+}
+
+
+.filtros-acciones .boton {
+
+    margin-top: 0;
+
+    min-height: 42px;
+
+}
+
+
+.filtros-acciones .boton-secundario {
+
+    margin-top: 0;
+
+}
+
+
+/* =========================================================
+   MENSAJE DE ERROR
+   ========================================================= */
+
+.mensaje-error {
+
+    width: 100%;
+
+    margin-bottom: 25px;
+
+    padding: 14px 17px;
+
+    border: 1px solid rgba(232, 93, 117, 0.18);
+
+    border-radius: 10px;
+
+    background: var(--rojo-suave);
+
+    color: var(--rojo);
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+}
+
+
+/* =========================================================
+   RESUMEN FINANCIERO
+   ========================================================= */
+
+.resumen-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 15px;
+
+    margin-bottom: 25px;
+
+}
+
+
+.tarjeta-resumen {
+
+    min-width: 0;
+
+    padding: 20px;
+
+    background: var(--blanco);
+
+    border: 1px solid var(--borde);
+
+    border-radius: var(--radio);
+
+    box-shadow: var(--sombra);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+
+.tarjeta-resumen:hover {
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 10px 35px rgba(61, 55, 120, 0.10);
+
+}
+
+
+.tarjeta-resumen > span {
+
+    display: block;
+
+    margin-bottom: 9px;
+
+    color: var(--texto-secundario);
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+
+.tarjeta-resumen > strong {
+
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--texto);
+
+    font-size: 24px;
+
+    font-weight: 700;
+
+    letter-spacing: -0.4px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+.tarjeta-resumen > small {
+
+    display: block;
+
+    color: var(--texto-suave);
+
+    font-size: 10px;
+
+}
+
+
+/* =========================================================
+   COLORES DE TARJETAS
+   ========================================================= */
+
+.tarjeta-resumen:nth-child(1) {
+
+    background: var(--verde-suave);
+
+    border-color: rgba(54, 179, 126, 0.12);
+
+}
+
+
+.tarjeta-resumen:nth-child(1) > strong {
+
+    color: var(--verde);
+
+}
+
+
+.tarjeta-resumen:nth-child(2) {
+
+    background: var(--rojo-suave);
+
+    border-color: rgba(232, 93, 117, 0.12);
+
+}
+
+
+.tarjeta-resumen:nth-child(2) > strong {
+
+    color: var(--rojo);
+
+}
+
+
+.tarjeta-resumen:nth-child(3) {
+
+    background: var(--primario-suave);
+
+    border-color: rgba(99, 91, 219, 0.12);
+
+}
+
+
+.tarjeta-resumen:nth-child(3) > strong {
+
+    color: var(--primario);
+
+}
+
+
+.tarjeta-resumen:nth-child(4) {
+
+    background: var(--azul-suave);
+
+    border-color: rgba(91, 141, 239, 0.12);
+
+}
+
+
+.tarjeta-resumen:nth-child(4) > strong {
+
+    color: var(--azul);
+
+}
+
+
+/* =========================================================
+   TABLAS DE REPORTES
+   ========================================================= */
+
+.tabla-reporte {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+}
+
+
+.tabla-reporte th {
+
+    padding: 13px 17px;
+
+    background: #FAF9FD;
+
+    border-bottom: 1px solid var(--borde);
+
+    color: var(--texto-secundario);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-align: left;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.4px;
+
+    white-space: nowrap;
+
+}
+
+
+.tabla-reporte td {
+
+    padding: 14px 17px;
+
+    border-bottom: 1px solid var(--borde);
+
+    color: var(--texto);
+
+    font-size: 12px;
+
+    vertical-align: middle;
+
+}
+
+
+.tabla-reporte tbody tr {
+
+    transition: background 0.15s ease;
+
+}
+
+
+.tabla-reporte tbody tr:hover {
+
+    background: #FAF9FD;
+
+}
+
+
+.tabla-reporte tbody tr:last-child td {
+
+    border-bottom: none;
+
+}
+
+
+/* =========================================================
+   TABLA RESUMEN CATEGORÍAS
+   ========================================================= */
+
+#tablaResumenCategorias td:nth-child(2) {
+
+    color: var(--verde);
+
+    font-weight: 600;
+
+}
+
+
+#tablaResumenCategorias td:nth-child(3) {
+
+    color: var(--rojo);
+
+    font-weight: 600;
+
+}
+
+
+#tablaResumenCategorias td:nth-child(4) {
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   TABLA DE MOVIMIENTOS
+   ========================================================= */
+
+.tabla-movimientos {
+
+    min-width: 1050px;
+
+}
+
+
+.tabla-movimientos th,
+
+.tabla-movimientos td {
+
+    white-space: nowrap;
+
+}
+
+
+.tabla-movimientos td:nth-child(6),
+
+.tabla-movimientos td:nth-child(7) {
+
+    white-space: normal;
+
+    min-width: 180px;
+
+    max-width: 300px;
+
+}
+
+
+/* =========================================================
+   ESTADO / TIPO
+   ========================================================= */
+
+.tipo-ingreso {
+
+    color: var(--verde) !important;
+
+    font-weight: 600;
+
+}
+
+
+.tipo-egreso {
+
+    color: var(--rojo) !important;
+
+    font-weight: 600;
+
+}
+
+
+.tipo-ajuste {
+
+    color: var(--primario) !important;
+
+    font-weight: 600;
+
+}
+
+
+/* =========================================================
+   CELDA VACÍA
+   ========================================================= */
+
+.tabla-vacia {
+
+    padding: 35px 20px !important;
+
+    text-align: center !important;
+
+    color: var(--texto-secundario) !important;
+
+    font-size: 12px !important;
+
+}
+
+
+/* =========================================================
+   TEXTO CANTIDAD DE MOVIMIENTOS
+   ========================================================= */
+
+#textoCantidadMovimientos {
+
+    color: var(--texto-secundario);
+
+}
+
+
+/* =========================================================
+   CARGANDO
+   ========================================================= */
+
+.cargando-reporte {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 10px;
+
+    width: 100%;
+
+    margin: 20px 0;
+
+    padding: 25px;
+
+    color: var(--texto-secundario);
+
+    font-size: 12px;
+
+}
+
+
+.spinner {
+
+    width: 20px;
+
+    height: 20px;
+
+    border: 3px solid var(--primario-suave);
+
+    border-top-color: var(--primario);
+
+    border-radius: 50%;
+
+    animation: girar 0.8s linear infinite;
+
+}
+
+
+@keyframes girar {
+
+    from {
+
+        transform: rotate(0deg);
+
+    }
+
+    to {
+
+        transform: rotate(360deg);
+
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .main-content {
+
+        width: calc(100% - 220px);
+
+        margin-left: 220px;
+
+        padding: 25px;
+
+    }
+
+
+    .filtros-grid {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+
+    .resumen-grid {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+    .reportes-header {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+
+    .reportes-header-acciones {
+
+        justify-content: flex-start;
+
+    }
+
+}
+
+
+/* =========================================================
+   MÓVIL
+   ========================================================= */
+
+@media (max-width: 750px) {
+
+    .main-content {
+
+        width: 100%;
+
+        margin-left: 0;
+
+        padding: 22px 18px 40px;
+
+    }
+
+
+    .reportes-header {
+
+        padding: 20px;
+
+    }
+
+
+    .reportes-header h1 {
+
+        font-size: 20px;
+
+    }
+
+
+    .reportes-header-acciones {
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        width: 100%;
+
+    }
+
+
+    .reportes-header-acciones .boton {
+
+        width: 100%;
+
+    }
+
+
+    .reportes-header-acciones
+    #volverButton {
+
+        grid-column: 1 / -1;
+
+    }
+
+
+    .filtros-grid {
+
+        grid-template-columns: 1fr;
+
+        padding: 20px;
+
+    }
+
+
+    .filtros-acciones {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        padding: 0 20px 20px;
+
+    }
+
+
+    .filtros-acciones .boton {
+
+        width: 100%;
+
+    }
+
+
+    .resumen-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .panel-titulo {
+
+        padding: 20px;
+
+    }
+
+}
+
+
+/* =========================================================
+   MÓVILES PEQUEÑOS
+   ========================================================= */
+
+@media (max-width: 500px) {
+
+    .main-content {
+
+        padding: 18px 12px 30px;
+
+    }
+
+
+    .reportes-header {
+
+        padding: 18px;
+
+    }
+
+
+    .reportes-header-acciones {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .reportes-header-acciones
+    #volverButton {
+
+        grid-column: auto;
+
+    }
+
+
+    .tarjeta-resumen {
+
+        padding: 18px;
+
+    }
+
+
+    .tarjeta-resumen > strong {
+
+        font-size: 22px;
+
+    }
+
+
+    .panel-titulo {
+
+        padding: 18px;
+
+    }
+
+
+    .filtros-grid {
+
+        padding: 18px;
+
+    }
+
+
+    .filtros-acciones {
+
+        padding:
+            0
+            18px
+            18px;
+
+    }
+
+}

@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Finanzas | Sistema Financiero</title>
+
+<link
+    rel="stylesheet"
+    href="styles.css"
+>
+
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- =====================================================
+     BARRA LATERAL
+     ===================================================== -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+
+        <div class="logo-icon">
+            SF
+        </div>
+
+        <div class="logo-text">
+
+            <strong>
+                Sistema Financiero
+            </strong>
+
+            <span>
+                Comunidad Juan Cheuquelen
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <nav class="menu">
+
+        <!-- INICIO -->
+
+        <a
+            href="dashboard.html"
+            class="menu-item"
+        >
+
+            <span class="menu-icon">
+                ⌂
+            </span>
+
+            <span>
+                Inicio
+            </span>
+
+        </a>
+
+
+        <!-- SOCIOS -->
+
+        <a
+            href="socios.html"
+            class="menu-item"
+            id="menuSocios"
+        >
+
+            <span class="menu-icon">
+                ♙
+            </span>
+
+            <span>
+                Socios
+            </span>
+
+        </a>
+
+
+        <!-- CUOTAS -->
+
+        <a
+            href="cuotas.html"
+            class="menu-item"
+            id="menuCuotas"
+        >
+
+            <span class="menu-icon">
+                ▣
+            </span>
+
+            <span>
+                Cuotas
+            </span>
+
+        </a>
+
+
+        <!-- FINANZAS -->
+
+        <a
+            href="finanzas.html"
+            class="menu-item activo"
+            id="menuFinanzas"
+        >
+
+            <span class="menu-icon">
+                ◈
+            </span>
+
+            <span>
+                Finanzas
+            </span>
+
+        </a>
+
+
+        <!-- REPORTES -->
+
+        <a
+            href="#"
+            class="menu-item"
+            id="menuReportes"
+        >
+
+            <span class="menu-icon">
+                ▥
+            </span>
+
+            <span>
+                Reportes
+            </span>
+
+        </a>
+
+    </nav>
+
+
+    <!-- CERRAR SESIÓN -->
+
+    <div class="sidebar-bottom">
+
+        <button
+            id="logoutButton"
+            class="cerrar-sesion"
+            type="button"
+        >
+
+            <span>
+                ↪
+            </span>
+
+            Cerrar sesión
+
+        </button>
+
+    </div>
+
+</aside>
+
+
+<!-- =====================================================
+     CONTENIDO PRINCIPAL
+     ===================================================== -->
+
+<main class="contenido">
+
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+        <div>
+
+            <h1>
+                Finanzas
+            </h1>
+
+            <p>
+                Control y seguimiento de los movimientos financieros
+            </p>
+
+        </div>
+
+
+        <div class="usuario">
+
+            <div class="usuario-icono">
+                ♙
+            </div>
+
+
+            <div>
+
+                <strong id="nombreUsuario">
+                    Usuario
+                </strong>
+
+                <span id="rolUsuario">
+                    Cargando...
+                </span>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- =================================================
+         ENCABEZADO
+         ================================================= -->
+
+    <section class="dashboard-header">
+
+        <div>
+
+            <span class="etiqueta">
+                CONTROL FINANCIERO
+            </span>
+
+            <h2>
+                Movimientos financieros
+            </h2>
+
+            <p>
+                Registre y consulte los ingresos y egresos de la comunidad.
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <button
+                type="button"
+                id="nuevoMovimientoButton"
+                class="boton-principal"
+                style="display: none;"
+            >
+
+                + Registrar movimiento
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         RESUMEN
+         ================================================= -->
+
+    <section class="tarjetas-cuotas">
+
+
+        <!-- INGRESOS -->
+
+        <div class="tarjeta-cuota">
+
+            <div class="cuota-icono cuota-pagada">
+                ↑
+            </div>
+
+            <div>
+
+                <span>
+                    Ingresos
+                </span>
+
+                <strong id="totalIngresos">
+                    $0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- EGRESOS -->
+
+        <div class="tarjeta-cuota">
+
+            <div class="cuota-icono cuota-pendiente">
+                ↓
+            </div>
+
+            <div>
+
+                <span>
+                    Egresos
+                </span>
+
+                <strong id="totalEgresos">
+                    $0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- SALDO -->
+
+        <div class="tarjeta-cuota">
+
+            <div class="cuota-icono cuota-parcial">
+                $
+            </div>
+
+            <div>
+
+                <span>
+                    Saldo
+                </span>
+
+                <strong id="saldoActual">
+                    $0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- MOVIMIENTOS -->
+
+        <div class="tarjeta-cuota">
+
+            <div class="cuota-icono">
+                #
+            </div>
+
+            <div>
+
+                <span>
+                    Movimientos
+                </span>
+
+                <strong id="totalMovimientos">
+                    0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- =================================================
+         FILTROS
+         ================================================= -->
+
+    <section class="panel-card">
+
+        <div class="filtros-socios">
+
+
+            <!-- PERÍODO -->
+
+            <div class="campo-filtro">
+
+                <label for="periodoSelect">
+                    Período financiero
+                </label>
+
+                <select id="periodoSelect">
+
+                    <option value="">
+                        Cargando períodos...
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- CUENTA -->
+
+            <div class="campo-filtro">
+
+                <label for="cuentaSelect">
+                    Cuenta
+                </label>
+
+                <select id="cuentaSelect">
+
+                    <option value="">
+                        Todas las cuentas
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- TIPO -->
+
+            <div class="campo-filtro">
+
+                <label for="tipoSelect">
+                    Tipo
+                </label>
+
+                <select id="tipoSelect">
+
+                    <option value="todos">
+                        Todos
+                    </option>
+
+                    <option value="ingreso">
+                        Ingresos
+                    </option>
+
+                    <option value="egreso">
+                        Egresos
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- ORIGEN -->
+
+            <div class="campo-filtro">
+
+                <label for="origenSelect">
+                    Origen
+                </label>
+
+                <select id="origenSelect">
+
+                    <option value="todos">
+                        Todos
+                    </option>
+
+                    <option value="pago_cuota">
+                        Pago de cuota
+                    </option>
+
+                    <option value="ingreso">
+                        Ingreso
+                    </option>
+
+                    <option value="egreso">
+                        Egreso
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- FECHA DESDE -->
+
+            <div class="campo-filtro">
+
+                <label for="fechaDesde">
+                    Desde
+                </label>
+
+                <input
+                    type="date"
+                    id="fechaDesde"
+                >
+
+            </div>
+
+
+            <!-- FECHA HASTA -->
+
+            <div class="campo-filtro">
+
+                <label for="fechaHasta">
+                    Hasta
+                </label>
+
+                <input
+                    type="date"
+                    id="fechaHasta"
+                >
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         LISTADO
+         ================================================= -->
+
+    <section class="seccion-dashboard">
+
+
+        <div class="titulo-seccion">
+
+            <div>
+
+                <h3>
+                    Historial de movimientos
+                </h3>
+
+                <p id="contadorMovimientos">
+                    Cargando movimientos...
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="limpiarFiltrosButton"
+                class="boton-secundario"
+            >
+
+                Limpiar filtros
+
+            </button>
+
+        </div>
+
+
+        <div class="panel-card">
+
+            <div class="tabla-contenedor">
+
+                <table class="tabla-socios">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Fecha
+                            </th>
+
+                            <th>
+                                Cuenta
+                            </th>
+
+                            <th>
+                                Tipo
+                            </th>
+
+                            <th>
+                                Origen
+                            </th>
+
+                            <th>
+                                Descripción
+                            </th>
+
+                            <th>
+                                Monto
+                            </th>
+
+                            <th>
+                                Subtipo
+                            </th>
+
+                            <th>
+                                Acciones
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="tablaMovimientos">
+
+                        <tr>
+
+                            <td
+                                colspan="8"
+                                class="tabla-cargando"
+                            >
+
+                                Cargando movimientos...
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL REGISTRAR MOVIMIENTO
+     ===================================================== -->
+
+<div
+    id="modalNuevoMovimiento"
+    class="modal"
+    style="display: none;"
+>
+
+    <div class="modal-contenido">
+
+
+        <div class="modal-header">
+
+            <div>
+
+                <span class="etiqueta">
+                    NUEVO MOVIMIENTO
+                </span>
+
+                <h2>
+                    Registrar movimiento financiero
+                </h2>
+
+                <p>
+                    Registre un ingreso o egreso de la comunidad.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="cerrarModalNuevoMovimiento"
+                class="modal-cerrar"
+            >
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <form id="formNuevoMovimiento">
+
+
+            <div class="form-grid">
+
+
+                <!-- PERÍODO -->
+
+                <div class="campo-formulario">
+
+                    <label for="nuevoPeriodo">
+                        Período financiero *
+                    </label>
+
+                    <select
+                        id="nuevoPeriodo"
+                        required
+                    >
+
+                        <option value="">
+                            Seleccione un período
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- CUENTA -->
+
+                <div class="campo-formulario">
+
+                    <label for="nuevoCuenta">
+                        Cuenta *
+                    </label>
+
+                    <select
+                        id="nuevoCuenta"
+                        required
+                    >
+
+                        <option value="">
+                            Seleccione una cuenta
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- TIPO -->
+
+                <div class="campo-formulario">
+
+                    <label for="nuevoTipo">
+                        Tipo de movimiento *
+                    </label>
+
+                    <select
+                        id="nuevoTipo"
+                        required
+                    >
+
+                        <option value="">
+                            Seleccione
+                        </option>
+
+                        <option value="ingreso">
+                            Ingreso
+                        </option>
+
+                        <option value="egreso">
+                            Egreso
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- FECHA -->
+
+                <div class="campo-formulario">
+
+                    <label for="nuevoFecha">
+                        Fecha *
+                    </label>
+
+                    <input
+                        type="date"
+                        id="nuevoFecha"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- MONTO -->
+
+                <div class="campo-formulario">
+
+                    <label for="nuevoMonto">
+                        Monto *
+                    </label>
+
+                    <input
+                        type="number"
+                        id="nuevoMonto"
+                        min="1"
+                        step="1"
+                        placeholder="Ej.: 500000"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- DESCRIPCIÓN -->
+
+                <div class="campo-formulario campo-completo">
+
+                    <label for="nuevoDescripcion">
+                        Descripción *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nuevoDescripcion"
+                        maxlength="250"
+                        placeholder="Ej.: Financiamiento proyecto comunitario"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- OBSERVACIÓN -->
+
+                <div class="campo-formulario campo-completo">
+
+                    <label for="nuevoObservacion">
+                        Observación
+                    </label>
+
+                    <textarea
+                        id="nuevoObservacion"
+                        rows="4"
+                        maxlength="500"
+                        placeholder="Información adicional, documento de respaldo, etc."
+                    ></textarea>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="modal-acciones">
+
+
+                <button
+                    type="button"
+                    id="cancelarNuevoMovimiento"
+                    class="boton-secundario"
+                >
+
+                    Cancelar
+
+                </button>
+
+
+                <button
+                    type="submit"
+                    id="guardarMovimientoButton"
+                    class="boton-principal"
+                >
+
+                    Guardar movimiento
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL DETALLE
+     ===================================================== -->
+
+<div
+    id="modalMovimiento"
+    class="modal"
+    style="display: none;"
+>
+
+    <div class="modal-contenido">
+
+
+        <div class="modal-header">
+
+            <div>
+
+                <span class="etiqueta">
+                    DETALLE DEL MOVIMIENTO
+                </span>
+
+                <h2>
+                    Información financiera
+                </h2>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="cerrarModalMovimiento"
+                class="modal-cerrar"
+            >
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <div class="form-grid">
+
+
+            <div class="campo-formulario">
+
+                <label>
+                    Fecha
+                </label>
+
+                <input
+                    type="text"
+                    id="detalleFecha"
+                    readonly
+                >
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label>
+                    Cuenta
+                </label>
+
+                <input
+                    type="text"
+                    id="detalleCuenta"
+                    readonly
+                >
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label>
+                    Tipo
+                </label>
+
+                <input
+                    type="text"
+                    id="detalleTipo"
+                    readonly
+                >
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label>
+                    Origen
+                </label>
+
+                <input
+                    type="text"
+                    id="detalleOrigen"
+                    readonly
+                >
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label>
+                    Monto
+                </label>
+
+                <input
+                    type="text"
+                    id="detalleMonto"
+                    readonly
+                >
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label>
+                    Subtipo
+                </label>
+
+                <input
+                    type="text"
+                    id="detalleSubtipo"
+                    readonly
+                >
+
+            </div>
+
+
+            <div class="campo-formulario campo-completo">
+
+                <label>
+                    Descripción
+                </label>
+
+                <textarea
+                    id="detalleDescripcion"
+                    rows="3"
+                    readonly
+                ></textarea>
+
+            </div>
+
+
+            <div class="campo-formulario campo-completo">
+
+                <label>
+                    Observación
+                </label>
+
+                <textarea
+                    id="detalleObservacion"
+                    rows="3"
+                    readonly
+                ></textarea>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="modal-acciones">
+
+            <button
+                type="button"
+                id="cerrarDetalle"
+                class="boton-secundario"
+            >
+
+                Cerrar
+
+            </button>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SCRIPTS
+     ===================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="config.js"></script>
+
+<script src="finanzas.js"></script>
+
+</body>
+
+</html>

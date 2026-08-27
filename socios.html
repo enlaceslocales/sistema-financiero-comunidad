@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Socios | Sistema Financiero</title>
+
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+    <!-- =====================================================
+         BARRA LATERAL
+         ===================================================== -->
+
+    <aside class="sidebar">
+
+
+        <!-- LOGO -->
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                SF
+            </div>
+
+            <div class="logo-text">
+
+                <strong>
+                    Sistema Financiero
+                </strong>
+
+                <span>
+                    Comunidad Juan Cheuquelen
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             MENÚ PRINCIPAL
+             ================================================= -->
+
+        <nav
+            class="menu"
+            aria-label="Menú principal"
+        >
+
+
+            <!-- INICIO -->
+
+            <a
+                href="dashboard.html"
+                class="menu-item"
+                id="menuInicio"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ⌂
+                </span>
+
+                <span>
+                    Inicio
+                </span>
+
+            </a>
+
+
+            <!-- SOCIOS -->
+
+            <a
+                href="socios.html"
+                class="menu-item activo"
+                id="menuSocios"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ♙
+                </span>
+
+                <span>
+                    Socios
+                </span>
+
+            </a>
+
+
+            <!-- CUOTAS -->
+
+            <a
+                href="cuotas.html"
+                class="menu-item"
+                id="menuCuotas"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ▣
+                </span>
+
+                <span>
+                    Cuotas
+                </span>
+
+            </a>
+
+
+            <!-- FINANZAS -->
+
+            <a
+                href="finanzas.html"
+                class="menu-item"
+                id="menuFinanzas"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ◈
+                </span>
+
+                <span>
+                    Finanzas
+                </span>
+
+            </a>
+
+
+            <!-- PROYECTOS -->
+
+            <a
+                href="proyectos.html"
+                class="menu-item"
+                id="menuProyectos"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ◫
+                </span>
+
+                <span>
+                    Proyectos
+                </span>
+
+            </a>
+
+
+            <!-- REPORTES -->
+
+            <a
+                href="reportes.html"
+                class="menu-item"
+                id="menuReportes"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ▥
+                </span>
+
+                <span>
+                    Reportes
+                </span>
+
+            </a>
+
+
+            <!-- =================================================
+                 USUARIOS
+
+                 SOLO ADMINISTRADOR
+
+                 Se mantiene oculto inicialmente.
+                 ================================================= -->
+
+            <a
+                href="usuarios.html"
+                class="menu-item"
+                id="menuUsuarios"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ♙
+                </span>
+
+                <span>
+                    Usuarios
+                </span>
+
+            </a>
+
+
+        </nav>
+
+
+        <!-- =================================================
+             PARTE INFERIOR
+             ================================================= -->
+
+        <div class="sidebar-bottom">
+
+
+            <button
+                type="button"
+                id="logoutButton"
+                class="cerrar-sesion"
+            >
+
+                <span aria-hidden="true">
+                    ↪
+                </span>
+
+                Cerrar sesión
+
+            </button>
+
+
+        </div>
+
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         CONTENIDO PRINCIPAL
+         ===================================================== -->
+
+    <main class="contenido">
+
+
+        <!-- =================================================
+             TOPBAR
+             ================================================= -->
+
+        <header class="topbar">
+
+
+            <div>
+
+                <h1>
+                    Socios
+                </h1>
+
+                <p>
+                    Administración de socios de la comunidad
+                </p>
+
+            </div>
+
+
+            <!-- USUARIO ACTUAL -->
+
+            <div class="usuario">
+
+
+                <div
+                    class="usuario-icono"
+                    aria-hidden="true"
+                >
+                    ♙
+                </div>
+
+
+                <div>
+
+                    <strong id="nombreUsuario">
+                        Usuario
+                    </strong>
+
+                    <span id="rolUsuario">
+                        Cargando...
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+        </header>
+
+
+
+        <!-- =================================================
+             ENCABEZADO
+             ================================================= -->
+
+        <section class="dashboard-header">
+
+
+            <div>
+
+
+                <span class="etiqueta">
+                    REGISTRO DE SOCIOS
+                </span>
+
+
+                <h2>
+                    Socios de la comunidad
+                </h2>
+
+
+                <p>
+                    Consulte y administre la información
+                    de los socios registrados.
+                </p>
+
+
+            </div>
+
+
+            <!-- NUEVO SOCIO -->
+
+            <button
+                type="button"
+                id="nuevoSocioButton"
+                class="boton"
+            >
+
+                + Nuevo socio
+
+            </button>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             FILTROS
+             ================================================= -->
+
+        <section class="panel-card">
+
+
+            <div class="filtros-socios">
+
+
+                <!-- BUSCADOR -->
+
+                <div class="campo-busqueda">
+
+
+                    <label for="buscarSocio">
+                        Buscar socio
+                    </label>
+
+
+                    <input
+                        type="search"
+                        id="buscarSocio"
+                        placeholder="Buscar por nombre o RUT..."
+                        autocomplete="off"
+                    >
+
+
+                </div>
+
+
+
+                <!-- FILTRO ESTADO -->
+
+                <div class="campo-filtro">
+
+
+                    <label for="filtroEstado">
+                        Estado
+                    </label>
+
+
+                    <select id="filtroEstado">
+
+
+                        <option value="todos">
+                            Todos
+                        </option>
+
+
+                        <option value="activo">
+                            Activos
+                        </option>
+
+
+                        <option value="inactivo">
+                            Inactivos
+                        </option>
+
+
+                    </select>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             LISTADO DE SOCIOS
+             ================================================= -->
+
+        <section class="seccion-dashboard">
+
+
+            <div class="titulo-seccion">
+
+
+                <div>
+
+
+                    <h3>
+                        Listado de socios
+                    </h3>
+
+
+                    <p id="contadorSocios">
+                        Cargando socios...
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="panel-card">
+
+
+                <div class="tabla-contenedor">
+
+
+                    <table class="tabla-socios">
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Nombre
+                                </th>
+
+                                <th>
+                                    RUT
+                                </th>
+
+                                <th>
+                                    Teléfono
+                                </th>
+
+                                <th>
+                                    Correo
+                                </th>
+
+                                <th>
+                                    Estado
+                                </th>
+
+                                <th>
+                                    Acciones
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="tablaSocios">
+
+
+                            <tr>
+
+                                <td
+                                    colspan="6"
+                                    class="tabla-cargando"
+                                >
+                                    Cargando socios...
+                                </td>
+
+                            </tr>
+
+
+                        </tbody>
+
+
+                    </table>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     MODAL SOCIO
+     ===================================================== -->
+
+<div
+    id="modalSocio"
+    class="modal"
+    style="display: none;"
+>
+
+
+    <div class="modal-contenido">
+
+
+        <!-- =================================================
+             ENCABEZADO DEL MODAL
+             ================================================= -->
+
+        <div class="modal-header">
+
+
+            <div>
+
+
+                <span class="etiqueta">
+                    REGISTRO DE SOCIO
+                </span>
+
+
+                <h2 id="modalTitulo">
+                    Nuevo socio
+                </h2>
+
+
+            </div>
+
+
+            <button
+                type="button"
+                id="cerrarModal"
+                class="modal-cerrar"
+                aria-label="Cerrar ventana"
+            >
+                ×
+            </button>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             FORMULARIO
+             ================================================= -->
+
+        <form id="formSocio">
+
+
+            <!-- ID DEL SOCIO -->
+
+            <input
+                type="hidden"
+                id="socioId"
+            >
+
+
+
+            <div class="form-grid">
+
+
+                <!-- NOMBRES -->
+
+                <div class="campo-formulario">
+
+
+                    <label for="nombres">
+                        Nombres *
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="nombres"
+                        autocomplete="given-name"
+                        required
+                    >
+
+
+                </div>
+
+
+
+                <!-- APELLIDO PATERNO -->
+
+                <div class="campo-formulario">
+
+
+                    <label for="apellidoPaterno">
+                        Apellido paterno
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="apellidoPaterno"
+                        autocomplete="family-name"
+                    >
+
+
+                </div>
+
+
+
+                <!-- APELLIDO MATERNO -->
+
+                <div class="campo-formulario">
+
+
+                    <label for="apellidoMaterno">
+                        Apellido materno
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="apellidoMaterno"
+                    >
+
+
+                </div>
+
+
+
+                <!-- RUT -->
+
+                <div class="campo-formulario">
+
+
+                    <label for="rut">
+                        RUT
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="rut"
+                        placeholder="12.345.678-9"
+                        autocomplete="off"
+                    >
+
+
+                </div>
+
+
+
+                <!-- TELÉFONO -->
+
+                <div class="campo-formulario">
+
+
+                    <label for="telefono">
+                        Teléfono
+                    </label>
+
+
+                    <input
+                        type="tel"
+                        id="telefono"
+                        autocomplete="tel"
+                    >
+
+
+                </div>
+
+
+
+                <!-- CORREO -->
+
+                <div class="campo-formulario">
+
+
+                    <label for="email">
+                        Correo electrónico
+                    </label>
+
+
+                    <input
+                        type="email"
+                        id="email"
+                        autocomplete="email"
+                    >
+
+
+                </div>
+
+
+
+                <!-- FECHA DE INGRESO -->
+
+                <div class="campo-formulario">
+
+
+                    <label for="fechaIngreso">
+                        Fecha de ingreso
+                    </label>
+
+
+                    <input
+                        type="date"
+                        id="fechaIngreso"
+                    >
+
+
+                </div>
+
+
+
+                <!-- ESTADO -->
+
+                <div class="campo-formulario">
+
+
+                    <label for="estado">
+                        Estado
+                    </label>
+
+
+                    <select id="estado">
+
+
+                        <option value="activo">
+                            Activo
+                        </option>
+
+
+                        <option value="inactivo">
+                            Inactivo
+                        </option>
+
+
+                    </select>
+
+
+                </div>
+
+
+
+                <!-- DIRECCIÓN -->
+
+                <div
+                    class="campo-formulario campo-completo"
+                >
+
+
+                    <label for="direccion">
+                        Dirección
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="direccion"
+                        autocomplete="street-address"
+                    >
+
+
+                </div>
+
+
+
+                <!-- OBSERVACIONES -->
+
+                <div
+                    class="campo-formulario campo-completo"
+                >
+
+
+                    <label for="observaciones">
+                        Observaciones
+                    </label>
+
+
+                    <textarea
+                        id="observaciones"
+                        rows="3"
+                    ></textarea>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 ACCIONES DEL MODAL
+                 ================================================= -->
+
+            <div class="modal-acciones">
+
+
+                <button
+                    type="button"
+                    id="cancelarSocio"
+                    class="boton-secundario"
+                >
+                    Cancelar
+                </button>
+
+
+                <button
+                    type="submit"
+                    id="guardarSocio"
+                    class="boton"
+                >
+                    Guardar socio
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     SCRIPTS
+     ===================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+
+<script src="config.js"></script>
+
+
+<script src="socios.js"></script>
+
+
+</body>
+
+</html>
