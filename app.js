@@ -11,6 +11,8 @@
 let perfilUsuario = null;
 let periodosDisponibles = [];
 
+let sistemaInicializado = false;
+
 
 // ============================================================
 // VERIFICAR SESIÓN
@@ -35,9 +37,9 @@ async function verificarSesion() {
             sessionError
         );
 
-        window.location.href = "login.html";
+        redirigirAlLogin();
 
-        return;
+        return false;
     }
 
 
@@ -47,9 +49,9 @@ async function verificarSesion() {
 
     if (!session) {
 
-        window.location.href = "login.html";
+        redirigirAlLogin();
 
-        return;
+        return false;
     }
 
 
@@ -93,7 +95,7 @@ async function verificarSesion() {
             "No fue posible cargar el perfil del usuario."
         );
 
-        return;
+        return false;
     }
 
 
@@ -109,9 +111,9 @@ async function verificarSesion() {
 
         await supabaseClient.auth.signOut();
 
-        window.location.href = "login.html";
+        redirigirAlLogin();
 
-        return;
+        return false;
     }
 
 
@@ -154,6 +156,24 @@ async function verificarSesion() {
     // ========================================================
 
     await cargarDashboard();
+
+
+    return true;
+}
+
+
+// ============================================================
+// REDIRIGIR AL LOGIN
+// ============================================================
+
+function redirigirAlLogin() {
+
+    /*
+     * replace() evita que la página protegida quede como
+     * destino inmediato dentro del historial de navegación.
+     */
+
+    window.location.replace("login.html");
 
 }
 
@@ -538,7 +558,7 @@ async function cargarPeriodos() {
 
 
     // --------------------------------------------------------
-    // SI NO EXISTE SELECTOR
+    // SI NO EXISTE SELECT
     // --------------------------------------------------------
 
     if (!select) {
@@ -651,9 +671,6 @@ async function cargarPeriodos() {
     // ========================================================
     // CAMBIAR PERÍODO
     // ========================================================
-
-    // Evitamos registrar múltiples listeners
-    // si la función se ejecuta nuevamente.
 
     if (
         select.dataset.listenerConfigurado !==
@@ -1256,11 +1273,18 @@ function configurarCerrarSesion() {
 
 
                 return;
+
             }
 
 
-            window.location.href =
-                "login.html";
+            /*
+             * replace() reemplaza el Dashboard en el historial
+             * por login.html.
+             */
+
+            window.location.replace(
+                "login.html"
+            );
 
         }
     );
@@ -1270,6 +1294,46 @@ function configurarCerrarSesion() {
         "true";
 
 }
+
+
+// ============================================================
+// CONTROL DE PÁGINA DESDE EL HISTORIAL
+// ============================================================
+
+window.addEventListener(
+    "pageshow",
+    async function (event) {
+
+        /*
+         * pageshow también se ejecuta cuando el navegador
+         * recupera una página desde el historial/bfcache.
+         *
+         * Volvemos a comprobar la sesión para evitar que
+         * una página protegida quede visible después de
+         * cerrar sesión.
+         */
+
+        if (event.persisted) {
+
+            console.log(
+                "Página recuperada desde el historial. " +
+                "Comprobando sesión..."
+            );
+
+            const sesionValida =
+                await verificarSesion();
+
+
+            if (!sesionValida) {
+
+                return;
+
+            }
+
+        }
+
+    }
+);
 
 
 // ============================================================
