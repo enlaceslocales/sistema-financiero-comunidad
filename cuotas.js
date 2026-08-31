@@ -190,21 +190,42 @@ function traducirRol(rol) {
 // ============================================================
 
 function configurarEventos() {
-const irPagosCuotasButton =
-    document.getElementById("irPagosCuotasButton");
 
-if (irPagosCuotasButton) {
+    const irPagosCuotasButton =
+        document.getElementById("irPagosCuotasButton");
 
-    irPagosCuotasButton.addEventListener(
-        "click",
-        function () {
+    if (irPagosCuotasButton) {
 
-            window.location.href =
-                "pagos-cuotas.html";
+        irPagosCuotasButton.addEventListener(
+            "click",
+            function () {
 
-        }
-    );
-}
+                window.location.href =
+                    "pagos-cuotas.html";
+
+            }
+        );
+    }
+
+
+    // ========================================================
+    // BOTON GENERAR REPORTE PDF
+    // ========================================================
+
+    const generarReporteButton =
+        document.getElementById(
+            "generarReporteCuotasButton"
+        );
+
+    if (generarReporteButton) {
+
+        generarReporteButton.addEventListener(
+            "click",
+            generarReporteCuotasPDF
+        );
+    }
+
+
     const nuevaCuotaButton =
         document.getElementById("nuevaCuotaButton");
 
@@ -266,7 +287,9 @@ if (irPagosCuotasButton) {
 
 
     const filtroEstado =
-        document.getElementById("filtroEstadoCuota");
+        document.getElementById(
+            "filtroEstadoCuota"
+        );
 
     if (filtroEstado) {
 
@@ -413,7 +436,13 @@ async function cargarPeriodos() {
     const resultado =
         await supabaseClient
             .from("periodos_financieros")
-            .select("*");
+            .select("*")
+            .order(
+                "anio",
+                {
+                    ascending: false
+                }
+            );
 
     if (resultado.error) {
 
@@ -1514,6 +1543,1057 @@ async function guardarCuota(event) {
 
 
 // ============================================================
+// ============================================================
+// REPORTE DETALLADO DE CUOTAS - PDF
+// ============================================================
+// ============================================================
+
+
+// ============================================================
+// CARGAR LIBRERIAS PDF
+// ============================================================
+
+async function cargarLibreriasPDF() {
+
+    if (
+        window.jspdf &&
+        window.jspdf.jsPDF
+    ) {
+
+        return true;
+    }
+
+    return new Promise(function (resolve) {
+
+        const script =
+            document.createElement("script");
+
+        script.src =
+            "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+
+        script.onload =
+            function () {
+
+                const scriptTabla =
+                    document.createElement("script");
+
+                scriptTabla.src =
+                    "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js";
+
+                scriptTabla.onload =
+                    function () {
+
+                        resolve(true);
+                    };
+
+                scriptTabla.onerror =
+                    function () {
+
+                        resolve(false);
+                    };
+
+                document.head.appendChild(
+                    scriptTabla
+                );
+            };
+
+        script.onerror =
+            function () {
+
+                resolve(false);
+            };
+
+        document.head.appendChild(
+            script
+        );
+    });
+}
+
+
+// ============================================================
+// GENERAR REPORTE PDF
+// ============================================================
+
+async function generarReporteCuotasPDF() {
+
+    const boton =
+        document.getElementById(
+            "generarReporteCuotasButton"
+        );
+
+    const periodoSelect =
+        document.getElementById(
+            "periodoSelect"
+        );
+
+    const estadoSelect =
+        document.getElementById(
+            "filtroEstadoCuota"
+        );
+
+    const periodoId =
+        periodoSelect
+            ? periodoSelect.value
+            : "";
+
+    const estado =
+        estadoSelect
+            ? estadoSelect.value
+            : "todos";
+
+
+    // ========================================================
+    // VALIDAR PERIODO
+    // ========================================================
+
+    if (!periodoId) {
+
+        alert(
+            "Seleccione un período financiero antes de generar el reporte."
+        );
+
+        return;
+    }
+
+
+    const periodo =
+        obtenerPeriodo(periodoId);
+
+
+    if (!periodo) {
+
+        alert(
+            "No fue posible identificar el período seleccionado."
+        );
+
+        return;
+    }
+
+
+    // ========================================================
+    // ESTADO DEL BOTON
+    // ========================================================
+
+    if (boton) {
+
+        boton.disabled =
+            true;
+
+        boton.dataset.textoOriginal =
+            boton.textContent;
+
+        boton.textContent =
+            "Generando PDF...";
+    }
+
+
+    try {
+
+        // ====================================================
+        // CARGAR LIBRERIAS
+        // ====================================================
+
+        const librerias =
+            await cargarLibreriasPDF();
+
+        if (!librerias) {
+
+            alert(
+                "No fue posible cargar las herramientas necesarias para generar el PDF."
+            );
+
+            return;
+        }
+
+
+        // ====================================================
+        // CONSULTAR RPC
+        // ====================================================
+
+        const estadoRPC =
+            estado === "todos"
+                ? null
+                : estado;
+
+        const resultado =
+            await supabaseClient.rpc(
+                "reporte_detallado_cuotas",
+                {
+                    p_periodo_id:
+                        Number(periodoId),
+
+                    p_estado:
+                        estadoRPC,
+
+                    p_socio_id:
+                        null
+                }
+            );
+
+
+        if (resultado.error) {
+
+            console.error(
+                "Error al generar reporte detallado:",
+                resultado.error
+            );
+
+            alert(
+                obtenerMensajeError(
+                    resultado.error
+                )
+            );
+
+            return;
+        }
+
+
+        const datos =
+            resultado.data || [];
+
+
+        if (datos.length === 0) {
+
+            alert(
+                "No existen registros de cuotas para los criterios seleccionados."
+            );
+
+            return;
+        }
+
+
+        // ====================================================
+        // CREAR PDF
+        // ====================================================
+
+        const jsPDF =
+            window.jspdf.jsPDF;
+
+        const doc =
+            new jsPDF(
+                {
+                    orientation: "landscape",
+                    unit: "mm",
+                    format: "a4"
+                }
+            );
+
+
+        // ====================================================
+        // CONFIGURACION GENERAL
+        // ====================================================
+
+        const margen =
+            12;
+
+        let posicionY =
+            14;
+
+
+        // ====================================================
+        // TITULO
+        // ====================================================
+
+        doc.setFont(
+            "helvetica",
+            "bold"
+        );
+
+        doc.setFontSize(
+            16
+        );
+
+        doc.text(
+            "SISTEMA FINANCIERO",
+            margen,
+            posicionY
+        );
+
+        posicionY +=
+            7;
+
+
+        doc.setFontSize(
+            12
+        );
+
+        doc.text(
+            "Comunidad Juan Cheuquelen",
+            margen,
+            posicionY
+        );
+
+        posicionY +=
+            8;
+
+
+        doc.setFont(
+            "helvetica",
+            "bold"
+        );
+
+        doc.setFontSize(
+            14
+        );
+
+        doc.text(
+            "Reporte detallado de cuotas",
+            margen,
+            posicionY
+        );
+
+        posicionY +=
+            7;
+
+
+        // ====================================================
+        // INFORMACION DEL REPORTE
+        // ====================================================
+
+        doc.setFont(
+            "helvetica",
+            "normal"
+        );
+
+        doc.setFontSize(
+            9
+        );
+
+        const nombrePeriodo =
+            obtenerNombrePeriodo(
+                periodo
+            );
+
+        doc.text(
+            "Período: " +
+            nombrePeriodo,
+            margen,
+            posicionY
+        );
+
+        posicionY +=
+            5;
+
+
+        doc.text(
+            "Estado consultado: " +
+            traducirEstadoReporte(estado),
+            margen,
+            posicionY
+        );
+
+        posicionY +=
+            5;
+
+
+        doc.text(
+            "Fecha de generación: " +
+            formatearFecha(
+                obtenerFechaActual()
+            ),
+            margen,
+            posicionY
+        );
+
+        posicionY +=
+            8;
+
+
+        // ====================================================
+        // RESUMEN
+        // ====================================================
+
+        const resumen =
+            calcularResumenReporte(
+                datos
+            );
+
+
+        doc.setFont(
+            "helvetica",
+            "bold"
+        );
+
+        doc.setFontSize(
+            10
+        );
+
+        doc.text(
+            "Resumen:",
+            margen,
+            posicionY
+        );
+
+        posicionY +=
+            5;
+
+
+        doc.setFont(
+            "helvetica",
+            "normal"
+        );
+
+        doc.text(
+            "Cuotas: " +
+            resumen.totalCuotas,
+            margen,
+            posicionY
+        );
+
+        doc.text(
+            "Pagadas: " +
+            resumen.pagadas,
+            margen + 42,
+            posicionY
+        );
+
+        doc.text(
+            "Parciales: " +
+            resumen.parciales,
+            margen + 82,
+            posicionY
+        );
+
+        doc.text(
+            "Pendientes: " +
+            resumen.pendientes,
+            margen + 125,
+            posicionY
+        );
+
+        posicionY +=
+            5;
+
+
+        doc.text(
+            "Monto cuotas: " +
+            formatearMoneda(
+                resumen.montoTotal
+            ),
+            margen,
+            posicionY
+        );
+
+        doc.text(
+            "Total pagado: " +
+            formatearMoneda(
+                resumen.totalPagado
+            ),
+            margen + 70,
+            posicionY
+        );
+
+        doc.text(
+            "Saldo pendiente: " +
+            formatearMoneda(
+                resumen.saldoPendiente
+            ),
+            margen + 145,
+            posicionY
+        );
+
+        posicionY +=
+            8;
+
+
+        // ====================================================
+        // TABLA PRINCIPAL
+        // ====================================================
+
+        const filas =
+            [];
+
+
+        datos.forEach(function (registro) {
+
+            const pagos =
+                normalizarPagos(
+                    registro.pagos
+                );
+
+
+            const detallePagos =
+                construirDetallePagosPDF(
+                    pagos
+                );
+
+
+            filas.push(
+                [
+                    registro.socio_nombre || "—",
+
+                    registro.socio_rut || "—",
+
+                    registro.categoria_nombre || "—",
+
+                    formatearFecha(
+                        registro.fecha_emision
+                    ),
+
+                    formatearFecha(
+                        registro.fecha_vencimiento
+                    ),
+
+                    formatearMoneda(
+                        registro.monto_cuota
+                    ),
+
+                    traducirEstado(
+                        registro.estado_cuota
+                    ),
+
+                    formatearMoneda(
+                        registro.total_pagado
+                    ),
+
+                    formatearMoneda(
+                        registro.saldo_pendiente
+                    ),
+
+                    String(
+                        registro.cantidad_pagos || 0
+                    ),
+
+                    registro.modalidad_pago ||
+                    "Sin pagos",
+
+                    detallePagos
+                ]
+            );
+        });
+
+
+        doc.autoTable(
+            {
+                startY: posicionY,
+
+                head: [
+                    [
+                        "Socio",
+                        "RUT",
+                        "Categoría",
+                        "Emisión",
+                        "Vencimiento",
+                        "Cuota",
+                        "Estado",
+                        "Pagado",
+                        "Saldo",
+                        "N° pagos",
+                        "Modalidad",
+                        "Detalle de pagos"
+                    ]
+                ],
+
+                body:
+                    filas,
+
+                theme:
+                    "grid",
+
+                styles:
+                    {
+                        font:
+                            "helvetica",
+
+                        fontSize:
+                            7,
+
+                        cellPadding:
+                            2,
+
+                        valign:
+                            "top",
+
+                        overflow:
+                            "linebreak"
+                    },
+
+                headStyles:
+                    {
+                        fontStyle:
+                            "bold",
+
+                        halign:
+                            "center"
+                    },
+
+                columnStyles:
+                    {
+                        0:
+                            {
+                                cellWidth:
+                                    34
+                            },
+
+                        1:
+                            {
+                                cellWidth:
+                                    24
+                            },
+
+                        2:
+                            {
+                                cellWidth:
+                                    25
+                            },
+
+                        3:
+                            {
+                                cellWidth:
+                                    18
+                            },
+
+                        4:
+                            {
+                                cellWidth:
+                                    20
+                            },
+
+                        5:
+                            {
+                                cellWidth:
+                                    20
+                            },
+
+                        6:
+                            {
+                                cellWidth:
+                                    18
+                            },
+
+                        7:
+                            {
+                                cellWidth:
+                                    20
+                            },
+
+                        8:
+                            {
+                                cellWidth:
+                                    20
+                            },
+
+                        9:
+                            {
+                                cellWidth:
+                                    13
+                            },
+
+                        10:
+                            {
+                                cellWidth:
+                                    25
+                            },
+
+                        11:
+                            {
+                                cellWidth:
+                                    65
+                            }
+                    },
+
+                margin:
+                    {
+                        left:
+                            margen,
+
+                        right:
+                            margen
+                    },
+
+                didDrawPage:
+                    function (data) {
+
+                        agregarEncabezadoPiePDF(
+                            doc,
+                            data,
+                            nombrePeriodo
+                        );
+                    }
+            }
+        );
+
+
+        // ====================================================
+        // NOMBRE DEL ARCHIVO
+        // ====================================================
+
+        const anio =
+            periodo.anio ||
+            "periodo";
+
+        const fecha =
+            obtenerFechaActual();
+
+        const nombreArchivo =
+            "reporte_detallado_cuotas_" +
+            anio +
+            "_" +
+            fecha +
+            ".pdf";
+
+
+        doc.save(
+            nombreArchivo
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Error inesperado al generar PDF:",
+            error
+        );
+
+        alert(
+            "Ocurrió un error inesperado al generar el reporte PDF."
+        );
+
+
+    } finally {
+
+        if (boton) {
+
+            boton.disabled =
+                false;
+
+            boton.textContent =
+                boton.dataset.textoOriginal ||
+                "Generar reporte PDF";
+        }
+    }
+}
+
+
+// ============================================================
+// NORMALIZAR PAGOS
+// ============================================================
+
+function normalizarPagos(pagos) {
+
+    if (!pagos) {
+        return [];
+    }
+
+    if (Array.isArray(pagos)) {
+        return pagos;
+    }
+
+    if (typeof pagos === "string") {
+
+        try {
+
+            const resultado =
+                JSON.parse(pagos);
+
+            return Array.isArray(resultado)
+                ? resultado
+                : [];
+
+        } catch (error) {
+
+            console.error(
+                "No fue posible interpretar los pagos:",
+                error
+            );
+
+            return [];
+        }
+    }
+
+    return [];
+}
+
+
+// ============================================================
+// CONSTRUIR DETALLE DE PAGOS PARA PDF
+// ============================================================
+
+function construirDetallePagosPDF(pagos) {
+
+    if (!pagos || pagos.length === 0) {
+
+        return "Sin pagos registrados";
+    }
+
+    return pagos.map(
+        function (pago, indice) {
+
+            const numero =
+                indice + 1;
+
+            const fecha =
+                formatearFecha(
+                    pago.fecha_pago
+                );
+
+            const monto =
+                formatearMoneda(
+                    pago.monto
+                );
+
+            const medio =
+                pago.medio_pago ||
+                "—";
+
+            const comprobante =
+                pago.numero_comprobante ||
+                "—";
+
+            const banco =
+                pago.banco_origen ||
+                "—";
+
+            const observacion =
+                pago.observacion ||
+                "—";
+
+            const estado =
+                pago.estado ||
+                "activo";
+
+            let detalle =
+                numero +
+                ". " +
+                fecha +
+                " | " +
+                monto +
+                " | " +
+                medio;
+
+            if (
+                comprobante !== "—"
+            ) {
+
+                detalle +=
+                    " | Comp.: " +
+                    comprobante;
+            }
+
+            if (
+                banco !== "—"
+            ) {
+
+                detalle +=
+                    " | Banco: " +
+                    banco;
+            }
+
+            if (
+                observacion !== "—"
+            ) {
+
+                detalle +=
+                    " | Obs.: " +
+                    observacion;
+            }
+
+            if (
+                estado !== "activo"
+            ) {
+
+                detalle +=
+                    " | Estado: " +
+                    estado;
+            }
+
+            return detalle;
+        }
+    ).join(
+        "\n"
+    );
+}
+
+
+// ============================================================
+// RESUMEN DEL REPORTE
+// ============================================================
+
+function calcularResumenReporte(datos) {
+
+    let montoTotal =
+        0;
+
+    let totalPagado =
+        0;
+
+    let saldoPendiente =
+        0;
+
+    let pagadas =
+        0;
+
+    let parciales =
+        0;
+
+    let pendientes =
+        0;
+
+
+    datos.forEach(
+        function (registro) {
+
+            montoTotal +=
+                Number(
+                    registro.monto_cuota
+                ) || 0;
+
+            totalPagado +=
+                Number(
+                    registro.total_pagado
+                ) || 0;
+
+            saldoPendiente +=
+                Number(
+                    registro.saldo_pendiente
+                ) || 0;
+
+
+            switch (
+                registro.estado_cuota
+            ) {
+
+                case "pagada":
+
+                    pagadas++;
+
+                    break;
+
+                case "parcial":
+
+                    parciales++;
+
+                    break;
+
+                case "pendiente":
+
+                    pendientes++;
+
+                    break;
+            }
+        }
+    );
+
+
+    return {
+
+        totalCuotas:
+            datos.length,
+
+        pagadas:
+            pagadas,
+
+        parciales:
+            parciales,
+
+        pendientes:
+            pendientes,
+
+        montoTotal:
+            montoTotal,
+
+        totalPagado:
+            totalPagado,
+
+        saldoPendiente:
+            saldoPendiente
+    };
+}
+
+
+// ============================================================
+// TRADUCIR ESTADO DEL REPORTE
+// ============================================================
+
+function traducirEstadoReporte(estado) {
+
+    switch (estado) {
+
+        case "todos":
+            return "Todos";
+
+        case "pagada":
+            return "Pagadas";
+
+        case "parcial":
+            return "Parciales";
+
+        case "pendiente":
+            return "Pendientes";
+
+        case "anulada":
+            return "Anuladas";
+
+        default:
+            return estado || "Todos";
+    }
+}
+
+
+// ============================================================
+// ENCABEZADO Y PIE DEL PDF
+// ============================================================
+
+function agregarEncabezadoPiePDF(
+    doc,
+    data,
+    nombrePeriodo
+) {
+
+    const numeroPagina =
+        doc.internal.getNumberOfPages();
+
+    const anchoPagina =
+        doc.internal.pageSize.getWidth();
+
+    const altoPagina =
+        doc.internal.pageSize.getHeight();
+
+
+    // ========================================================
+    // PIE DE PAGINA
+    // ========================================================
+
+    doc.setFont(
+        "helvetica",
+        "normal"
+    );
+
+    doc.setFontSize(
+        7
+    );
+
+    doc.text(
+        "Sistema Financiero - Comunidad Juan Cheuquelen",
+        12,
+        altoPagina - 8
+    );
+
+    doc.text(
+        "Período: " +
+        nombrePeriodo,
+        anchoPagina / 2,
+        altoPagina - 8,
+        {
+            align:
+                "center"
+        }
+    );
+
+    doc.text(
+        "Página " +
+        numeroPagina,
+        anchoPagina - 12,
+        altoPagina - 8,
+        {
+            align:
+                "right"
+        }
+    );
+}
+
+
+// ============================================================
 // OBTENER VALOR
 // ============================================================
 
@@ -1789,6 +2869,7 @@ async function cerrarSesion() {
         return;
     }
 
-    window.location.href =
-        "login.html";
+    window.location.replace(
+        "login.html"
+    );
 }
