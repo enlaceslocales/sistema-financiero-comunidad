@@ -30,24 +30,34 @@ let cuentas = [];
 let reporteActual = [];
 
 
+/*
+ * Información financiera disponible para el reporte.
+ *
+ * Se utiliza tanto para la pantalla como para
+ * las exportaciones PDF y Excel.
+ */
+
+let resumenDisponible = {
+
+    anio: "",
+    fechaCorte: "",
+    cajaComunidad: 0,
+    cuentaBancaria: 0,
+    totalDisponible: 0
+
+};
+
+
 /* ============================================================
    ROLES AUTORIZADOS
    ============================================================ */
 
-/*
- * Reportes es un módulo de consulta.
- *
- * Roles permitidos:
- *
- * administrador
- * tesorero
- * consulta
- */
-
 const ROLES_REPORTES_AUTORIZADOS = [
+
     "administrador",
     "tesorero",
     "consulta"
+
 ];
 
 
@@ -83,10 +93,6 @@ document.addEventListener(
 
 async function verificarSesion() {
 
-    /*
-     * Verificar que Supabase exista.
-     */
-
     if (
         typeof supabaseClient === "undefined" ||
         !supabaseClient
@@ -105,10 +111,6 @@ async function verificarSesion() {
 
     }
 
-
-    /*
-     * Obtener sesión actual.
-     */
 
     const resultadoSesion =
         await supabaseClient.auth.getSession();
@@ -133,10 +135,6 @@ async function verificarSesion() {
         resultadoSesion.data.session;
 
 
-    /*
-     * No existe sesión.
-     */
-
     if (!session) {
 
         window.location.href =
@@ -147,17 +145,9 @@ async function verificarSesion() {
     }
 
 
-    /*
-     * Guardar usuario autenticado.
-     */
-
     usuarioActual =
         session.user;
 
-
-    /*
-     * Obtener perfil desde profiles.
-     */
 
     const resultadoPerfil =
         await supabaseClient
@@ -197,10 +187,6 @@ async function verificarSesion() {
         resultadoPerfil.data;
 
 
-    /*
-     * El usuario debe tener un perfil.
-     */
-
     if (!perfil) {
 
         console.error(
@@ -217,10 +203,6 @@ async function verificarSesion() {
     }
 
 
-    /*
-     * Verificar usuario activo.
-     */
-
     if (!perfil.activo) {
 
         alert(
@@ -236,10 +218,6 @@ async function verificarSesion() {
 
     }
 
-
-    /*
-     * Verificar rol autorizado.
-     */
 
     if (
         !ROLES_REPORTES_AUTORIZADOS.includes(
@@ -261,43 +239,19 @@ async function verificarSesion() {
     }
 
 
-    /*
-     * Guardar perfil.
-     */
-
     perfilUsuario =
         perfil;
 
 
-    /*
-     * Mostrar usuario.
-     */
-
     mostrarUsuario();
 
-
-    /*
-     * Configurar eventos.
-     */
-
     configurarEventos();
-
-
-    /*
-     * Cargar información.
-     */
 
     await cargarPeriodos();
 
     await cargarCuentas();
 
     await cargarMovimientos();
-
-
-    /*
-     * Inicialmente no mostrar reporte
-     * hasta presionar Generar reporte.
-     */
 
 }
 
@@ -307,11 +261,6 @@ async function verificarSesion() {
    ============================================================ */
 
 function mostrarUsuario() {
-
-    /*
-     * Si reportes.html ya tiene los elementos,
-     * simplemente los utilizamos.
-     */
 
     const nombreUsuario =
         document.getElementById(
@@ -344,11 +293,6 @@ function mostrarUsuario() {
     }
 
 
-    /*
-     * Si reportes.html no tiene usuario,
-     * lo agregamos automáticamente.
-     */
-
     if (
         !nombreUsuario &&
         !rolUsuario
@@ -379,10 +323,6 @@ function crearPanelUsuario() {
 
     }
 
-
-    /*
-     * Evitar duplicarlo.
-     */
 
     if (
         document.getElementById(
@@ -432,10 +372,6 @@ function crearPanelUsuario() {
         </div>
         `;
 
-
-    /*
-     * Insertar antes de los botones.
-     */
 
     contenedor.prepend(
         usuario
@@ -652,9 +588,7 @@ function llenarSelectorAnios() {
                 !anios.includes(anio)
             ) {
 
-                anios.push(
-                    anio
-                );
+                anios.push(anio);
 
             }
 
@@ -825,10 +759,6 @@ async function generarReporte() {
 
     try {
 
-        /*
-         * Obtener filtros.
-         */
-
         const anio =
             document.getElementById(
                 "filtroAnio"
@@ -853,10 +783,6 @@ async function generarReporte() {
             )?.value || "";
 
 
-        /*
-         * Validar fechas.
-         */
-
         if (
             desde &&
             hasta &&
@@ -876,17 +802,13 @@ async function generarReporte() {
         }
 
 
-        /*
-         * Filtrar movimientos.
-         */
-
         let lista =
             [...movimientos];
 
 
-        /*
-         * FILTRO POR AÑO
-         */
+        /* ====================================================
+           FILTRO POR AÑO
+           ==================================================== */
 
         if (anio) {
 
@@ -923,9 +845,9 @@ async function generarReporte() {
         }
 
 
-        /*
-         * FILTRO FECHA DESDE
-         */
+        /* ====================================================
+           FILTRO FECHA DESDE
+           ==================================================== */
 
         if (desde) {
 
@@ -950,9 +872,9 @@ async function generarReporte() {
         }
 
 
-        /*
-         * FILTRO FECHA HASTA
-         */
+        /* ====================================================
+           FILTRO FECHA HASTA
+           ==================================================== */
 
         if (hasta) {
 
@@ -977,9 +899,9 @@ async function generarReporte() {
         }
 
 
-        /*
-         * FILTRO POR CATEGORÍA
-         */
+        /* ====================================================
+           FILTRO POR CATEGORÍA
+           ==================================================== */
 
         if (
             categoria &&
@@ -1000,17 +922,25 @@ async function generarReporte() {
         }
 
 
-        /*
-         * Guardar reporte actual.
-         */
-
         reporteActual =
             lista;
 
 
-        /*
-         * Mostrar contenido.
-         */
+        /* ====================================================
+           CALCULAR SALDOS DISPONIBLES
+           ==================================================== */
+
+        resumenDisponible =
+            calcularSaldosDisponibles(
+                anio,
+                desde,
+                hasta
+            );
+
+
+        /* ====================================================
+           MOSTRAR CONTENIDO
+           ==================================================== */
 
         const contenido =
             document.getElementById(
@@ -1026,36 +956,45 @@ async function generarReporte() {
         }
 
 
-        /*
-         * Actualizar resumen.
-         */
+        /* ====================================================
+           ACTUALIZAR RESUMEN
+           ==================================================== */
 
         actualizarResumen(
             lista
         );
 
 
-        /*
-         * Resumen por categoría.
-         */
+        /* ====================================================
+           ACTUALIZAR SALDOS DISPONIBLES
+           ==================================================== */
+
+        actualizarSaldosDisponibles(
+            resumenDisponible
+        );
+
+
+        /* ====================================================
+           RESUMEN POR CATEGORÍA
+           ==================================================== */
 
         actualizarResumenCategorias(
             lista
         );
 
 
-        /*
-         * Tabla de movimientos.
-         */
+        /* ====================================================
+           TABLA DE MOVIMIENTOS
+           ==================================================== */
 
         actualizarTablaMovimientos(
             lista
         );
 
 
-        /*
-         * Cantidad.
-         */
+        /* ====================================================
+           CANTIDAD
+           ==================================================== */
 
         const textoCantidad =
             document.getElementById(
@@ -1100,6 +1039,337 @@ async function generarReporte() {
 
 
 /* ============================================================
+   CALCULAR SALDOS DISPONIBLES
+   ============================================================ */
+
+/*
+ * IMPORTANTE:
+ *
+ * El saldo disponible NO se calcula utilizando únicamente
+ * reporteActual, porque reporteActual puede tener filtros
+ * por categoría.
+ *
+ * Ejemplo:
+ *
+ * Si filtramos solamente "Pago de cuotas", eso no significa
+ * que el dinero disponible de la comunidad corresponda
+ * solamente a esos movimientos.
+ *
+ * Por eso se utilizan TODOS los movimientos financieros
+ * hasta la fecha de corte correspondiente.
+ */
+
+function calcularSaldosDisponibles(
+    anio,
+    desde,
+    hasta
+) {
+
+    let fechaCorte =
+        "";
+
+
+    /*
+     * Si existe una fecha "hasta",
+     * esa es la fecha de corte.
+     */
+
+    if (hasta) {
+
+        fechaCorte =
+            hasta;
+
+    }
+
+
+    /*
+     * Si no existe "hasta" pero se seleccionó
+     * un año, utilizamos el 31 de diciembre
+     * de ese año.
+     */
+
+    else if (anio) {
+
+        fechaCorte =
+            String(anio) +
+            "-12-31";
+
+    }
+
+
+    /*
+     * Si no hay año ni fecha hasta,
+     * utilizamos la fecha del movimiento
+     * más reciente disponible.
+     */
+
+    else {
+
+        const fechas =
+            movimientos
+                .map(
+                    function (movimiento) {
+
+                        return obtenerFechaMovimiento(
+                            movimiento
+                        );
+
+                    }
+                )
+                .filter(
+                    function (fecha) {
+
+                        return !!fecha;
+
+                    }
+                )
+                .sort();
+
+
+        if (fechas.length > 0) {
+
+            fechaCorte =
+                fechas[
+                    fechas.length - 1
+                ];
+
+        }
+
+    }
+
+
+    /*
+     * Si todavía no existe fecha de corte,
+     * calculamos sobre todos los movimientos.
+     */
+
+    const movimientosParaSaldo =
+        movimientos.filter(
+            function (movimiento) {
+
+                if (!fechaCorte) {
+
+                    return true;
+
+                }
+
+
+                const fecha =
+                    obtenerFechaMovimiento(
+                        movimiento
+                    );
+
+
+                if (!fecha) {
+
+                    return false;
+
+                }
+
+
+                return fecha <= fechaCorte;
+
+            }
+        );
+
+
+    let cajaComunidad =
+        0;
+
+
+    let cuentaBancaria =
+        0;
+
+
+    movimientosParaSaldo.forEach(
+        function (movimiento) {
+
+            const monto =
+                Number(
+                    movimiento.monto
+                ) || 0;
+
+
+            let valor =
+                0;
+
+
+            if (
+                movimiento.tipo ===
+                "ingreso"
+            ) {
+
+                valor =
+                    monto;
+
+            }
+
+
+            else if (
+                movimiento.tipo ===
+                "egreso"
+            ) {
+
+                valor =
+                    -monto;
+
+            }
+
+
+            const cuenta =
+                obtenerCuenta(
+                    movimiento.cuenta_id
+                );
+
+
+            /*
+             * Cuenta bancaria.
+             */
+
+            if (
+                cuenta &&
+                cuenta.tipo ===
+                "bancaria"
+            ) {
+
+                cuentaBancaria +=
+                    valor;
+
+            }
+
+
+            /*
+             * Todo lo que no sea bancaria
+             * se considera caja/efectivo.
+             */
+
+            else {
+
+                cajaComunidad +=
+                    valor;
+
+            }
+
+        }
+    );
+
+
+    const totalDisponible =
+        cajaComunidad +
+        cuentaBancaria;
+
+
+    return {
+
+        anio:
+            anio
+                ? String(anio)
+                : "Todos",
+
+        fechaCorte:
+            fechaCorte,
+
+        cajaComunidad:
+            cajaComunidad,
+
+        cuentaBancaria:
+            cuentaBancaria,
+
+        totalDisponible:
+            totalDisponible
+
+    };
+
+}
+
+
+/* ============================================================
+   ACTUALIZAR SALDOS DISPONIBLES EN PANTALLA
+   ============================================================ */
+
+function actualizarSaldosDisponibles(
+    resumen
+) {
+
+    /*
+     * Esta función busca diferentes IDs posibles
+     * para no romper el HTML actual.
+     *
+     * Si posteriormente agregamos las tarjetas:
+     *
+     * saldoCajaComunidad
+     * saldoCuentaBancaria
+     * saldoTotalDisponible
+     * anioReportado
+     *
+     * se actualizarán automáticamente.
+     */
+
+    const anioElement =
+        document.getElementById(
+            "anioReportado"
+        );
+
+
+    const cajaElement =
+        document.getElementById(
+            "saldoCajaComunidad"
+        );
+
+
+    const bancoElement =
+        document.getElementById(
+            "saldoCuentaBancaria"
+        );
+
+
+    const totalElement =
+        document.getElementById(
+            "saldoTotalDisponible"
+        );
+
+
+    if (anioElement) {
+
+        anioElement.textContent =
+            resumen.anio;
+
+    }
+
+
+    if (cajaElement) {
+
+        cajaElement.textContent =
+            formatearMoneda(
+                resumen.cajaComunidad
+            );
+
+    }
+
+
+    if (bancoElement) {
+
+        bancoElement.textContent =
+            formatearMoneda(
+                resumen.cuentaBancaria
+            );
+
+    }
+
+
+    if (totalElement) {
+
+        totalElement.textContent =
+            formatearMoneda(
+                resumen.totalDisponible
+            );
+
+    }
+
+}
+
+
+/* ============================================================
    OBTENER FECHA DEL MOVIMIENTO
    ============================================================ */
 
@@ -1131,16 +1401,6 @@ function obtenerFechaMovimiento(
    CLASIFICAR MOVIMIENTO
    ============================================================ */
 
-/*
- * Clasificación utilizada por Reportes:
- *
- * proyecto_egreso -> proyectos
- * pago_cuota      -> pago_cuota
- * subtipo reversa -> ajuste
- * ingreso         -> ingreso
- * egreso          -> egreso
- */
-
 function clasificarMovimiento(
     movimiento
 ) {
@@ -1166,10 +1426,6 @@ function clasificarMovimiento(
         ).toLowerCase();
 
 
-    /*
-     * Proyecto.
-     */
-
     if (
         origen === "proyecto_egreso" ||
         origen === "proyecto"
@@ -1180,10 +1436,6 @@ function clasificarMovimiento(
     }
 
 
-    /*
-     * Pago de cuota.
-     */
-
     if (
         origen === "pago_cuota"
     ) {
@@ -1192,10 +1444,6 @@ function clasificarMovimiento(
 
     }
 
-
-    /*
-     * Ajustes / reversas.
-     */
 
     if (
         subtipo === "reversa" ||
@@ -1207,10 +1455,6 @@ function clasificarMovimiento(
     }
 
 
-    /*
-     * Ingreso.
-     */
-
     if (
         movimiento.tipo === "ingreso" ||
         origen === "ingreso"
@@ -1220,10 +1464,6 @@ function clasificarMovimiento(
 
     }
 
-
-    /*
-     * Egreso.
-     */
 
     if (
         movimiento.tipo === "egreso" ||
@@ -1249,6 +1489,7 @@ function actualizarResumen(
 ) {
 
     let ingresos = 0;
+
     let egresos = 0;
 
 
@@ -1496,11 +1737,13 @@ function actualizarResumenCategorias(
 
 
     const orden = [
+
         "proyectos",
         "pago_cuota",
         "ingreso",
         "egreso",
         "ajuste"
+
     ];
 
 
@@ -1513,10 +1756,6 @@ function actualizarResumenCategorias(
             const item =
                 categorias[clave];
 
-
-            /*
-             * No mostrar categorías completamente vacías.
-             */
 
             if (
                 item.movimientos === 0
@@ -1911,6 +2150,7 @@ function obtenerNombreCuenta(
         }
 
     }
+
     else {
 
         texto +=
@@ -2077,6 +2317,17 @@ function limpiarFiltros() {
         [];
 
 
+    resumenDisponible = {
+
+        anio: "",
+        fechaCorte: "",
+        cajaComunidad: 0,
+        cuentaBancaria: 0,
+        totalDisponible: 0
+
+    };
+
+
     limpiarMensajeError();
 
 }
@@ -2115,6 +2366,66 @@ function exportarExcelReporte() {
     }
 
 
+    /*
+     * ========================================================
+     * RESUMEN FINANCIERO INICIAL
+     * ========================================================
+     */
+
+    const filasResumen = [
+
+        [
+            "REPORTE FINANCIERO"
+        ],
+
+        [],
+
+        [
+            "Año reportado",
+            resumenDisponible.anio
+        ],
+
+        [
+            "Fecha de corte",
+            resumenDisponible.fechaCorte
+                ? formatearFecha(
+                    resumenDisponible.fechaCorte
+                )
+                : "—"
+        ],
+
+        [
+            "Monto disponible — Caja Comunidad",
+            resumenDisponible.cajaComunidad
+        ],
+
+        [
+            "Monto disponible — Cuenta Bancaria",
+            resumenDisponible.cuentaBancaria
+        ],
+
+        [
+            "MONTO TOTAL DISPONIBLE",
+            resumenDisponible.totalDisponible
+        ],
+
+        [],
+
+        [
+            "DETALLE DE MOVIMIENTOS"
+        ],
+
+        []
+
+    ];
+
+
+    /*
+     * ========================================================
+     * MOVIMIENTOS
+     * ========================================================
+     */
+
     const filas =
         reporteActual.map(
             function (movimiento) {
@@ -2131,71 +2442,168 @@ function exportarExcelReporte() {
                     );
 
 
-                return {
+                return [
 
-                    "Fecha":
-                        formatearFecha(
-                            obtenerFechaMovimiento(
-                                movimiento
-                            )
-                        ),
-
-                    "Categoría":
-                        traducirCategoria(
-                            categoria
-                        ),
-
-                    "Tipo":
-                        traducirTipo(
-                            movimiento.tipo
-                        ),
-
-                    "Cuenta":
-                        obtenerNombreCuenta(
-                            cuenta
-                        ),
-
-                    "Monto":
-                        Number(
-                            movimiento.monto
-                        ) || 0,
-
-                    "Descripción":
-                        movimiento.descripcion ||
-                        "",
-
-                    "Observación":
-                        movimiento.observacion ||
-                        "",
-
-                    "Subtipo":
-                        traducirSubtipo(
-                            movimiento.subtipo
+                    formatearFecha(
+                        obtenerFechaMovimiento(
+                            movimiento
                         )
+                    ),
 
-                };
+                    traducirCategoria(
+                        categoria
+                    ),
+
+                    traducirTipo(
+                        movimiento.tipo
+                    ),
+
+                    obtenerNombreCuenta(
+                        cuenta
+                    ),
+
+                    Number(
+                        movimiento.monto
+                    ) || 0,
+
+                    movimiento.descripcion ||
+                    "",
+
+                    movimiento.observacion ||
+                    "",
+
+                    traducirSubtipo(
+                        movimiento.subtipo
+                    )
+
+                ];
 
             }
         );
 
 
-    const hoja =
-        XLSX.utils.json_to_sheet(
+    /*
+     * ========================================================
+     * CONSTRUIR HOJA EXCEL
+     * ========================================================
+     */
+
+    const datosExcel =
+        filasResumen.concat(
+
+            [
+
+                [
+                    "Fecha",
+                    "Categoría",
+                    "Tipo",
+                    "Cuenta",
+                    "Monto",
+                    "Descripción",
+                    "Observación",
+                    "Subtipo"
+                ]
+
+            ],
+
             filas
+
         );
 
 
+    const hoja =
+        XLSX.utils.aoa_to_sheet(
+            datosExcel
+        );
+
+
+    /*
+     * Anchos de columnas.
+     */
+
     hoja["!cols"] = [
-        { wch: 12 },
+
         { wch: 20 },
-        { wch: 12 },
-        { wch: 35 },
+        { wch: 32 },
         { wch: 15 },
+        { wch: 40 },
+        { wch: 20 },
         { wch: 45 },
         { wch: 45 },
         { wch: 15 }
+
     ];
 
+
+    /*
+     * Formato monetario para los saldos.
+     */
+
+    const celdasMonetarias = [
+
+        "B5",
+        "B6",
+        "B7"
+
+    ];
+
+
+    celdasMonetarias.forEach(
+        function (celda) {
+
+            if (
+                hoja[celda]
+            ) {
+
+                hoja[celda].z =
+                    '$ #,##0';
+
+            }
+
+        }
+    );
+
+
+    /*
+     * Formato monetario para columna
+     * de movimientos.
+     *
+     * Los movimientos comienzan después
+     * de las filas de resumen.
+     */
+
+    const primeraFilaMovimientos =
+        12;
+
+
+    for (
+        let fila = primeraFilaMovimientos;
+        fila <
+        primeraFilaMovimientos +
+        filas.length;
+        fila++
+    ) {
+
+        const celda =
+            hoja[
+                "E" +
+                fila
+            ];
+
+
+        if (celda) {
+
+            celda.z =
+                '$ #,##0';
+
+        }
+
+    }
+
+
+    /*
+     * Crear libro.
+     */
 
     const libro =
         XLSX.utils.book_new();
@@ -2207,6 +2615,10 @@ function exportarExcelReporte() {
         "Reporte financiero"
     );
 
+
+    /*
+     * Fecha de generación.
+     */
 
     const fecha =
         new Date()
@@ -2274,7 +2686,9 @@ function exportarPdfReporte() {
 
 
     /*
-     * Título.
+     * ========================================================
+     * TÍTULO
+     * ========================================================
      */
 
     documento.setFontSize(
@@ -2290,7 +2704,9 @@ function exportarPdfReporte() {
 
 
     /*
-     * Información del usuario.
+     * ========================================================
+     * INFORMACIÓN DEL USUARIO
+     * ========================================================
      */
 
     documento.setFontSize(
@@ -2320,11 +2736,13 @@ function exportarPdfReporte() {
 
 
     /*
-     * Fecha de generación.
+     * ========================================================
+     * FECHA DE GENERACIÓN
+     * ========================================================
      */
 
     documento.text(
-        "Fecha: " +
+        "Fecha de generación: " +
         formatearFecha(
             new Date()
                 .toISOString()
@@ -2339,7 +2757,89 @@ function exportarPdfReporte() {
 
 
     /*
-     * Preparar filas.
+     * ========================================================
+     * BLOQUE DE DISPONIBILIDAD FINANCIERA
+     * ========================================================
+     */
+
+    documento.setFontSize(
+        11
+    );
+
+
+    documento.text(
+        "Situación de disponibilidad financiera",
+        14,
+        40
+    );
+
+
+    documento.setFontSize(
+        9
+    );
+
+
+    documento.text(
+        "Año reportado: " +
+        resumenDisponible.anio,
+        14,
+        47
+    );
+
+
+    documento.text(
+        "Fecha de corte: " +
+        (
+            resumenDisponible.fechaCorte
+                ? formatearFecha(
+                    resumenDisponible.fechaCorte
+                )
+                : "—"
+        ),
+        14,
+        52
+    );
+
+
+    documento.text(
+        "Caja Comunidad: " +
+        formatearMoneda(
+            resumenDisponible.cajaComunidad
+        ),
+        90,
+        47
+    );
+
+
+    documento.text(
+        "Cuenta Bancaria: " +
+        formatearMoneda(
+            resumenDisponible.cuentaBancaria
+        ),
+        90,
+        52
+    );
+
+
+    documento.setFontSize(
+        10
+    );
+
+
+    documento.text(
+        "TOTAL DISPONIBLE: " +
+        formatearMoneda(
+            resumenDisponible.totalDisponible
+        ),
+        180,
+        49
+    );
+
+
+    /*
+     * ========================================================
+     * PREPARAR FILAS
+     * ========================================================
      */
 
     const filas =
@@ -2395,7 +2895,9 @@ function exportarPdfReporte() {
 
 
     /*
-     * AutoTable.
+     * ========================================================
+     * AUTOTABLE
+     * ========================================================
      */
 
     if (
@@ -2414,7 +2916,7 @@ function exportarPdfReporte() {
 
     documento.autoTable({
 
-        startY: 38,
+        startY: 60,
 
         head: [[
 
@@ -2485,11 +2987,6 @@ function exportarPdfReporte() {
         didParseCell:
             function (data) {
 
-                /*
-                 * No aplicar estilos especiales
-                 * al encabezado.
-                 */
-
                 if (
                     data.section ===
                     "head"
@@ -2505,7 +3002,9 @@ function exportarPdfReporte() {
 
 
     /*
-     * Nombre del archivo.
+     * ========================================================
+     * NOMBRE DEL ARCHIVO
+     * ========================================================
      */
 
     const fecha =
