@@ -53,8 +53,6 @@
 
     <nav class="menu">
 
-        <!-- INICIO -->
-
         <a
             href="dashboard.html"
             class="menu-item"
@@ -70,8 +68,6 @@
 
         </a>
 
-
-        <!-- SOCIOS -->
 
         <a
             href="socios.html"
@@ -90,8 +86,6 @@
         </a>
 
 
-        <!-- CUOTAS -->
-
         <a
             href="cuotas.html"
             class="menu-item"
@@ -109,8 +103,6 @@
         </a>
 
 
-        <!-- FINANZAS -->
-
         <a
             href="finanzas.html"
             class="menu-item activo"
@@ -127,8 +119,6 @@
 
         </a>
 
-
-        <!-- REPORTES -->
 
         <a
             href="#"
@@ -148,8 +138,6 @@
 
     </nav>
 
-
-    <!-- CERRAR SESIÓN -->
 
     <div class="sidebar-bottom">
 
@@ -179,7 +167,9 @@
 <main class="contenido">
 
 
-    <!-- TOPBAR -->
+    <!-- =================================================
+         TOPBAR
+         ================================================= -->
 
     <header class="topbar">
 
@@ -237,7 +227,7 @@
             </h2>
 
             <p>
-                Registre y consulte los ingresos y egresos de la comunidad.
+                Registre y consulte los ingresos, egresos y traspasos entre cuentas de la comunidad.
             </p>
 
         </div>
@@ -432,6 +422,10 @@
                         Egresos
                     </option>
 
+                    <option value="traspaso">
+                        Traspasos
+                    </option>
+
                 </select>
 
             </div>
@@ -461,6 +455,10 @@
 
                     <option value="egreso">
                         Egreso
+                    </option>
+
+                    <option value="traspaso">
+                        Traspaso entre cuentas
                     </option>
 
                 </select>
@@ -644,8 +642,8 @@
                     Registrar movimiento financiero
                 </h2>
 
-                <p>
-                    Registre un ingreso o egreso de la comunidad.
+                <p id="textoAyudaNuevoMovimiento">
+                    Registre un ingreso, egreso o traspaso entre cuentas de la comunidad.
                 </p>
 
             </div>
@@ -692,7 +690,7 @@
                 </div>
 
 
-                <!-- CUENTA -->
+                <!-- CUENTA ORIGEN / CUENTA -->
 
                 <div class="campo-formulario">
 
@@ -737,6 +735,35 @@
 
                         <option value="egreso">
                             Egreso
+                        </option>
+
+                        <option value="traspaso">
+                            Traspaso entre cuentas
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- CUENTA DESTINO -->
+
+                <div
+                    class="campo-formulario"
+                    id="contenedorCuentaDestino"
+                    style="display: none;"
+                >
+
+                    <label for="nuevoCuentaDestino">
+                        Cuenta destino *
+                    </label>
+
+                    <select
+                        id="nuevoCuentaDestino"
+                    >
+
+                        <option value="">
+                            Seleccione una cuenta destino
                         </option>
 
                     </select>
@@ -793,7 +820,7 @@
                         type="text"
                         id="nuevoDescripcion"
                         maxlength="250"
-                        placeholder="Ej.: Financiamiento proyecto comunitario"
+                        placeholder="Ej.: Depósito de efectivo en cuenta bancaria"
                         required
                     >
 
@@ -878,7 +905,7 @@
                     DETALLE DEL MOVIMIENTO
                 </span>
 
-                <h2>
+                <h2 id="detalleTitulo">
                     Información financiera
                 </h2>
 
@@ -901,6 +928,8 @@
         <div class="form-grid">
 
 
+            <!-- FECHA -->
+
             <div class="campo-formulario">
 
                 <label>
@@ -916,9 +945,11 @@
             </div>
 
 
+            <!-- CUENTA -->
+
             <div class="campo-formulario">
 
-                <label>
+                <label id="detalleCuentaLabel">
                     Cuenta
                 </label>
 
@@ -930,6 +961,29 @@
 
             </div>
 
+
+            <!-- CUENTA DESTINO -->
+
+            <div
+                class="campo-formulario"
+                id="contenedorDetalleCuentaDestino"
+                style="display: none;"
+            >
+
+                <label>
+                    Cuenta destino
+                </label>
+
+                <input
+                    type="text"
+                    id="detalleCuentaDestino"
+                    readonly
+                >
+
+            </div>
+
+
+            <!-- TIPO -->
 
             <div class="campo-formulario">
 
@@ -946,6 +1000,8 @@
             </div>
 
 
+            <!-- ORIGEN -->
+
             <div class="campo-formulario">
 
                 <label>
@@ -960,6 +1016,8 @@
 
             </div>
 
+
+            <!-- MONTO -->
 
             <div class="campo-formulario">
 
@@ -976,6 +1034,8 @@
             </div>
 
 
+            <!-- SUBTIPO -->
+
             <div class="campo-formulario">
 
                 <label>
@@ -991,6 +1051,29 @@
             </div>
 
 
+            <!-- ID TRASPASO -->
+
+            <div
+                class="campo-formulario"
+                id="contenedorDetalleTraspaso"
+                style="display: none;"
+            >
+
+                <label>
+                    ID de traspaso
+                </label>
+
+                <input
+                    type="text"
+                    id="detalleTraspasoId"
+                    readonly
+                >
+
+            </div>
+
+
+            <!-- DESCRIPCIÓN -->
+
             <div class="campo-formulario campo-completo">
 
                 <label>
@@ -1005,6 +1088,8 @@
 
             </div>
 
+
+            <!-- OBSERVACIÓN -->
 
             <div class="campo-formulario campo-completo">
 
