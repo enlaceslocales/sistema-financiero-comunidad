@@ -2077,7 +2077,6 @@ async function abrirHistorial(
 
 }
 
-
 // ============================================================
 // IMPRIMIR HISTORIAL
 // ============================================================
@@ -2148,6 +2147,89 @@ function imprimirHistorial() {
     }
 
 
+    // ========================================================
+    // OBTENER INFORMACIÓN DEL SOCIO Y PERÍODO
+    // ========================================================
+
+    const cuotaSeleccionada =
+        cuotas.find(
+            function (cuota) {
+
+                return (
+                    contenido.textContent
+                        .includes(
+                            construirNombreCompleto(
+                                obtenerSocio(
+                                    cuota.socio_id
+                                ) || {}
+                            )
+                        )
+                );
+
+            }
+        );
+
+
+    let nombreSocio =
+        "Socio";
+
+
+    let rutSocio =
+        "";
+
+
+    let periodoSocio =
+        "";
+
+
+    if (cuotaSeleccionada) {
+
+        const socio =
+            obtenerSocio(
+                cuotaSeleccionada.socio_id
+            );
+
+
+        const periodo =
+            obtenerPeriodo(
+                cuotaSeleccionada.periodo_id
+            );
+
+
+        if (socio) {
+
+            nombreSocio =
+                construirNombreCompleto(
+                    socio
+                );
+
+
+            rutSocio =
+                socio.rut
+                    ? String(
+                        socio.rut
+                    )
+                    : "";
+
+        }
+
+
+        if (periodo) {
+
+            periodoSocio =
+                String(
+                    periodo.anio
+                );
+
+        }
+
+    }
+
+
+    // ========================================================
+    // CONTENIDO A IMPRIMIR
+    // ========================================================
+
     const contenidoImpresion =
         contenido.innerHTML
             .replace(
@@ -2155,6 +2237,20 @@ function imprimirHistorial() {
                 ""
             );
 
+
+    // ========================================================
+    // FECHA DE EMISIÓN
+    // ========================================================
+
+    const fechaEmision =
+        formatearFecha(
+            obtenerFechaActual()
+        );
+
+
+    // ========================================================
+    // DOCUMENTO DE IMPRESIÓN
+    // ========================================================
 
     ventana.document.open();
 
@@ -2168,11 +2264,19 @@ function imprimirHistorial() {
 
         "<meta charset='UTF-8'>" +
 
-        "<title>Historial de pagos</title>" +
+        "<title>Historial de pagos - " +
+        escaparHTML(
+            nombreSocio
+        ) +
+        "</title>" +
+
 
         "<style>" +
 
-        "* { box-sizing: border-box; }" +
+        "* {" +
+        "box-sizing: border-box;" +
+        "}" +
+
 
         "body {" +
         "font-family: Arial, Helvetica, sans-serif;" +
@@ -2181,29 +2285,41 @@ function imprimirHistorial() {
         "font-size: 13px;" +
         "}" +
 
+
         ".encabezado {" +
         "border-bottom: 2px solid #222;" +
         "padding-bottom: 15px;" +
         "margin-bottom: 25px;" +
         "}" +
 
+
         ".encabezado h1 {" +
         "margin: 0 0 5px 0;" +
         "font-size: 22px;" +
         "}" +
 
+
         ".encabezado p {" +
         "margin: 3px 0;" +
         "}" +
+
 
         ".titulo {" +
         "margin-bottom: 20px;" +
         "}" +
 
+
         ".titulo h2 {" +
         "margin: 0;" +
         "font-size: 18px;" +
         "}" +
+
+
+        ".titulo p {" +
+        "margin: 5px 0 0 0;" +
+        "color: #555;" +
+        "}" +
+
 
         ".historial-resumen {" +
         "border: 1px solid #ccc;" +
@@ -2211,9 +2327,11 @@ function imprimirHistorial() {
         "margin-bottom: 20px;" +
         "}" +
 
+
         ".historial-resumen p {" +
         "margin: 6px 0;" +
         "}" +
+
 
         "table {" +
         "width: 100%;" +
@@ -2221,20 +2339,106 @@ function imprimirHistorial() {
         "margin-top: 20px;" +
         "}" +
 
+
         "th, td {" +
         "border: 1px solid #bbb;" +
         "padding: 8px;" +
         "text-align: left;" +
         "}" +
 
+
         "th {" +
         "background: #f0f0f0;" +
         "font-weight: bold;" +
         "}" +
 
+
         "td:nth-child(2) {" +
         "text-align: right;" +
         "}" +
+
+
+        // ====================================================
+        // ZONA INFERIOR DEL DOCUMENTO
+        // ====================================================
+
+        ".zona-firma {" +
+        "margin-top: 55px;" +
+        "min-height: 150px;" +
+        "display: flex;" +
+        "justify-content: space-between;" +
+        "align-items: flex-end;" +
+        "}" +
+
+
+        ".informacion-emision {" +
+        "font-size: 11px;" +
+        "color: #555;" +
+        "max-width: 55%;" +
+        "}" +
+
+
+        ".informacion-emision p {" +
+        "margin: 4px 0;" +
+        "}" +
+
+
+        // ====================================================
+        // TIMBRE CIRCULAR
+        // ====================================================
+
+        ".timbre {" +
+        "width: 125px;" +
+        "height: 125px;" +
+        "border: 3px solid #333;" +
+        "border-radius: 50%;" +
+        "display: flex;" +
+        "align-items: center;" +
+        "justify-content: center;" +
+        "position: relative;" +
+        "text-align: center;" +
+        "font-weight: bold;" +
+        "font-size: 10px;" +
+        "letter-spacing: 0.5px;" +
+        "transform: rotate(-8deg);" +
+        "}" +
+
+
+        ".timbre::before {" +
+        "content: '';" +
+        "position: absolute;" +
+        "width: 104px;" +
+        "height: 104px;" +
+        "border: 1px solid #333;" +
+        "border-radius: 50%;" +
+        "}" +
+
+
+        ".timbre-contenido {" +
+        "position: relative;" +
+        "z-index: 2;" +
+        "width: 90px;" +
+        "line-height: 1.25;" +
+        "}" +
+
+
+        ".timbre-titulo {" +
+        "font-size: 10px;" +
+        "}" +
+
+
+        ".timbre-centro {" +
+        "font-size: 14px;" +
+        "margin: 5px 0;" +
+        "letter-spacing: 1px;" +
+        "}" +
+
+
+        ".timbre-fecha {" +
+        "font-size: 8px;" +
+        "font-weight: normal;" +
+        "}" +
+
 
         ".pie {" +
         "margin-top: 35px;" +
@@ -2243,6 +2447,7 @@ function imprimirHistorial() {
         "font-size: 11px;" +
         "color: #555;" +
         "}" +
+
 
         "@media print {" +
 
@@ -2259,21 +2464,42 @@ function imprimirHistorial() {
         "page-break-after: auto;" +
         "}" +
 
+        ".zona-firma {" +
+        "page-break-inside: avoid;" +
         "}" +
+
+        ".timbre {" +
+        "-webkit-print-color-adjust: exact;" +
+        "print-color-adjust: exact;" +
+        "}" +
+
+        "}" +
+
 
         "</style>" +
 
         "</head>" +
 
+
         "<body>" +
+
+
+        // ====================================================
+        // ENCABEZADO
+        // ====================================================
 
         "<div class='encabezado'>" +
 
         "<h1>Sistema Financiero</h1>" +
 
-        "<p>Comunidad Juan Cheuquelen</p>" +
+        "<p>Comunidad Indígena Juan Cheuquelen</p>" +
 
         "</div>" +
+
+
+        // ====================================================
+        // TÍTULO
+        // ====================================================
 
         "<div class='titulo'>" +
 
@@ -2283,18 +2509,102 @@ function imprimirHistorial() {
 
         "</div>" +
 
+
+        // ====================================================
+        // CONTENIDO
+        // ====================================================
+
         contenidoImpresion +
+
+
+        // ====================================================
+        // FIRMA / TIMBRE
+        // ====================================================
+
+        "<div class='zona-firma'>" +
+
+
+        "<div class='informacion-emision'>" +
+
+        "<p><strong>Documento emitido por:</strong> Tesorería</p>" +
+
+        "<p><strong>Socio:</strong> " +
+        escaparHTML(
+            nombreSocio
+        ) +
+        "</p>" +
+
+        (
+            rutSocio
+                ? "<p><strong>RUT:</strong> " +
+                  escaparHTML(
+                      rutSocio
+                  ) +
+                  "</p>"
+                : ""
+        ) +
+
+        (
+            periodoSocio
+                ? "<p><strong>Período:</strong> " +
+                  escaparHTML(
+                      periodoSocio
+                  ) +
+                  "</p>"
+                : ""
+        ) +
+
+        "</div>" +
+
+
+        // ====================================================
+        // TIMBRE
+        // ====================================================
+
+        "<div class='timbre'>" +
+
+        "<div class='timbre-contenido'>" +
+
+        "<div class='timbre-titulo'>" +
+        "EMITIDO POR" +
+        "</div>" +
+
+        "<div class='timbre-centro'>" +
+        "TESORERÍA" +
+        "</div>" +
+
+        "<div class='timbre-titulo'>" +
+        "COMUNIDAD INDÍGENA" +
+        "</div>" +
+
+        "<div class='timbre-fecha'>" +
+        fechaEmision +
+        "</div>" +
+
+        "</div>" +
+
+        "</div>" +
+
+
+        "</div>" +
+
+
+        // ====================================================
+        // PIE
+        // ====================================================
 
         "<div class='pie'>" +
 
         "Documento generado el " +
+
         escaparHTML(
-            formatearFecha(
-                obtenerFechaActual()
-            )
+            fechaEmision
         ) +
 
+        " desde el Sistema Financiero." +
+
         "</div>" +
+
 
         "</body>" +
 
