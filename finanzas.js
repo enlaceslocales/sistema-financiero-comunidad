@@ -7,6 +7,8 @@ let usuarioActual = null;
 let perfilUsuario = null;
 
 let movimientos = [];
+let movimientosLogicos = [];
+
 let cuentas = [];
 let periodos = [];
 
@@ -52,6 +54,7 @@ async function verificarSesion() {
             "login.html";
 
         return;
+
     }
 
 
@@ -61,6 +64,7 @@ async function verificarSesion() {
             "login.html";
 
         return;
+
     }
 
 
@@ -100,6 +104,7 @@ async function verificarSesion() {
         );
 
         return;
+
     }
 
 
@@ -115,6 +120,7 @@ async function verificarSesion() {
             "login.html";
 
         return;
+
     }
 
 
@@ -147,6 +153,7 @@ function mostrarUsuario() {
         document.getElementById(
             "nombreUsuario"
         );
+
 
     const rolUsuario =
         document.getElementById(
@@ -188,16 +195,11 @@ function configurarPermisos() {
 
 
     if (!boton) {
+
         return;
+
     }
 
-
-    /*
-       Administrador y Tesorero pueden registrar
-       movimientos.
-
-       Consulta solamente puede visualizar.
-    */
 
     if (
         perfilUsuario.rol === "administrador" ||
@@ -455,10 +457,31 @@ function configurarEventos() {
     }
 
 
-    /*
-       Eventos para actualizar en tiempo real
-       la disponibilidad de la cuenta.
-    */
+    /* ========================================================
+       TIPO DE MOVIMIENTO
+       ======================================================== */
+
+    const nuevoTipo =
+        document.getElementById(
+            "nuevoTipo"
+        );
+
+
+    if (nuevoTipo) {
+
+        nuevoTipo.addEventListener(
+            "change",
+            function () {
+
+                actualizarInterfazTipoMovimiento();
+
+                actualizarAdvertenciaSaldo();
+
+            }
+        );
+
+    }
+
 
     const nuevaCuenta =
         document.getElementById(
@@ -476,15 +499,15 @@ function configurarEventos() {
     }
 
 
-    const nuevoTipo =
+    const nuevaCuentaDestino =
         document.getElementById(
-            "nuevoTipo"
+            "nuevoCuentaDestino"
         );
 
 
-    if (nuevoTipo) {
+    if (nuevaCuentaDestino) {
 
-        nuevoTipo.addEventListener(
+        nuevaCuentaDestino.addEventListener(
             "change",
             actualizarAdvertenciaSaldo
         );
@@ -557,7 +580,8 @@ function configurarEventos() {
             function (event) {
 
                 if (
-                    event.target === modal
+                    event.target ===
+                    modal
                 ) {
 
                     cerrarModalMovimiento();
@@ -603,6 +627,7 @@ async function cargarPeriodos() {
             "periodoSelect"
         );
 
+
     const nuevoPeriodo =
         document.getElementById(
             "nuevoPeriodo"
@@ -641,16 +666,13 @@ async function cargarPeriodos() {
         }
 
         return;
+
     }
 
 
     periodos =
         resultado.data || [];
 
-
-    /* ========================================================
-       SELECT DE FILTRO
-       ======================================================== */
 
     if (select) {
 
@@ -692,10 +714,6 @@ async function cargarPeriodos() {
 
     }
 
-
-    /* ========================================================
-       SELECT DEL FORMULARIO
-       ======================================================== */
 
     if (nuevoPeriodo) {
 
@@ -751,9 +769,16 @@ async function cargarCuentas() {
             "cuentaSelect"
         );
 
+
     const nuevaCuenta =
         document.getElementById(
             "nuevoCuenta"
+        );
+
+
+    const nuevaCuentaDestino =
+        document.getElementById(
+            "nuevoCuentaDestino"
         );
 
 
@@ -779,6 +804,7 @@ async function cargarCuentas() {
         );
 
         return;
+
     }
 
 
@@ -829,7 +855,7 @@ async function cargarCuentas() {
 
 
     /* ========================================================
-       SELECT NUEVO MOVIMIENTO
+       SELECT CUENTA PRINCIPAL
        ======================================================== */
 
     if (nuevaCuenta) {
@@ -872,6 +898,51 @@ async function cargarCuentas() {
 
     }
 
+
+    /* ========================================================
+       SELECT CUENTA DESTINO
+       ======================================================== */
+
+    if (nuevaCuentaDestino) {
+
+        nuevaCuentaDestino.innerHTML =
+            '<option value="">Seleccione una cuenta destino</option>';
+
+
+        cuentas
+            .filter(
+                function (cuenta) {
+
+                    return cuenta.activo === true;
+
+                }
+            )
+            .forEach(
+                function (cuenta) {
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+
+                    option.value =
+                        cuenta.id;
+
+
+                    option.textContent =
+                        cuenta.nombre;
+
+
+                    nuevaCuentaDestino.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+    }
+
 }
 
 
@@ -903,7 +974,7 @@ async function cargarMovimientos() {
         await supabaseClient
             .from("movimientos")
             .select(
-                "id, periodo_id, cuenta_id, fecha_movimiento, tipo, monto, origen, referencia_id, descripcion, observacion, created_at, created_by, subtipo"
+                "id, periodo_id, cuenta_id, fecha_movimiento, tipo, monto, origen, referencia_id, descripcion, observacion, created_at, created_by, subtipo, traspaso_id"
             )
             .order(
                 "fecha_movimiento",
@@ -939,9 +1010,17 @@ async function cargarMovimientos() {
         }
 
 
+        movimientos =
+            [];
+
+        movimientosLogicos =
+            [];
+
         actualizarResumen([]);
 
+
         return;
+
     }
 
 
@@ -949,7 +1028,358 @@ async function cargarMovimientos() {
         resultado.data || [];
 
 
+    construirMovimientosLogicos();
+
+
     aplicarFiltros();
+
+}
+
+
+/* ============================================================
+   CONSTRUIR MOVIMIENTOS LÓGICOS
+   ============================================================ */
+
+/*
+   Un traspaso genera dos registros físicos:
+
+   1. Egreso de la cuenta origen.
+   2. Ingreso en la cuenta destino.
+
+   Ambos comparten el mismo traspaso_id.
+
+   Para la interfaz se agrupan como una sola operación.
+*/
+
+function construirMovimientosLogicos() {
+
+    const resultado =
+        [];
+
+    const traspasosProcesados =
+        new Set();
+
+
+    movimientos.forEach(
+        function (movimiento) {
+
+            if (
+                movimiento.origen ===
+                "traspaso"
+            ) {
+
+                if (
+                    !movimiento.traspaso_id
+                ) {
+
+                    /*
+                       Compatibilidad con registros
+                       antiguos que pudieran tener
+                       origen traspaso pero no ID.
+                    */
+
+                    resultado.push({
+
+                        tipoLogico:
+                            "traspaso",
+
+                        movimientoOrigen:
+                            movimiento,
+
+                        movimientoDestino:
+                            null,
+
+                        id:
+                            "traspaso-" +
+                            movimiento.id,
+
+                        fecha_movimiento:
+                            movimiento.fecha_movimiento,
+
+                        periodo_id:
+                            movimiento.periodo_id,
+
+                        cuenta_id:
+                            movimiento.cuenta_id,
+
+                        cuenta_destino_id:
+                            null,
+
+                        tipo:
+                            "traspaso",
+
+                        monto:
+                            Number(
+                                movimiento.monto
+                            ) || 0,
+
+                        origen:
+                            "traspaso",
+
+                        descripcion:
+                            movimiento.descripcion,
+
+                        observacion:
+                            movimiento.observacion,
+
+                        subtipo:
+                            movimiento.subtipo,
+
+                        traspaso_id:
+                            null,
+
+                        created_at:
+                            movimiento.created_at
+
+                    });
+
+
+                    return;
+
+                }
+
+
+                const traspasoId =
+                    movimiento.traspaso_id;
+
+
+                if (
+                    traspasosProcesados.has(
+                        traspasoId
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                const movimientosTraspaso =
+                    movimientos.filter(
+                        function (elemento) {
+
+                            return (
+                                elemento.origen ===
+                                    "traspaso" &&
+                                elemento.traspaso_id ===
+                                    traspasoId
+                            );
+
+                        }
+                    );
+
+
+                let movimientoOrigen =
+                    movimientosTraspaso.find(
+                        function (elemento) {
+
+                            return (
+                                elemento.tipo ===
+                                "egreso"
+                            );
+
+                        }
+                    );
+
+
+                let movimientoDestino =
+                    movimientosTraspaso.find(
+                        function (elemento) {
+
+                            return (
+                                elemento.tipo ===
+                                "ingreso"
+                            );
+
+                        }
+                    );
+
+
+                /*
+                   Si por alguna razón vienen
+                   en orden diferente, buscamos
+                   por seguridad.
+                */
+
+                if (
+                    !movimientoOrigen
+                ) {
+
+                    movimientoOrigen =
+                        movimientosTraspaso[0];
+
+                }
+
+
+                if (
+                    !movimientoDestino
+                ) {
+
+                    movimientoDestino =
+                        movimientosTraspaso.find(
+                            function (elemento) {
+
+                                return (
+                                    elemento.id !==
+                                    movimientoOrigen.id
+                                );
+
+                            }
+                        );
+
+                }
+
+
+                resultado.push({
+
+                    tipoLogico:
+                        "traspaso",
+
+                    movimientoOrigen:
+                        movimientoOrigen,
+
+                    movimientoDestino:
+                        movimientoDestino,
+
+                    id:
+                        "traspaso-" +
+                        traspasoId,
+
+                    fecha_movimiento:
+                        movimientoOrigen
+                            ? movimientoOrigen.fecha_movimiento
+                            : movimiento.fecha_movimiento,
+
+                    periodo_id:
+                        movimientoOrigen
+                            ? movimientoOrigen.periodo_id
+                            : movimiento.periodo_id,
+
+                    cuenta_id:
+                        movimientoOrigen
+                            ? movimientoOrigen.cuenta_id
+                            : null,
+
+                    cuenta_destino_id:
+                        movimientoDestino
+                            ? movimientoDestino.cuenta_id
+                            : null,
+
+                    tipo:
+                        "traspaso",
+
+                    monto:
+                        movimientoOrigen
+                            ? Number(
+                                movimientoOrigen.monto
+                            ) || 0
+                            : Number(
+                                movimiento.monto
+                            ) || 0,
+
+                    origen:
+                        "traspaso",
+
+                    descripcion:
+                        movimientoOrigen
+                            ? movimientoOrigen.descripcion
+                            : movimiento.descripcion,
+
+                    observacion:
+                        movimientoOrigen
+                            ? movimientoOrigen.observacion
+                            : movimiento.observacion,
+
+                    subtipo:
+                        movimientoOrigen
+                            ? movimientoOrigen.subtipo
+                            : movimiento.subtipo,
+
+                    traspaso_id:
+                        traspasoId,
+
+                    created_at:
+                        movimientoOrigen
+                            ? movimientoOrigen.created_at
+                            : movimiento.created_at
+
+                });
+
+
+                traspasosProcesados.add(
+                    traspasoId
+                );
+
+
+                return;
+
+            }
+
+
+            /*
+               Movimiento normal.
+            */
+
+            resultado.push({
+
+                tipoLogico:
+                    "normal",
+
+                movimientoOrigen:
+                    movimiento,
+
+                movimientoDestino:
+                    null,
+
+                id:
+                    movimiento.id,
+
+                fecha_movimiento:
+                    movimiento.fecha_movimiento,
+
+                periodo_id:
+                    movimiento.periodo_id,
+
+                cuenta_id:
+                    movimiento.cuenta_id,
+
+                cuenta_destino_id:
+                    null,
+
+                tipo:
+                    movimiento.tipo,
+
+                monto:
+                    Number(
+                        movimiento.monto
+                    ) || 0,
+
+                origen:
+                    movimiento.origen,
+
+                descripcion:
+                    movimiento.descripcion,
+
+                observacion:
+                    movimiento.observacion,
+
+                subtipo:
+                    movimiento.subtipo,
+
+                traspaso_id:
+                    null,
+
+                created_at:
+                    movimiento.created_at
+
+            });
+
+        }
+    );
+
+
+    movimientosLogicos =
+        resultado;
 
 }
 
@@ -965,25 +1395,30 @@ function aplicarFiltros() {
             "periodoSelect"
         );
 
+
     const cuenta =
         document.getElementById(
             "cuentaSelect"
         );
+
 
     const tipo =
         document.getElementById(
             "tipoSelect"
         );
 
+
     const origen =
         document.getElementById(
             "origenSelect"
         );
 
+
     const fechaDesde =
         document.getElementById(
             "fechaDesde"
         );
+
 
     const fechaHasta =
         document.getElementById(
@@ -1028,7 +1463,7 @@ function aplicarFiltros() {
 
 
     const filtrados =
-        movimientos.filter(
+        movimientosLogicos.filter(
             function (movimiento) {
 
                 const coincidePeriodo =
@@ -1039,10 +1474,20 @@ function aplicarFiltros() {
                     String(periodoId);
 
 
+                /*
+                   En un traspaso la cuenta seleccionada
+                   puede ser tanto la cuenta origen como
+                   la cuenta destino.
+                */
+
                 const coincideCuenta =
                     !cuentaId ||
                     String(
                         movimiento.cuenta_id
+                    ) ===
+                    String(cuentaId) ||
+                    String(
+                        movimiento.cuenta_destino_id
                     ) ===
                     String(cuentaId);
 
@@ -1099,7 +1544,7 @@ function aplicarFiltros() {
 
     actualizarContador(
         filtrados.length,
-        movimientos.length
+        movimientosLogicos.length
     );
 
 }
@@ -1118,7 +1563,9 @@ function renderizarMovimientos(lista) {
 
 
     if (!tabla) {
+
         return;
+
     }
 
 
@@ -1136,6 +1583,7 @@ function renderizarMovimientos(lista) {
             '</tr>';
 
         return;
+
     }
 
 
@@ -1148,16 +1596,83 @@ function renderizarMovimientos(lista) {
                 );
 
 
-            const cuenta =
-                obtenerCuenta(
-                    movimiento.cuenta_id
-                );
+            let nombreCuenta =
+                "Cuenta no encontrada";
 
 
-            const nombreCuenta =
-                cuenta
-                    ? cuenta.nombre
-                    : "Cuenta no encontrada";
+            let cuentaVisual =
+                "";
+
+
+            /*
+               TRASPASO
+            */
+
+            if (
+                movimiento.tipo ===
+                "traspaso"
+            ) {
+
+                const cuentaOrigen =
+                    obtenerCuenta(
+                        movimiento.cuenta_id
+                    );
+
+
+                const cuentaDestino =
+                    obtenerCuenta(
+                        movimiento.cuenta_destino_id
+                    );
+
+
+                const nombreOrigen =
+                    cuentaOrigen
+                        ? cuentaOrigen.nombre
+                        : "Cuenta no encontrada";
+
+
+                const nombreDestino =
+                    cuentaDestino
+                        ? cuentaDestino.nombre
+                        : "Cuenta no encontrada";
+
+
+                cuentaVisual =
+                    escaparHTML(
+                        nombreOrigen
+                    ) +
+                    " → " +
+                    escaparHTML(
+                        nombreDestino
+                    );
+
+            }
+
+
+            /*
+               MOVIMIENTO NORMAL
+            */
+
+            else {
+
+                const cuenta =
+                    obtenerCuenta(
+                        movimiento.cuenta_id
+                    );
+
+
+                nombreCuenta =
+                    cuenta
+                        ? cuenta.nombre
+                        : "Cuenta no encontrada";
+
+
+                cuentaVisual =
+                    escaparHTML(
+                        nombreCuenta
+                    );
+
+            }
 
 
             const tipo =
@@ -1176,10 +1691,32 @@ function renderizarMovimientos(lista) {
                 );
 
 
-            const claseMonto =
-                tipo === "ingreso"
-                    ? "estado-activo"
-                    : "estado-inactivo";
+            let claseMonto =
+                "";
+
+
+            if (
+                tipo ===
+                "ingreso"
+            ) {
+
+                claseMonto =
+                    "estado-activo";
+
+            } else if (
+                tipo ===
+                "egreso"
+            ) {
+
+                claseMonto =
+                    "estado-inactivo";
+
+            } else {
+
+                claseMonto =
+                    "";
+
+            }
 
 
             const descripcion =
@@ -1196,22 +1733,24 @@ function renderizarMovimientos(lista) {
                 '</td>' +
 
                 '<td>' +
-                escaparHTML(
-                    nombreCuenta
-                ) +
+                cuentaVisual +
                 '</td>' +
 
                 '<td>' +
                 '<span class="' +
                 claseMonto +
                 '">' +
-                traducirTipo(tipo) +
+                traducirTipo(
+                    tipo
+                ) +
                 '</span>' +
                 '</td>' +
 
                 '<td>' +
                 escaparHTML(
-                    traducirOrigen(origen)
+                    traducirOrigen(
+                        origen
+                    )
                 ) +
                 '</td>' +
 
@@ -1240,7 +1779,11 @@ function renderizarMovimientos(lista) {
                 'class="boton-tabla" ' +
                 'data-accion="detalle" ' +
                 'data-id="' +
-                movimiento.id +
+                escaparHTML(
+                    String(
+                        movimiento.id
+                    )
+                ) +
                 '">' +
 
                 'Detalle' +
@@ -1272,9 +1815,7 @@ function renderizarMovimientos(lista) {
                 function () {
 
                     abrirDetalleMovimiento(
-                        Number(
-                            boton.dataset.id
-                        )
+                        boton.dataset.id
                     );
 
                 }
@@ -1290,14 +1831,36 @@ function renderizarMovimientos(lista) {
    ACTUALIZAR RESUMEN
    ============================================================ */
 
+/*
+   IMPORTANTE:
+
+   Los traspasos no son ingresos ni egresos
+   de la comunidad.
+
+   Por eso se excluyen del resumen.
+
+   Los movimientos normales sí se consideran.
+*/
+
 function actualizarResumen(lista) {
 
     let ingresos = 0;
+
     let egresos = 0;
 
 
     lista.forEach(
         function (movimiento) {
+
+            if (
+                movimiento.tipo ===
+                "traspaso"
+            ) {
+
+                return;
+
+            }
+
 
             const monto =
                 Number(
@@ -1415,7 +1978,9 @@ function actualizarContador(
 
 
     if (!contador) {
+
         return;
+
     }
 
 
@@ -1425,6 +1990,7 @@ function actualizarContador(
             "No existen movimientos registrados.";
 
         return;
+
     }
 
 
@@ -1437,6 +2003,7 @@ function actualizarContador(
             " movimientos";
 
         return;
+
     }
 
 
@@ -1459,7 +2026,9 @@ function obtenerCuenta(id) {
         function (cuenta) {
 
             return (
-                Number(cuenta.id) ===
+                Number(
+                    cuenta.id
+                ) ===
                 Number(id)
             );
 
@@ -1479,7 +2048,9 @@ function obtenerPeriodo(id) {
         function (periodo) {
 
             return (
-                Number(periodo.id) ===
+                Number(
+                    periodo.id
+                ) ===
                 Number(id)
             );
 
@@ -1494,16 +2065,18 @@ function obtenerPeriodo(id) {
    ============================================================ */
 
 /*
-   El saldo disponible se calcula utilizando:
+   Los traspasos SÍ afectan el saldo individual
+   de las cuentas.
 
-   saldo_inicial
-   + todos los ingresos registrados
-   - todos los egresos registrados
+   Ejemplo:
 
-   Importante:
-   Se utilizan TODOS los movimientos de la cuenta,
-   independientemente de los filtros actualmente
-   aplicados en pantalla.
+   Caja:
+   -100.000
+
+   Banco:
+   +100.000
+
+   Pero no afectan el ingreso/egreso general.
 */
 
 function calcularSaldoCuenta(cuentaId) {
@@ -1517,10 +2090,25 @@ function calcularSaldoCuenta(cuentaId) {
     if (!cuenta) {
 
         return {
-            saldoInicial: 0,
-            ingresos: 0,
-            egresos: 0,
-            disponible: 0
+
+            saldoInicial:
+                0,
+
+            ingresos:
+                0,
+
+            egresos:
+                0,
+
+            traspasosEntrada:
+                0,
+
+            traspasosSalida:
+                0,
+
+            disponible:
+                0
+
         };
 
     }
@@ -1532,8 +2120,20 @@ function calcularSaldoCuenta(cuentaId) {
         ) || 0;
 
 
-    let ingresos = 0;
-    let egresos = 0;
+    let ingresos =
+        0;
+
+
+    let egresos =
+        0;
+
+
+    let traspasosEntrada =
+        0;
+
+
+    let traspasosSalida =
+        0;
 
 
     movimientos.forEach(
@@ -1546,6 +2146,30 @@ function calcularSaldoCuenta(cuentaId) {
                 Number(cuentaId)
             ) {
 
+                /*
+                   Puede ser cuenta destino
+                   de un traspaso.
+                */
+
+                if (
+                    movimiento.origen ===
+                        "traspaso" &&
+                    movimiento.tipo ===
+                        "ingreso" &&
+                    Number(
+                        movimiento.cuenta_id
+                    ) ===
+                    Number(cuentaId)
+                ) {
+
+                    traspasosEntrada +=
+                        Number(
+                            movimiento.monto
+                        ) || 0;
+
+                }
+
+
                 return;
 
             }
@@ -1557,6 +2181,46 @@ function calcularSaldoCuenta(cuentaId) {
                 ) || 0;
 
 
+            /*
+               TRASPASO
+            */
+
+            if (
+                movimiento.origen ===
+                "traspaso"
+            ) {
+
+                if (
+                    movimiento.tipo ===
+                    "egreso"
+                ) {
+
+                    traspasosSalida +=
+                        monto;
+
+                }
+
+
+                if (
+                    movimiento.tipo ===
+                    "ingreso"
+                ) {
+
+                    traspasosEntrada +=
+                        monto;
+
+                }
+
+
+                return;
+
+            }
+
+
+            /*
+               INGRESO NORMAL
+            */
+
             if (
                 movimiento.tipo ===
                 "ingreso"
@@ -1567,6 +2231,10 @@ function calcularSaldoCuenta(cuentaId) {
 
             }
 
+
+            /*
+               EGRESO NORMAL
+            */
 
             if (
                 movimiento.tipo ===
@@ -1584,15 +2252,26 @@ function calcularSaldoCuenta(cuentaId) {
 
     const disponible =
         saldoInicial +
-        ingresos -
-        egresos;
+        ingresos +
+        traspasosEntrada -
+        egresos -
+        traspasosSalida;
 
 
     return {
+
         saldoInicial,
+
         ingresos,
+
         egresos,
+
+        traspasosEntrada,
+
+        traspasosSalida,
+
         disponible
+
     };
 
 }
@@ -1643,26 +2322,26 @@ function obtenerElementoAdvertenciaSaldo() {
     advertencia.style.marginTop =
         "8px";
 
+
     advertencia.style.padding =
         "10px 12px";
+
 
     advertencia.style.borderRadius =
         "6px";
 
+
     advertencia.style.fontSize =
         "14px";
+
 
     advertencia.style.lineHeight =
         "1.4";
 
+
     advertencia.style.display =
         "none";
 
-
-    /*
-       Se coloca inmediatamente después
-       del campo de monto.
-    */
 
     monto.parentNode.insertBefore(
         advertencia,
@@ -1671,6 +2350,126 @@ function obtenerElementoAdvertenciaSaldo() {
 
 
     return advertencia;
+
+}
+
+
+/* ============================================================
+   ACTUALIZAR INTERFAZ SEGÚN TIPO
+   ============================================================ */
+
+function actualizarInterfazTipoMovimiento() {
+
+    const tipo =
+        document.getElementById(
+            "nuevoTipo"
+        );
+
+
+    const contenedorDestino =
+        document.getElementById(
+            "contenedorCuentaDestino"
+        );
+
+
+    const cuentaDestino =
+        document.getElementById(
+            "nuevoCuentaDestino"
+        );
+
+
+    const textoAyuda =
+        document.getElementById(
+            "textoAyudaNuevoMovimiento"
+        );
+
+
+    if (!tipo) {
+
+        return;
+
+    }
+
+
+    if (
+        tipo.value ===
+        "traspaso"
+    ) {
+
+        if (contenedorDestino) {
+
+            contenedorDestino.style.display =
+                "block";
+
+        }
+
+
+        if (cuentaDestino) {
+
+            cuentaDestino.required =
+                true;
+
+        }
+
+
+        if (textoAyuda) {
+
+            textoAyuda.textContent =
+                "Transfiera dinero entre dos cuentas de la comunidad. Esta operación no modifica el total de ingresos ni egresos.";
+
+        }
+
+
+        return;
+
+    }
+
+
+    if (contenedorDestino) {
+
+        contenedorDestino.style.display =
+            "none";
+
+    }
+
+
+    if (cuentaDestino) {
+
+        cuentaDestino.required =
+            false;
+
+        cuentaDestino.value =
+            "";
+
+    }
+
+
+    if (textoAyuda) {
+
+        if (
+            tipo.value ===
+            "ingreso"
+        ) {
+
+            textoAyuda.textContent =
+                "Registre un ingreso recibido por la comunidad.";
+
+        } else if (
+            tipo.value ===
+            "egreso"
+        ) {
+
+            textoAyuda.textContent =
+                "Registre un egreso realizado por la comunidad.";
+
+        } else {
+
+            textoAyuda.textContent =
+                "Registre un ingreso, egreso o traspaso entre cuentas de la comunidad.";
+
+        }
+
+    }
 
 }
 
@@ -1695,6 +2494,12 @@ function actualizarAdvertenciaSaldo() {
     const cuenta =
         document.getElementById(
             "nuevoCuenta"
+        );
+
+
+    const cuentaDestino =
+        document.getElementById(
+            "nuevoCuentaDestino"
         );
 
 
@@ -1727,6 +2532,14 @@ function actualizarAdvertenciaSaldo() {
         );
 
 
+    const cuentaDestinoId =
+        cuentaDestino
+            ? Number(
+                cuentaDestino.value
+            )
+            : 0;
+
+
     const tipoValor =
         tipo.value;
 
@@ -1736,11 +2549,6 @@ function actualizarAdvertenciaSaldo() {
             monto.value
         ) || 0;
 
-
-    /*
-       Si no se ha seleccionado cuenta,
-       no mostramos información.
-    */
 
     if (!cuentaId) {
 
@@ -1759,8 +2567,150 @@ function actualizarAdvertenciaSaldo() {
 
 
     /*
-       Si se selecciona ingreso,
-       mostramos el saldo actual.
+       TRASPASO
+    */
+
+    if (
+        tipoValor ===
+        "traspaso"
+    ) {
+
+        advertencia.style.display =
+            "block";
+
+
+        if (
+            !cuentaDestinoId
+        ) {
+
+            advertencia.style.backgroundColor =
+                "#f5f5f5";
+
+            advertencia.style.border =
+                "1px solid #dddddd";
+
+            advertencia.style.color =
+                "#555555";
+
+
+            advertencia.innerHTML =
+                "<strong>Saldo disponible de la cuenta origen:</strong> " +
+                formatearMoneda(
+                    datos.disponible
+                );
+
+            return;
+
+        }
+
+
+        if (
+            cuentaDestinoId ===
+            cuentaId
+        ) {
+
+            advertencia.style.backgroundColor =
+                "#fff1f1";
+
+            advertencia.style.border =
+                "1px solid #e0a0a0";
+
+            advertencia.style.color =
+                "#9b1c1c";
+
+
+            advertencia.innerHTML =
+                "<strong>⚠ Las cuentas deben ser diferentes.</strong>";
+
+            return;
+
+        }
+
+
+        const cuentaDestinoSeleccionada =
+            obtenerCuenta(
+                cuentaDestinoId
+            );
+
+
+        const saldoDespues =
+            datos.disponible -
+            montoValor;
+
+
+        if (
+            montoValor > 0 &&
+            montoValor >
+            datos.disponible
+        ) {
+
+            advertencia.style.backgroundColor =
+                "#fff1f1";
+
+            advertencia.style.border =
+                "1px solid #e0a0a0";
+
+            advertencia.style.color =
+                "#9b1c1c";
+
+
+            advertencia.innerHTML =
+                "<strong>⚠ Saldo insuficiente en la cuenta origen.</strong><br>" +
+                "Disponible actualmente: " +
+                formatearMoneda(
+                    datos.disponible
+                ) +
+                "<br>" +
+                "Traspaso solicitado: " +
+                formatearMoneda(
+                    montoValor
+                );
+
+        } else {
+
+            advertencia.style.backgroundColor =
+                "#eef8f0";
+
+            advertencia.style.border =
+                "1px solid #a8d5b0";
+
+            advertencia.style.color =
+                "#256333";
+
+
+            advertencia.innerHTML =
+                "<strong>Traspaso entre cuentas</strong><br>" +
+                "Desde: " +
+                escaparHTML(
+                    obtenerCuenta(cuentaId)
+                        ? obtenerCuenta(cuentaId).nombre
+                        : "Cuenta"
+                ) +
+                "<br>" +
+                "Hacia: " +
+                escaparHTML(
+                    cuentaDestinoSeleccionada
+                        ? cuentaDestinoSeleccionada.nombre
+                        : "Cuenta destino"
+                ) +
+                "<br>" +
+                "Saldo de origen después del traspaso: " +
+                formatearMoneda(
+                    saldoDespues
+                ) +
+                "<br>" +
+                "<small>Esta operación no modifica los ingresos ni egresos generales.</small>";
+
+        }
+
+
+        return;
+
+    }
+
+
+    /*
+       INGRESO
     */
 
     if (
@@ -1771,11 +2721,14 @@ function actualizarAdvertenciaSaldo() {
         advertencia.style.display =
             "block";
 
+
         advertencia.style.backgroundColor =
             "#eef6ff";
 
+
         advertencia.style.border =
             "1px solid #b8d8f5";
+
 
         advertencia.style.color =
             "#24506f";
@@ -1803,8 +2756,7 @@ function actualizarAdvertenciaSaldo() {
 
 
     /*
-       Si no es egreso, mostrar información
-       general de saldo.
+       SIN TIPO
     */
 
     if (
@@ -1815,11 +2767,14 @@ function actualizarAdvertenciaSaldo() {
         advertencia.style.display =
             "block";
 
+
         advertencia.style.backgroundColor =
             "#f5f5f5";
 
+
         advertencia.style.border =
             "1px solid #dddddd";
+
 
         advertencia.style.color =
             "#555555";
@@ -1856,15 +2811,13 @@ function actualizarAdvertenciaSaldo() {
         datos.disponible
     ) {
 
-        /*
-           SALDO INSUFICIENTE
-        */
-
         advertencia.style.backgroundColor =
             "#fff1f1";
 
+
         advertencia.style.border =
             "1px solid #e0a0a0";
+
 
         advertencia.style.color =
             "#9b1c1c";
@@ -1894,15 +2847,13 @@ function actualizarAdvertenciaSaldo() {
 
     } else {
 
-        /*
-           SALDO SUFICIENTE
-        */
-
         advertencia.style.backgroundColor =
             "#eef8f0";
 
+
         advertencia.style.border =
             "1px solid #a8d5b0";
+
 
         advertencia.style.color =
             "#256333";
@@ -1946,6 +2897,7 @@ function abrirNuevoMovimiento() {
         );
 
         return;
+
     }
 
 
@@ -1958,6 +2910,12 @@ function abrirNuevoMovimiento() {
     const fecha =
         document.getElementById(
             "nuevoFecha"
+        );
+
+
+    const cuentaDestino =
+        document.getElementById(
+            "nuevoCuentaDestino"
         );
 
 
@@ -1987,16 +2945,8 @@ function abrirNuevoMovimiento() {
 
     if (fecha) {
 
-        /*
-           Se utiliza la fecha local del navegador
-           para evitar diferencias producidas por UTC.
-        */
-
-        const hoy =
-            obtenerFechaLocal();
-
         fecha.value =
-            hoy;
+            obtenerFechaLocal();
 
     }
 
@@ -2004,6 +2954,14 @@ function abrirNuevoMovimiento() {
     if (tipo) {
 
         tipo.value =
+            "";
+
+    }
+
+
+    if (cuentaDestino) {
+
+        cuentaDestino.value =
             "";
 
     }
@@ -2033,9 +2991,8 @@ function abrirNuevoMovimiento() {
     }
 
 
-    /*
-       Limpiar advertencia anterior.
-    */
+    actualizarInterfazTipoMovimiento();
+
 
     const advertencia =
         document.getElementById(
@@ -2122,6 +3079,7 @@ async function guardarMovimiento(event) {
         );
 
         return;
+
     }
 
 
@@ -2134,6 +3092,12 @@ async function guardarMovimiento(event) {
     const cuenta =
         document.getElementById(
             "nuevoCuenta"
+        );
+
+
+    const cuentaDestino =
+        document.getElementById(
+            "nuevoCuentaDestino"
         );
 
 
@@ -2179,6 +3143,14 @@ async function guardarMovimiento(event) {
         );
 
 
+    const cuentaDestinoId =
+        cuentaDestino
+            ? Number(
+                cuentaDestino.value
+            )
+            : 0;
+
+
     const tipoValor =
         tipo.value;
 
@@ -2212,6 +3184,7 @@ async function guardarMovimiento(event) {
         );
 
         return;
+
     }
 
 
@@ -2222,18 +3195,18 @@ async function guardarMovimiento(event) {
         );
 
         return;
+
     }
 
 
-    /*
-       Solamente se permiten:
-       - ingreso
-       - egreso
-    */
-
     if (
-        !["ingreso", "egreso"]
-            .includes(tipoValor)
+        ![
+            "ingreso",
+            "egreso",
+            "traspaso"
+        ].includes(
+            tipoValor
+        )
     ) {
 
         alert(
@@ -2241,6 +3214,7 @@ async function guardarMovimiento(event) {
         );
 
         return;
+
     }
 
 
@@ -2254,6 +3228,7 @@ async function guardarMovimiento(event) {
         );
 
         return;
+
     }
 
 
@@ -2264,6 +3239,7 @@ async function guardarMovimiento(event) {
         );
 
         return;
+
     }
 
 
@@ -2274,6 +3250,7 @@ async function guardarMovimiento(event) {
         );
 
         return;
+
     }
 
 
@@ -2294,6 +3271,7 @@ async function guardarMovimiento(event) {
         );
 
         return;
+
     }
 
 
@@ -2307,11 +3285,12 @@ async function guardarMovimiento(event) {
         );
 
         return;
+
     }
 
 
     /* ========================================================
-       VALIDAR CUENTA
+       VALIDAR CUENTA ORIGEN
        ======================================================== */
 
     const cuentaSeleccionada =
@@ -2327,6 +3306,7 @@ async function guardarMovimiento(event) {
         );
 
         return;
+
     }
 
 
@@ -2337,22 +3317,90 @@ async function guardarMovimiento(event) {
         );
 
         return;
+
     }
 
 
     /* ========================================================
-       VALIDAR DISPONIBILIDAD PARA EGRESOS
+       VALIDAR TRASPASO
        ======================================================== */
 
-    let saldoCuenta = null;
+    let cuentaDestinoSeleccionada =
+        null;
 
 
     if (
         tipoValor ===
-        "egreso"
+        "traspaso"
     ) {
 
-        saldoCuenta =
+        if (!cuentaDestinoId) {
+
+            alert(
+                "Debe seleccionar una cuenta destino."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            cuentaDestinoId ===
+            cuentaId
+        ) {
+
+            alert(
+                "La cuenta de origen y la cuenta destino deben ser diferentes."
+            );
+
+            return;
+
+        }
+
+
+        cuentaDestinoSeleccionada =
+            obtenerCuenta(
+                cuentaDestinoId
+            );
+
+
+        if (!cuentaDestinoSeleccionada) {
+
+            alert(
+                "La cuenta destino seleccionada no es válida."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !cuentaDestinoSeleccionada.activo
+        ) {
+
+            alert(
+                "No se puede realizar un traspaso hacia una cuenta inactiva."
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       VALIDAR SALDO
+       ======================================================== */
+
+    if (
+        tipoValor === "egreso" ||
+        tipoValor === "traspaso"
+    ) {
+
+        const saldoCuenta =
             calcularSaldoCuenta(
                 cuentaId
             );
@@ -2370,6 +3418,7 @@ async function guardarMovimiento(event) {
 
             const confirmarSaldoNegativo =
                 confirm(
+
                     "⚠ ADVERTENCIA DE SALDO\n\n" +
 
                     "La cuenta seleccionada dispone actualmente de " +
@@ -2378,13 +3427,18 @@ async function guardarMovimiento(event) {
                     ) +
                     ".\n\n" +
 
-                    "El egreso solicitado es de " +
+                    (
+                        tipoValor === "traspaso"
+                            ? "El traspaso solicitado es de "
+                            : "El egreso solicitado es de "
+                    ) +
+
                     formatearMoneda(
                         montoValor
                     ) +
                     ".\n\n" +
 
-                    "Este movimiento dejaría un saldo negativo de " +
+                    "La operación dejaría un saldo negativo de " +
                     formatearMoneda(
                         Math.abs(
                             saldoDespues
@@ -2392,11 +3446,14 @@ async function guardarMovimiento(event) {
                     ) +
                     ".\n\n" +
 
-                    "¿Está seguro de que desea registrar este egreso?"
+                    "¿Está seguro de que desea continuar?"
+
                 );
 
 
-            if (!confirmarSaldoNegativo) {
+            if (
+                !confirmarSaldoNegativo
+            ) {
 
                 return;
 
@@ -2411,11 +3468,55 @@ async function guardarMovimiento(event) {
        CONFIRMACIÓN GENERAL
        ======================================================== */
 
+    let mensajeConfirmacion =
+        "";
+
+
+    if (
+        tipoValor ===
+        "traspaso"
+    ) {
+
+        mensajeConfirmacion =
+
+            "¿Desea realizar este traspaso?\n\n" +
+
+            "Desde:\n" +
+
+            cuentaSeleccionada.nombre +
+
+            "\n\nHacia:\n" +
+
+            cuentaDestinoSeleccionada.nombre +
+
+            "\n\nMonto:\n" +
+
+            formatearMoneda(
+                montoValor
+            ) +
+
+            "\n\n" +
+
+            "Esta operación no modificará el total de ingresos ni egresos de la comunidad.";
+
+    } else {
+
+        mensajeConfirmacion =
+
+            "¿Desea registrar este movimiento por " +
+
+            formatearMoneda(
+                montoValor
+            ) +
+
+            "?";
+
+    }
+
+
     const confirmar =
         confirm(
-            "¿Desea registrar este movimiento por " +
-            formatearMoneda(montoValor) +
-            "?"
+            mensajeConfirmacion
         );
 
 
@@ -2445,139 +3546,322 @@ async function guardarMovimiento(event) {
 
     try {
 
-        /*
-           Los pagos de cuotas NO se registran aquí.
-
-           Este formulario solamente genera:
-           - ingreso
-           - egreso
-
-           Los pagos de cuotas son generados
-           automáticamente por pagos_cuotas.
-        */
-
-
-        const nuevoMovimiento = {
-
-            periodo_id:
-                periodoId,
-
-            cuenta_id:
-                cuentaId,
-
-            fecha_movimiento:
-                fechaValor,
-
-            tipo:
-                tipoValor,
-
-            monto:
-                montoValor,
-
-            /*
-               El origen coincide con el tipo.
-            */
-
-            origen:
-                tipoValor,
-
-            referencia_id:
-                null,
-
-            descripcion:
-                descripcionValor,
-
-            observacion:
-                observacionValor ||
-                null,
-
-            created_by:
-                usuarioActual.id,
-
-            subtipo:
-                "normal"
-
-        };
-
-
-        console.log(
-            "Movimiento a registrar:",
-            nuevoMovimiento
-        );
-
-
-        const resultado =
-            await supabaseClient
-                .from("movimientos")
-                .insert(
-                    nuevoMovimiento
-                )
-                .select()
-                .single();
-
-
-        if (resultado.error) {
-
-            console.error(
-                "Error al guardar movimiento:",
-                resultado.error
-            );
-
-            alert(
-                "No fue posible registrar el movimiento.\n\n" +
-                resultado.error.message
-            );
-
-            return;
-        }
-
-
-        console.log(
-            "Movimiento registrado:",
-            resultado.data
-        );
-
-
-        /*
-           Mostrar información adicional cuando
-           se registra un egreso.
-        */
+        /* ====================================================
+           TRASPASO
+           ==================================================== */
 
         if (
             tipoValor ===
-            "egreso"
+            "traspaso"
         ) {
 
-            const nuevoSaldo =
-                calcularSaldoCuenta(
-                    cuentaId
-                );
+            const traspasoId =
+                crypto.randomUUID();
+
+
+            const movimientoSalida = {
+
+                periodo_id:
+                    periodoId,
+
+                cuenta_id:
+                    cuentaId,
+
+                fecha_movimiento:
+                    fechaValor,
+
+                tipo:
+                    "egreso",
+
+                monto:
+                    montoValor,
+
+                origen:
+                    "traspaso",
+
+                referencia_id:
+                    null,
+
+                descripcion:
+                    descripcionValor,
+
+                observacion:
+                    observacionValor ||
+                    null,
+
+                created_by:
+                    usuarioActual.id,
+
+                subtipo:
+                    "normal",
+
+                traspaso_id:
+                    traspasoId
+
+            };
+
+
+            const movimientoEntrada = {
+
+                periodo_id:
+                    periodoId,
+
+                cuenta_id:
+                    cuentaDestinoId,
+
+                fecha_movimiento:
+                    fechaValor,
+
+                tipo:
+                    "ingreso",
+
+                monto:
+                    montoValor,
+
+                origen:
+                    "traspaso",
+
+                referencia_id:
+                    null,
+
+                descripcion:
+                    descripcionValor,
+
+                observacion:
+                    observacionValor ||
+                    null,
+
+                created_by:
+                    usuarioActual.id,
+
+                subtipo:
+                    "normal",
+
+                traspaso_id:
+                    traspasoId
+
+            };
+
+
+            console.log(
+                "Movimiento de salida:",
+                movimientoSalida
+            );
+
+
+            console.log(
+                "Movimiento de entrada:",
+                movimientoEntrada
+            );
 
 
             /*
-               El movimiento recién insertado todavía
-               no está en el array local, por lo que
-               calculamos manualmente el saldo posterior.
+               Primero registramos la salida.
             */
 
-            const saldoPosterior =
-                nuevoSaldo.disponible -
-                montoValor;
+            const resultadoSalida =
+                await supabaseClient
+                    .from("movimientos")
+                    .insert(
+                        movimientoSalida
+                    )
+                    .select()
+                    .single();
+
+
+            if (
+                resultadoSalida.error
+            ) {
+
+                console.error(
+                    "Error al registrar salida del traspaso:",
+                    resultadoSalida.error
+                );
+
+
+                throw resultadoSalida.error;
+
+            }
+
+
+            /*
+               Luego registramos la entrada.
+            */
+
+            const resultadoEntrada =
+                await supabaseClient
+                    .from("movimientos")
+                    .insert(
+                        movimientoEntrada
+                    )
+                    .select()
+                    .single();
+
+
+            if (
+                resultadoEntrada.error
+            ) {
+
+                console.error(
+                    "Error al registrar entrada del traspaso:",
+                    resultadoEntrada.error
+                );
+
+
+                /*
+                   Intentamos eliminar el movimiento
+                   de salida para evitar dejar un
+                   traspaso incompleto.
+                */
+
+                await supabaseClient
+                    .from("movimientos")
+                    .delete()
+                    .eq(
+                        "id",
+                        resultadoSalida.data.id
+                    );
+
+
+                throw resultadoEntrada.error;
+
+            }
 
 
             alert(
-                "Movimiento registrado correctamente.\n\n" +
-                "Saldo disponible después del egreso: " +
+                "Traspaso registrado correctamente.\n\n" +
+
+                cuentaSeleccionada.nombre +
+                " → " +
+                cuentaDestinoSeleccionada.nombre +
+
+                "\n\nMonto: " +
+
                 formatearMoneda(
-                    saldoPosterior
-                )
+                    montoValor
+                ) +
+
+                "\n\nLa operación no modifica los ingresos ni egresos generales."
             );
 
-        } else {
 
-            alert(
-                "Movimiento registrado correctamente."
+        }
+
+
+        /* ====================================================
+           INGRESO / EGRESO NORMAL
+           ==================================================== */
+
+        else {
+
+            const nuevoMovimiento = {
+
+                periodo_id:
+                    periodoId,
+
+                cuenta_id:
+                    cuentaId,
+
+                fecha_movimiento:
+                    fechaValor,
+
+                tipo:
+                    tipoValor,
+
+                monto:
+                    montoValor,
+
+                origen:
+                    tipoValor,
+
+                referencia_id:
+                    null,
+
+                descripcion:
+                    descripcionValor,
+
+                observacion:
+                    observacionValor ||
+                    null,
+
+                created_by:
+                    usuarioActual.id,
+
+                subtipo:
+                    "normal"
+
+            };
+
+
+            console.log(
+                "Movimiento a registrar:",
+                nuevoMovimiento
             );
+
+
+            const resultado =
+                await supabaseClient
+                    .from("movimientos")
+                    .insert(
+                        nuevoMovimiento
+                    )
+                    .select()
+                    .single();
+
+
+            if (
+                resultado.error
+            ) {
+
+                console.error(
+                    "Error al guardar movimiento:",
+                    resultado.error
+                );
+
+
+                throw resultado.error;
+
+            }
+
+
+            /*
+               Mostrar información adicional
+               para egresos.
+            */
+
+            if (
+                tipoValor ===
+                "egreso"
+            ) {
+
+                const saldoAnterior =
+                    calcularSaldoCuenta(
+                        cuentaId
+                    );
+
+
+                const saldoPosterior =
+                    saldoAnterior.disponible -
+                    montoValor;
+
+
+                alert(
+                    "Movimiento registrado correctamente.\n\n" +
+
+                    "Saldo disponible después del egreso: " +
+
+                    formatearMoneda(
+                        saldoPosterior
+                    )
+                );
+
+            } else {
+
+                alert(
+                    "Movimiento registrado correctamente."
+                );
+
+            }
 
         }
 
@@ -2598,7 +3882,11 @@ async function guardarMovimiento(event) {
 
 
         alert(
-            "Ocurrió un error inesperado al registrar el movimiento."
+            "No fue posible registrar la operación.\n\n" +
+            (
+                error.message ||
+                "Ocurrió un error inesperado."
+            )
         );
 
     }
@@ -2627,12 +3915,14 @@ async function guardarMovimiento(event) {
 function abrirDetalleMovimiento(id) {
 
     const movimiento =
-        movimientos.find(
+        movimientosLogicos.find(
             function (elemento) {
 
                 return (
-                    Number(elemento.id) ===
-                    Number(id)
+                    String(
+                        elemento.id
+                    ) ===
+                    String(id)
                 );
 
             }
@@ -2646,12 +3936,19 @@ function abrirDetalleMovimiento(id) {
         );
 
         return;
+
     }
 
 
     const cuenta =
         obtenerCuenta(
             movimiento.cuenta_id
+        );
+
+
+    const cuentaDestino =
+        obtenerCuenta(
+            movimiento.cuenta_destino_id
         );
 
 
@@ -2723,6 +4020,138 @@ function abrirDetalleMovimiento(id) {
     );
 
 
+    /*
+       Mostrar información específica
+       del traspaso.
+    */
+
+    const contenedorDestino =
+        document.getElementById(
+            "contenedorDetalleCuentaDestino"
+        );
+
+
+    const detalleCuentaDestino =
+        document.getElementById(
+            "detalleCuentaDestino"
+        );
+
+
+    const contenedorTraspaso =
+        document.getElementById(
+            "contenedorDetalleTraspaso"
+        );
+
+
+    const detalleTraspasoId =
+        document.getElementById(
+            "detalleTraspasoId"
+        );
+
+
+    const etiquetaCuenta =
+        document.getElementById(
+            "detalleCuentaLabel"
+        );
+
+
+    const titulo =
+        document.getElementById(
+            "detalleTitulo"
+        );
+
+
+    if (
+        movimiento.tipo ===
+        "traspaso"
+    ) {
+
+        if (etiquetaCuenta) {
+
+            etiquetaCuenta.textContent =
+                "Cuenta origen";
+
+        }
+
+
+        if (titulo) {
+
+            titulo.textContent =
+                "Detalle del traspaso";
+
+        }
+
+
+        if (contenedorDestino) {
+
+            contenedorDestino.style.display =
+                "block";
+
+        }
+
+
+        if (detalleCuentaDestino) {
+
+            detalleCuentaDestino.value =
+                cuentaDestino
+                    ? cuentaDestino.nombre
+                    : "Cuenta no encontrada";
+
+        }
+
+
+        if (contenedorTraspaso) {
+
+            contenedorTraspaso.style.display =
+                "block";
+
+        }
+
+
+        if (detalleTraspasoId) {
+
+            detalleTraspasoId.value =
+                movimiento.traspaso_id ||
+                "No disponible";
+
+        }
+
+    } else {
+
+        if (etiquetaCuenta) {
+
+            etiquetaCuenta.textContent =
+                "Cuenta";
+
+        }
+
+
+        if (titulo) {
+
+            titulo.textContent =
+                "Información financiera";
+
+        }
+
+
+        if (contenedorDestino) {
+
+            contenedorDestino.style.display =
+                "none";
+
+        }
+
+
+        if (contenedorTraspaso) {
+
+            contenedorTraspaso.style.display =
+                "none";
+
+        }
+
+    }
+
+
     const modal =
         document.getElementById(
             "modalMovimiento"
@@ -2742,6 +4171,7 @@ function abrirDetalleMovimiento(id) {
         {
             movimiento,
             cuenta,
+            cuentaDestino,
             periodo
         }
     );
@@ -2905,6 +4335,9 @@ function traducirTipo(tipo) {
         case "egreso":
             return "Egreso";
 
+        case "traspaso":
+            return "Traspaso";
+
         default:
             return tipo || "—";
 
@@ -2930,6 +4363,9 @@ function traducirOrigen(origen) {
         case "egreso":
             return "Egreso";
 
+        case "traspaso":
+            return "Traspaso entre cuentas";
+
         default:
             return origen || "—";
 
@@ -2951,6 +4387,9 @@ function traducirSubtipo(subtipo) {
 
         case "reversa":
             return "Reversa";
+
+        case "ajuste":
+            return "Ajuste";
 
         default:
             return subtipo || "Normal";
