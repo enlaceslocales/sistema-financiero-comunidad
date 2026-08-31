@@ -2,21 +2,25 @@
 <html lang="es">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
     >
 
     <title>Reportes | Sistema Financiero</title>
 
-  <link
-    rel="stylesheet"
-    href="styles.css"
->
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
 
-<link
-    rel="stylesheet"
-    href="reportes.css"
->
+    <link
+        rel="stylesheet"
+        href="reportes.css"
+    >
 
 </head>
 
@@ -24,16 +28,12 @@
 <body>
 
 
-<!-- =========================================================
-     CONTENEDOR PRINCIPAL
-     ========================================================= -->
-
 <div class="app">
 
 
-    <!-- =====================================================
+    <!-- =========================================================
          MENÚ LATERAL
-         ===================================================== -->
+         ========================================================= -->
 
     <aside class="sidebar">
 
@@ -504,6 +504,132 @@
 
 
                 </div>
+
+
+
+                <!-- =================================================
+                     DISPONIBILIDAD FINANCIERA
+                     ================================================= -->
+
+                <section
+                    class="panel reporte-disponibilidad"
+                    id="seccionDisponibilidad"
+                >
+
+
+                    <div class="panel-titulo">
+
+
+                        <div>
+
+                            <span class="etiqueta">
+                                DISPONIBILIDAD FINANCIERA
+                            </span>
+
+                            <h2>
+                                Disponibilidad de fondos
+                            </h2>
+
+                            <p>
+                                Resumen monetario de los fondos disponibles
+                                para el año reportado.
+                            </p>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="disponibilidad-grid">
+
+
+                        <!-- AÑO REPORTADO -->
+
+                        <div class="tarjeta-disponibilidad">
+
+                            <span>
+                                Año reportado
+                            </span>
+
+                            <strong id="disponibilidadAnio">
+                                —
+                            </strong>
+
+                            <small>
+                                Período financiero seleccionado
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- CAJA -->
+
+                        <div class="tarjeta-disponibilidad">
+
+                            <span>
+                                Caja comunidad
+                            </span>
+
+                            <strong id="disponibilidadCaja">
+                                $0
+                            </strong>
+
+                            <small>
+                                Saldo disponible en caja
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- BANCO -->
+
+                        <div class="tarjeta-disponibilidad">
+
+                            <span>
+                                Cuenta bancaria
+                            </span>
+
+                            <strong id="disponibilidadBanco">
+                                $0
+                            </strong>
+
+                            <small>
+                                Saldo disponible en cuenta bancaria
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- TOTAL -->
+
+                        <div
+                            class="tarjeta-disponibilidad tarjeta-disponibilidad-total"
+                        >
+
+                            <span>
+                                Total disponible
+                            </span>
+
+                            <strong id="disponibilidadTotal">
+                                $0
+                            </strong>
+
+                            <small>
+                                Caja + cuenta bancaria
+                            </small>
+
+                        </div>
+
+
+                    </div>
+
+
+                </section>
 
 
 
