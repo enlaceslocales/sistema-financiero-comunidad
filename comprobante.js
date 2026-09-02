@@ -180,7 +180,13 @@ function renderizarComprobante(c) {
     const socio = c.socio_nombre || "—";
     const rut = c.socio_rut || "—";
     const periodo = c.periodo_anio || c.anio || "—";
+
+    // Fecha real en que se realizó el pago.
+    const fechaPago = formatearFecha(c.fecha_pago);
+
+    // Fecha en que se generó el comprobante.
     const fechaEmision = formatearFecha(c.fecha_emision);
+
     const monto = formatearMoneda(c.monto_pagado);
     const medio = traducirMedioPago(c.medio_pago);
     const estado = obtenerEstadoVisible(c);
@@ -199,6 +205,11 @@ function renderizarComprobante(c) {
     asignarTexto("periodoOriginal", periodo);
     asignarTexto("periodoCopia", periodo);
 
+    // Nueva fecha: fecha real del pago.
+    asignarTexto("fechaPagoOriginal", fechaPago);
+    asignarTexto("fechaPagoCopia", fechaPago);
+
+    // Fecha existente: fecha de emisión del comprobante.
     asignarTexto("fechaOriginal", fechaEmision);
     asignarTexto("fechaCopia", fechaEmision);
 
@@ -241,14 +252,18 @@ function obtenerEstadoVisible(c) {
         anulado: "ANULADO"
     };
 
-    return estados[estadoPago] || String(c.estado_pago || c.estado || "EMITIDO").toUpperCase();
+    return (
+        estados[estadoPago] ||
+        String(c.estado_pago || c.estado || "EMITIDO").toUpperCase()
+    );
 }
 
 function asignarTexto(id, valor) {
     const elemento = document.getElementById(id);
 
     if (elemento) {
-        elemento.textContent = valor == null || valor === "" ? "—" : String(valor);
+        elemento.textContent =
+            valor == null || valor === "" ? "—" : String(valor);
     }
 }
 
@@ -271,11 +286,13 @@ async function imprimirComprobante() {
 
         if (registro) {
             if (registro.cantidad_impresiones != null) {
-                comprobanteActual.cantidad_impresiones = registro.cantidad_impresiones;
+                comprobanteActual.cantidad_impresiones =
+                    registro.cantidad_impresiones;
             }
 
             if (registro.ultima_impresion_at) {
-                comprobanteActual.ultima_impresion_at = registro.ultima_impresion_at;
+                comprobanteActual.ultima_impresion_at =
+                    registro.ultima_impresion_at;
             }
         }
 
@@ -288,6 +305,7 @@ async function imprimirComprobante() {
         }, 100);
     } catch (error) {
         console.error("Error al registrar impresión:", error);
+
         mostrarError(
             "No fue posible registrar la impresión del comprobante. " +
             obtenerMensajeError(error)
@@ -295,7 +313,10 @@ async function imprimirComprobante() {
     } finally {
         if (boton) {
             boton.disabled = false;
-            boton.textContent = boton.dataset.textoOriginal || "🖨️ Imprimir comprobante";
+            boton.textContent =
+                boton.dataset.textoOriginal ||
+                "🖨️ Imprimir comprobante";
+
             delete boton.dataset.textoOriginal;
         }
     }
@@ -371,8 +392,9 @@ function formatearFecha(valor) {
     // Para una fecha SQL YYYY-MM-DD se evita el desfase horario.
     const texto = String(valor);
 
-    if (/^\\d{4}-\\d{2}-\\d{2}$/.test(texto)) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(texto)) {
         const partes = texto.split("-");
+
         return `${partes[2]}-${partes[1]}-${partes[0]}`;
     }
 
@@ -417,7 +439,12 @@ function obtenerMensajeError(error) {
         return "No se encontró el comprobante solicitado.";
     }
 
-    return error.message || error.details || error.hint || "Ocurrió un error inesperado.";
+    return (
+        error.message ||
+        error.details ||
+        error.hint ||
+        "Ocurrió un error inesperado."
+    );
 }
 
 async function cerrarSesion() {
