@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprobantes | Sistema Financiero</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">SF</div>
+            <div class="logo-text">
+                <strong>Sistema Financiero</strong>
+                <span>Comunidad Juan Cheuquelen</span>
+            </div>
+        </div>
+
+        <nav class="menu">
+            <a href="dashboard.html" class="menu-item"><span class="menu-icon">⌂</span><span>Inicio</span></a>
+            <a href="socios.html" class="menu-item"><span class="menu-icon">♙</span><span>Socios</span></a>
+            <a href="cuotas.html" class="menu-item"><span class="menu-icon">▣</span><span>Cuotas</span></a>
+            <a href="pagos-cuotas.html" class="menu-item"><span class="menu-icon">$</span><span>Pagos de cuotas</span></a>
+            <a href="finanzas.html" class="menu-item"><span class="menu-icon">◈</span><span>Finanzas</span></a>
+            <a href="reportes.html" class="menu-item"><span class="menu-icon">▥</span><span>Reportes</span></a>
+            <a href="comprobantes.html" class="menu-item activo"><span class="menu-icon">▤</span><span>Comprobantes</span></a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <button id="logoutButton" class="cerrar-sesion" type="button"><span>↪</span>Cerrar sesión</button>
+        </div>
+    </aside>
+
+    <main class="contenido">
+        <header class="topbar">
+            <div>
+                <h1>Comprobantes</h1>
+                <p>Consulta, verificación y reimpresión de comprobantes de cuota</p>
+            </div>
+            <div class="usuario">
+                <div class="usuario-icono">♙</div>
+                <div>
+                    <strong id="nombreUsuario">Usuario</strong>
+                    <span id="rolUsuario">Cargando...</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="dashboard-header">
+            <div>
+                <span class="etiqueta">CONTROL DOCUMENTAL</span>
+                <h2>Comprobantes de pago de cuota</h2>
+                <p>Busque un comprobante por número, socio o RUT y vuelva a imprimirlo conservando su numeración original.</p>
+            </div>
+        </section>
+
+        <section class="panel-card">
+            <div class="filtros-socios">
+                <div class="campo-busqueda">
+                    <label for="buscarComprobante">Buscar comprobante</label>
+                    <input type="search" id="buscarComprobante" placeholder="CJ-2026-000001, nombre o RUT...">
+                </div>
+
+                <div class="campo-filtro">
+                    <label for="periodoComprobante">Período</label>
+                    <select id="periodoComprobante">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+
+                <div class="campo-filtro">
+                    <label for="estadoComprobante">Estado</label>
+                    <select id="estadoComprobante">
+                        <option value="">Todos</option>
+                        <option value="vigente">Vigentes</option>
+                        <option value="anulado">Anulados</option>
+                        <option value="pendiente">Pendientes de emisión</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="seccion-dashboard">
+            <div class="titulo-seccion">
+                <div>
+                    <h3>Pagos y comprobantes de cuota</h3>
+                    <p id="contadorComprobantes">Cargando pagos y comprobantes...</p>
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <div class="tabla-contenedor">
+                    <table class="tabla-socios">
+                        <thead>
+                            <tr>
+                                <th>Comprobante</th>
+                                <th>Socio</th>
+                                <th>Período</th>
+                                <th>Fecha emisión</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th>Impresiones</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaComprobantes">
+                            <tr><td colspan="8" class="tabla-cargando">Cargando comprobantes...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="comprobantes.js"></script>
+</body>
+</html>
