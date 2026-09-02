@@ -1,7 +1,13 @@
-// ============================================================
-// SISTEMA FINANCIERO
-// MODULO DE CUOTAS
-// ============================================================
+/* =========================================================
+   SISTEMA FINANCIERO
+   Módulo: Cuotas
+   Comunidad Indígena Juan Cheuquelen
+   ========================================================= */
+
+
+/* =========================================================
+   VARIABLES GLOBALES
+   ========================================================= */
 
 let usuarioActual = null;
 let perfilUsuario = null;
@@ -12,219 +18,210 @@ let periodos = [];
 let categorias = [];
 
 
-// ============================================================
-// INICIAR MODULO
-// ============================================================
+/* =========================================================
+   INICIO
+   ========================================================= */
 
-document.addEventListener("DOMContentLoaded", async function () {
-    await verificarSesion();
+document.addEventListener("DOMContentLoaded", () => {
+    verificarSesion();
 });
 
 
-// ============================================================
-// VERIFICAR SESION
-// ============================================================
+/* =========================================================
+   SESIÓN Y AUTENTICACIÓN
+   ========================================================= */
 
 async function verificarSesion() {
 
-    const resultadoSesion =
-        await supabaseClient.auth.getSession();
+    try {
 
-    const session =
-        resultadoSesion.data.session;
+        const {
+            data: { session },
+            error: sessionError
+        } = await supabaseClient.auth.getSession();
 
-    const sessionError =
-        resultadoSesion.error;
+        if (sessionError) {
+            throw sessionError;
+        }
 
-    if (sessionError) {
+        if (!session) {
+            window.location.href = "login.html";
+            return;
+        }
 
-        console.error(
-            "Error al comprobar la sesion:",
-            sessionError
-        );
+        usuarioActual = session.user;
 
-        window.location.href = "login.html";
+        const { data: perfil, error: perfilError } =
+            await supabaseClient
+                .from("profiles")
+                .select("nombre,email,rol,activo")
+                .eq("id", usuarioActual.id)
+                .maybeSingle();
 
-        return;
-    }
+        if (perfilError) {
+            throw perfilError;
+        }
 
-    if (!session) {
+        if (!perfil) {
+            alert("No se encontró el perfil del usuario.");
+            await cerrarSesion();
+            return;
+        }
 
-        window.location.href = "login.html";
+        if (perfil.activo === false) {
+            alert("Tu usuario se encuentra desactivado.");
+            await cerrarSesion();
+            return;
+        }
 
-        return;
-    }
+        perfilUsuario = perfil;
 
-    usuarioActual = session.user;
+        /*
+         * El rol consulta solamente puede acceder
+         * al módulo de reportes.
+         */
+        if (perfilUsuario.rol === "consulta") {
+            window.location.href = "reportes.html";
+            return;
+        }
 
-    console.log(
-        "Usuario autenticado:",
-        usuarioActual.email
-    );
+        /*
+         * Solo administrador y tesorero pueden
+         * administrar cuotas.
+         */
+        if (
+            perfilUsuario.rol !== "administrador" &&
+            perfilUsuario.rol !== "tesorero"
+        ) {
+            alert("No tienes permisos para acceder al módulo de cuotas.");
+            window.location.href = "index.html";
+            return;
+        }
 
+        mostrarUsuario();
 
-    // ========================================================
-    // OBTENER PERFIL
-    // ========================================================
+        configurarEventos();
 
-    const resultadoPerfil =
-        await supabaseClient
-            .from("profiles")
-            .select("nombre, email, rol, activo")
-            .eq("id", usuarioActual.id)
-            .single();
+        await cargarSocios();
+        await cargarPeriodos();
+        await cargarCategorias();
+        await cargarCuotas();
 
-    const perfil =
-        resultadoPerfil.data;
+    } catch (error) {
 
-    const error =
-        resultadoPerfil.error;
-
-    if (error) {
-
-        console.error(
-            "Error al obtener el perfil:",
-            error
-        );
-
-        alert(
-            "No fue posible cargar el perfil del usuario."
-        );
-
-        return;
-    }
-
-    if (!perfil) {
-
-        alert(
-            "No existe un perfil asociado al usuario."
-        );
-
-        await supabaseClient.auth.signOut();
-
-        window.location.href = "login.html";
-
-        return;
-    }
-
-    if (!perfil.activo) {
+        console.error("Error verificando sesión:", error);
 
         alert(
-            "Este usuario se encuentra desactivado."
+            "No fue posible verificar la sesión.\n\n" +
+            obtenerMensajeError(error)
         );
 
-        await supabaseClient.auth.signOut();
-
         window.location.href = "login.html";
-
-        return;
     }
-
-    perfilUsuario = perfil;
-
-    mostrarUsuario();
-
-    configurarEventos();
-
-    await cargarSocios();
-
-    await cargarPeriodos();
-
-    await cargarCategorias();
-
-    await cargarCuotas();
 }
 
 
-// ============================================================
-// MOSTRAR USUARIO
-// ============================================================
+/* =========================================================
+   MOSTRAR USUARIO
+   ========================================================= */
 
 function mostrarUsuario() {
 
-    const nombreUsuario =
-        document.getElementById("nombreUsuario");
+    const nombreElement = document.getElementById("usuarioNombre");
+    const rolElement = document.getElementById("usuarioRol");
 
-    const rolUsuario =
-        document.getElementById("rolUsuario");
+    if (nombreElement) {
 
-    if (nombreUsuario) {
-
-        nombreUsuario.textContent =
-            perfilUsuario.nombre || "Usuario";
+        nombreElement.textContent =
+            perfilUsuario?.nombre ||
+            perfilUsuario?.email ||
+            usuarioActual?.email ||
+            "Usuario";
     }
 
-    if (rolUsuario) {
-
-        rolUsuario.textContent =
-            traducirRol(perfilUsuario.rol);
+    if (rolElement) {
+        rolElement.textContent =
+            traducirRol(perfilUsuario?.rol);
     }
 }
 
 
-// ============================================================
-// TRADUCIR ROL
-// ============================================================
+/* =========================================================
+   TRADUCIR ROL
+   ========================================================= */
 
 function traducirRol(rol) {
 
-    switch (rol) {
+    const roles = {
 
-        case "administrador":
-            return "Administrador";
+        administrador: "Administrador",
 
-        case "tesorero":
-            return "Tesorero";
+        tesorero: "Tesorero",
 
-        case "consulta":
-            return "Consulta";
+        consulta: "Consulta"
+    };
 
-        default:
-            return "Usuario";
-    }
+    return roles[rol] || rol || "Usuario";
 }
 
 
-// ============================================================
-// CONFIGURAR EVENTOS
-// ============================================================
+/* =========================================================
+   CONFIGURAR EVENTOS
+   ========================================================= */
 
 function configurarEventos() {
+
+    /* -----------------------------------------------------
+       IR A PAGOS DE CUOTAS
+       ----------------------------------------------------- */
 
     const irPagosCuotasButton =
         document.getElementById("irPagosCuotasButton");
 
     if (irPagosCuotasButton) {
 
-        irPagosCuotasButton.addEventListener(
-            "click",
-            function () {
+        irPagosCuotasButton.addEventListener("click", () => {
 
-                window.location.href =
-                    "pagos-cuotas.html";
-
-            }
-        );
+            window.location.href = "pagos-cuotas.html";
+        });
     }
 
 
-    // ========================================================
-    // BOTON GENERAR REPORTE PDF
-    // ========================================================
+    /* -----------------------------------------------------
+       IR A COMPROBANTES
+       ----------------------------------------------------- */
 
-    const generarReporteButton =
-        document.getElementById(
-            "generarReporteCuotasButton"
-        );
+    const irComprobantesButton =
+        document.getElementById("irComprobantesButton");
 
-    if (generarReporteButton) {
+    if (irComprobantesButton) {
 
-        generarReporteButton.addEventListener(
+        irComprobantesButton.addEventListener("click", () => {
+
+            window.location.href = "comprobantes.html";
+        });
+    }
+
+
+    /* -----------------------------------------------------
+       GENERAR REPORTE
+       ----------------------------------------------------- */
+
+    const generarReporteCuotasButton =
+        document.getElementById("generarReporteCuotasButton");
+
+    if (generarReporteCuotasButton) {
+
+        generarReporteCuotasButton.addEventListener(
             "click",
             generarReporteCuotasPDF
         );
     }
 
+
+    /* -----------------------------------------------------
+       NUEVA CUOTA
+       ----------------------------------------------------- */
 
     const nuevaCuotaButton =
         document.getElementById("nuevaCuotaButton");
@@ -238,29 +235,37 @@ function configurarEventos() {
     }
 
 
-    const cerrarModal =
+    /* -----------------------------------------------------
+       CERRAR MODAL
+       ----------------------------------------------------- */
+
+    const cerrarModalButton =
         document.getElementById("cerrarModalCuota");
 
-    if (cerrarModal) {
+    if (cerrarModalButton) {
 
-        cerrarModal.addEventListener(
+        cerrarModalButton.addEventListener(
             "click",
             cerrarModalCuota
         );
     }
 
 
-    const cancelar =
-        document.getElementById("cancelarCuota");
+    const cancelarModalButton =
+        document.getElementById("cancelarModalCuota");
 
-    if (cancelar) {
+    if (cancelarModalButton) {
 
-        cancelar.addEventListener(
+        cancelarModalButton.addEventListener(
             "click",
             cerrarModalCuota
         );
     }
 
+
+    /* -----------------------------------------------------
+       FORMULARIO CUOTA
+       ----------------------------------------------------- */
 
     const formulario =
         document.getElementById("formCuota");
@@ -274,22 +279,28 @@ function configurarEventos() {
     }
 
 
-    const buscar =
+    /* -----------------------------------------------------
+       BUSCADOR
+       ----------------------------------------------------- */
+
+    const buscarCuota =
         document.getElementById("buscarCuota");
 
-    if (buscar) {
+    if (buscarCuota) {
 
-        buscar.addEventListener(
+        buscarCuota.addEventListener(
             "input",
             aplicarFiltros
         );
     }
 
 
+    /* -----------------------------------------------------
+       FILTRO ESTADO
+       ----------------------------------------------------- */
+
     const filtroEstado =
-        document.getElementById(
-            "filtroEstadoCuota"
-        );
+        document.getElementById("filtroEstadoCuota");
 
     if (filtroEstado) {
 
@@ -300,42 +311,72 @@ function configurarEventos() {
     }
 
 
-    const periodo =
+    /* -----------------------------------------------------
+       FILTRO PERÍODO
+       ----------------------------------------------------- */
+
+    const periodoSelect =
         document.getElementById("periodoSelect");
 
-    if (periodo) {
+    if (periodoSelect) {
 
-        periodo.addEventListener(
+        periodoSelect.addEventListener(
             "change",
             aplicarFiltros
         );
     }
 
 
+    /* -----------------------------------------------------
+       CERRAR MODAL AL HACER CLICK FUERA
+       ----------------------------------------------------- */
+
     const modal =
         document.getElementById("modalCuota");
 
     if (modal) {
 
-        modal.addEventListener(
-            "click",
-            function (event) {
+        modal.addEventListener("click", (event) => {
 
-                if (event.target === modal) {
-
-                    cerrarModalCuota();
-                }
+            if (event.target === modal) {
+                cerrarModalCuota();
             }
-        );
+        });
     }
 
 
-    const logoutButton =
-        document.getElementById("logoutButton");
+    /* -----------------------------------------------------
+       ESC PARA CERRAR MODAL
+       ----------------------------------------------------- */
 
-    if (logoutButton) {
+    document.addEventListener("keydown", (event) => {
 
-        logoutButton.addEventListener(
+        if (event.key === "Escape") {
+
+            const modalActual =
+                document.getElementById("modalCuota");
+
+            if (
+                modalActual &&
+                !modalActual.classList.contains("oculto") &&
+                modalActual.style.display !== "none"
+            ) {
+                cerrarModalCuota();
+            }
+        }
+    });
+
+
+    /* -----------------------------------------------------
+       CERRAR SESIÓN
+       ----------------------------------------------------- */
+
+    const cerrarSesionButton =
+        document.getElementById("cerrarSesionButton");
+
+    if (cerrarSesionButton) {
+
+        cerrarSesionButton.addEventListener(
             "click",
             cerrarSesion
         );
@@ -343,61 +384,60 @@ function configurarEventos() {
 }
 
 
-// ============================================================
-// CARGAR SOCIOS
-// ============================================================
+/* =========================================================
+   CARGAR SOCIOS
+   ========================================================= */
 
 async function cargarSocios() {
 
-    const resultado =
-        await supabaseClient
-            .from("socios")
-            .select(
-                "id, nombres, apellido_paterno, apellido_materno, rut, estado"
-            )
-            .order(
-                "apellido_paterno",
-                {
-                    ascending: true,
-                    nullsFirst: false
-                }
-            )
-            .order(
-                "nombres",
-                {
+    try {
+
+        const { data, error } =
+            await supabaseClient
+                .from("socios")
+                .select(`
+                    id,
+                    nombres,
+                    apellido_paterno,
+                    apellido_materno,
+                    rut,
+                    estado
+                `)
+                .order("apellido_paterno", {
                     ascending: true
-                }
-            );
+                })
+                .order("nombres", {
+                    ascending: true
+                });
 
-    if (resultado.error) {
+        if (error) {
+            throw error;
+        }
 
-        console.error(
-            "Error al cargar socios:",
-            resultado.error
-        );
+        socios = data || [];
+
+        llenarSelectSocios();
+
+    } catch (error) {
+
+        console.error("Error cargando socios:", error);
 
         alert(
-            "No fue posible cargar los socios."
+            "No fue posible cargar los socios.\n\n" +
+            obtenerMensajeError(error)
         );
-
-        return;
     }
-
-    socios =
-        resultado.data || [];
-
-    llenarSelectSocios();
 }
 
 
-// ============================================================
-// LLENAR SELECT DE SOCIOS
-// ============================================================
+/* =========================================================
+   LLENAR SELECT DE SOCIOS
+   ========================================================= */
 
 function llenarSelectSocios() {
 
     const select =
-        document.getElementById("socioSelect");
+        document.getElementById("socioCuota");
 
     if (!select) {
         return;
@@ -406,272 +446,253 @@ function llenarSelectSocios() {
     select.innerHTML =
         '<option value="">Seleccione un socio</option>';
 
-    socios.forEach(function (socio) {
+    socios.forEach((socio) => {
 
         const option =
             document.createElement("option");
 
-        option.value =
-            socio.id;
-
-        const nombre =
-            construirNombreCompleto(socio);
+        option.value = socio.id;
 
         option.textContent =
-            socio.rut
-                ? nombre + " - " + socio.rut
-                : nombre;
+            construirNombreCompleto(socio);
+
+        if (socio.rut) {
+            option.textContent +=
+                ` — ${socio.rut}`;
+        }
 
         select.appendChild(option);
     });
 }
 
 
-// ============================================================
-// CARGAR PERIODOS
-// ============================================================
+/* =========================================================
+   CARGAR PERÍODOS
+   ========================================================= */
 
 async function cargarPeriodos() {
 
-    const resultado =
-        await supabaseClient
-            .from("periodos_financieros")
-            .select("*")
-            .order(
-                "anio",
-                {
+    try {
+
+        const { data, error } =
+            await supabaseClient
+                .from("periodos_financieros")
+                .select("*")
+                .order("anio", {
                     ascending: false
-                }
-            );
+                });
 
-    if (resultado.error) {
+        if (error) {
+            throw error;
+        }
 
-        console.error(
-            "Error al cargar periodos:",
-            resultado.error
+        periodos = data || [];
+
+        llenarSelectPeriodos();
+
+    } catch (error) {
+
+        console.error("Error cargando períodos:", error);
+
+        alert(
+            "No fue posible cargar los períodos financieros.\n\n" +
+            obtenerMensajeError(error)
+        );
+    }
+}
+
+
+/* =========================================================
+   OBTENER NOMBRE PERÍODO
+   ========================================================= */
+
+function obtenerNombrePeriodo(periodoId) {
+
+    const periodo =
+        periodos.find(
+            (item) => String(item.id) === String(periodoId)
         );
 
-        return;
-    }
-
-    periodos =
-        resultado.data || [];
-
-    llenarSelectPeriodos();
-}
-
-
-// ============================================================
-// OBTENER NOMBRE DE PERIODO
-// ============================================================
-
-function obtenerNombrePeriodo(periodo) {
-
     if (!periodo) {
-        return "Periodo";
+        return "Sin período";
     }
 
-    const campos = [
-        "nombre",
-        "descripcion",
-        "periodo",
-        "anio",
-        "año"
-    ];
-
-    for (
-        let i = 0;
-        i < campos.length;
-        i++
-    ) {
-
-        const campo =
-            campos[i];
-
-        if (
-            periodo[campo] !== undefined &&
-            periodo[campo] !== null &&
-            String(periodo[campo]).trim() !== ""
-        ) {
-
-            return String(
-                periodo[campo]
-            );
-        }
-    }
-
-    return "Periodo #" + periodo.id;
+    return periodo.anio
+        ? String(periodo.anio)
+        : `Período ${periodo.id}`;
 }
 
 
-// ============================================================
-// LLENAR SELECT DE PERIODOS
-// ============================================================
+/* =========================================================
+   LLENAR SELECT PERÍODOS
+   ========================================================= */
 
 function llenarSelectPeriodos() {
 
-    const selectPrincipal =
+    const selectPeriodo =
+        document.getElementById("periodoCuota");
+
+    const filtroPeriodo =
         document.getElementById("periodoSelect");
 
-    const selectModal =
-        document.getElementById("periodoCuotaSelect");
 
-    if (selectPrincipal) {
+    /* -----------------------------------------------------
+       SELECT DEL FORMULARIO
+       ----------------------------------------------------- */
 
-        selectPrincipal.innerHTML =
-            '<option value="">Todos los periodos</option>';
-    }
+    if (selectPeriodo) {
 
-    if (selectModal) {
+        selectPeriodo.innerHTML =
+            '<option value="">Seleccione un período</option>';
 
-        selectModal.innerHTML =
-            '<option value="">Seleccione un periodo</option>';
-    }
+        periodos.forEach((periodo) => {
 
-    periodos.forEach(function (periodo) {
-
-        const nombre =
-            obtenerNombrePeriodo(periodo);
-
-        if (selectPrincipal) {
-
-            const optionPrincipal =
+            const option =
                 document.createElement("option");
 
-            optionPrincipal.value =
-                periodo.id;
+            option.value = periodo.id;
 
-            optionPrincipal.textContent =
-                nombre;
+            option.textContent =
+                periodo.anio || `Período ${periodo.id}`;
 
-            selectPrincipal.appendChild(
-                optionPrincipal
-            );
-        }
+            selectPeriodo.appendChild(option);
+        });
+    }
 
-        if (selectModal) {
 
-            const optionModal =
+    /* -----------------------------------------------------
+       FILTRO
+       ----------------------------------------------------- */
+
+    if (filtroPeriodo) {
+
+        const valorActual =
+            filtroPeriodo.value;
+
+        filtroPeriodo.innerHTML =
+            '<option value="">Todos los períodos</option>';
+
+        periodos.forEach((periodo) => {
+
+            const option =
                 document.createElement("option");
 
-            optionModal.value =
-                periodo.id;
+            option.value = periodo.id;
 
-            optionModal.textContent =
-                nombre;
+            option.textContent =
+                periodo.anio || `Período ${periodo.id}`;
 
-            selectModal.appendChild(
-                optionModal
-            );
+            filtroPeriodo.appendChild(option);
+        });
+
+        if (
+            valorActual &&
+            periodos.some(
+                (periodo) =>
+                    String(periodo.id) ===
+                    String(valorActual)
+            )
+        ) {
+            filtroPeriodo.value = valorActual;
         }
-    });
+    }
 }
 
 
-// ============================================================
-// CARGAR CATEGORIAS
-// ============================================================
+/* =========================================================
+   CARGAR CATEGORÍAS
+   ========================================================= */
 
 async function cargarCategorias() {
 
-    const resultado =
-        await supabaseClient
-            .from("categorias")
-            .select("*");
+    try {
 
-    if (resultado.error) {
+        const { data, error } =
+            await supabaseClient
+                .from("categorias")
+                .select("*")
+                .order("nombre", {
+                    ascending: true
+                });
+
+        if (error) {
+            throw error;
+        }
+
+        categorias = data || [];
+
+        llenarSelectCategorias();
+
+    } catch (error) {
 
         console.error(
-            "Error al cargar categorias:",
-            resultado.error
+            "Error cargando categorías:",
+            error
         );
 
-        return;
+        alert(
+            "No fue posible cargar las categorías.\n\n" +
+            obtenerMensajeError(error)
+        );
     }
-
-    categorias =
-        resultado.data || [];
-
-    llenarSelectCategorias();
 }
 
 
-// ============================================================
-// OBTENER NOMBRE DE CATEGORIA
-// ============================================================
+/* =========================================================
+   OBTENER NOMBRE CATEGORÍA
+   ========================================================= */
 
-function obtenerNombreCategoria(categoria) {
+function obtenerNombreCategoria(categoriaId) {
+
+    const categoria =
+        categorias.find(
+            (item) =>
+                String(item.id) ===
+                String(categoriaId)
+        );
 
     if (!categoria) {
-        return "Sin categoria";
+        return "Sin categoría";
     }
 
-    const campos = [
-        "nombre",
-        "descripcion",
-        "categoria"
-    ];
-
-    for (
-        let i = 0;
-        i < campos.length;
-        i++
-    ) {
-
-        const campo =
-            campos[i];
-
-        if (
-            categoria[campo] !== undefined &&
-            categoria[campo] !== null &&
-            String(categoria[campo]).trim() !== ""
-        ) {
-
-            return String(
-                categoria[campo]
-            );
-        }
-    }
-
-    return "Categoria #" + categoria.id;
+    return categoria.nombre || "Sin categoría";
 }
 
 
-// ============================================================
-// LLENAR CATEGORIAS
-// ============================================================
+/* =========================================================
+   LLENAR SELECT CATEGORÍAS
+   ========================================================= */
 
 function llenarSelectCategorias() {
 
     const select =
-        document.getElementById("categoriaSelect");
+        document.getElementById("categoriaCuota");
 
     if (!select) {
         return;
     }
 
     select.innerHTML =
-        '<option value="">Sin categoria</option>';
+        '<option value="">Seleccione una categoría</option>';
 
-    categorias.forEach(function (categoria) {
+    categorias.forEach((categoria) => {
 
         const option =
             document.createElement("option");
 
-        option.value =
-            categoria.id;
+        option.value = categoria.id;
 
         option.textContent =
-            obtenerNombreCategoria(categoria);
+            categoria.nombre || "Sin nombre";
 
         select.appendChild(option);
     });
 }
 
 
-// ============================================================
-// CARGAR CUOTAS
-// ============================================================
+/* =========================================================
+   CARGAR CUOTAS
+   ========================================================= */
 
 async function cargarCuotas() {
 
@@ -680,135 +701,134 @@ async function cargarCuotas() {
 
     if (tabla) {
 
-        tabla.innerHTML =
-            '<tr>' +
-            '<td colspan="8" class="tabla-cargando">' +
-            'Cargando cuotas...' +
-            '</td>' +
-            '</tr>';
+        tabla.innerHTML = `
+            <tr>
+                <td
+                    colspan="8"
+                    class="tabla-cargando"
+                >
+                    Cargando cuotas...
+                </td>
+            </tr>
+        `;
     }
 
-    console.log(
-        "Iniciando consulta de cuotas..."
-    );
+    try {
 
-    const resultado =
-        await supabaseClient
-            .from("cuotas")
-            .select(
-                "id, socio_id, periodo_id, categoria_id, fecha_emision, fecha_vencimiento, monto, estado, observaciones, created_at, updated_at, created_by"
-            )
-            .order(
-                "fecha_emision",
-                {
+        const { data, error } =
+            await supabaseClient
+                .from("cuotas")
+                .select(`
+                    id,
+                    socio_id,
+                    periodo_id,
+                    categoria_id,
+                    fecha_emision,
+                    fecha_vencimiento,
+                    monto,
+                    estado,
+                    observaciones,
+                    created_at,
+                    updated_at,
+                    created_by
+                `)
+                .order("fecha_emision", {
                     ascending: false
-                }
-            );
+                });
 
-    console.log(
-        "Resultado consulta cuotas:",
-        resultado
-    );
+        if (error) {
+            throw error;
+        }
 
-    if (resultado.error) {
+        cuotas = data || [];
+
+        aplicarFiltros();
+
+    } catch (error) {
 
         console.error(
-            "Error al cargar cuotas:",
-            resultado.error
+            "Error cargando cuotas:",
+            error
         );
 
         if (tabla) {
 
-            tabla.innerHTML =
-                '<tr>' +
-                '<td colspan="8" class="tabla-cargando">' +
-                'No fue posible cargar las cuotas.' +
-                '</td>' +
-                '</tr>';
+            tabla.innerHTML = `
+                <tr>
+                    <td
+                        colspan="8"
+                        class="tabla-cargando"
+                    >
+                        No fue posible cargar las cuotas.
+                    </td>
+                </tr>
+            `;
         }
 
-        actualizarResumen();
-
-        return;
+        alert(
+            "No fue posible cargar las cuotas.\n\n" +
+            obtenerMensajeError(error)
+        );
     }
-
-    cuotas =
-        resultado.data || [];
-
-    console.log(
-        "Cuotas cargadas correctamente:",
-        cuotas
-    );
-
-    aplicarFiltros();
 }
 
 
-// ============================================================
-// APLICAR FILTROS
-// ============================================================
+/* =========================================================
+   APLICAR FILTROS
+   ========================================================= */
 
 function aplicarFiltros() {
 
     const buscar =
-        document.getElementById("buscarCuota");
-
-    const filtroEstado =
-        document.getElementById(
-            "filtroEstadoCuota"
-        );
-
-    const periodo =
-        document.getElementById("periodoSelect");
-
-    const texto =
-        buscar
-            ? buscar.value.trim().toLowerCase()
-            : "";
+        (
+            document.getElementById("buscarCuota")?.value ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
 
     const estado =
-        filtroEstado
-            ? filtroEstado.value
-            : "todos";
+        document.getElementById(
+            "filtroEstadoCuota"
+        )?.value || "";
 
     const periodoId =
-        periodo
-            ? periodo.value
-            : "";
+        document.getElementById(
+            "periodoSelect"
+        )?.value || "";
 
-    const filtradas =
-        cuotas.filter(function (cuota) {
+
+    const resultado =
+        cuotas.filter((cuota) => {
 
             const socio =
                 obtenerSocio(cuota.socio_id);
 
-            const nombre =
+            const nombreSocio =
                 socio
-                    ? construirNombreCompleto(
-                        socio
-                    ).toLowerCase()
+                    ? construirNombreCompleto(socio)
                     : "";
 
-            const rut =
-                socio && socio.rut
-                    ? String(
-                        socio.rut
-                    ).toLowerCase()
-                    : "";
+            const rutSocio =
+                socio?.rut || "";
 
             const coincideBusqueda =
-                texto === "" ||
-                nombre.includes(texto) ||
-                rut.includes(texto);
+                !buscar ||
+                nombreSocio
+                    .toLowerCase()
+                    .includes(buscar) ||
+                rutSocio
+                    .toLowerCase()
+                    .includes(buscar);
 
             const coincideEstado =
-                estado === "todos" ||
+                !estado ||
                 cuota.estado === estado;
 
             const coincidePeriodo =
-                periodoId === "" ||
+                !periodoId ||
                 String(cuota.periodo_id) ===
-                String(periodoId);
+                    String(periodoId);
 
             return (
                 coincideBusqueda &&
@@ -817,62 +837,63 @@ function aplicarFiltros() {
             );
         });
 
-    renderizarCuotas(filtradas);
+
+    renderizarCuotas(resultado);
+
+    actualizarResumen(resultado);
 
     actualizarContador(
-        filtradas.length,
+        resultado.length,
         cuotas.length
     );
-
-    actualizarResumen();
 }
 
 
-// ============================================================
-// OBTENER SOCIO
-// ============================================================
+/* =========================================================
+   OBTENER SOCIO
+   ========================================================= */
 
-function obtenerSocio(id) {
+function obtenerSocio(socioId) {
 
-    return socios.find(function (socio) {
-
-        return Number(socio.id) === Number(id);
-
-    });
+    return socios.find(
+        (socio) =>
+            String(socio.id) ===
+            String(socioId)
+    ) || null;
 }
 
 
-// ============================================================
-// OBTENER PERIODO
-// ============================================================
+/* =========================================================
+   OBTENER PERÍODO
+   ========================================================= */
 
-function obtenerPeriodo(id) {
+function obtenerPeriodo(periodoId) {
 
-    return periodos.find(function (periodo) {
-
-        return Number(periodo.id) === Number(id);
-
-    });
+    return periodos.find(
+        (periodo) =>
+            String(periodo.id) ===
+            String(periodoId)
+    ) || null;
 }
 
 
-// ============================================================
-// OBTENER CATEGORIA
-// ============================================================
+/* =========================================================
+   OBTENER CATEGORÍA
+   ========================================================= */
 
-function obtenerCategoria(id) {
+function obtenerCategoria(categoriaId) {
 
-    return categorias.find(function (categoria) {
-
-        return Number(categoria.id) === Number(id);
-
-    });
+    return categorias.find(
+        (categoria) =>
+            String(categoria.id) ===
+            String(categoriaId)
+    ) || null;
 }
 
 
-// ============================================================
-// RENDERIZAR CUOTAS
-// ============================================================
+/* =========================================================
+   RENDERIZAR CUOTAS
+   ========================================================= */
 
 function renderizarCuotas(lista) {
 
@@ -883,24 +904,25 @@ function renderizarCuotas(lista) {
         return;
     }
 
-    tabla.innerHTML = "";
+    if (!lista.length) {
 
-    if (lista.length === 0) {
-
-        tabla.innerHTML =
-            '<tr>' +
-            '<td colspan="8" class="tabla-cargando">' +
-            'No se encontraron cuotas.' +
-            '</td>' +
-            '</tr>';
+        tabla.innerHTML = `
+            <tr>
+                <td
+                    colspan="8"
+                    class="tabla-cargando"
+                >
+                    No se encontraron cuotas.
+                </td>
+            </tr>
+        `;
 
         return;
     }
 
-    lista.forEach(function (cuota) {
+    tabla.innerHTML = "";
 
-        const fila =
-            document.createElement("tr");
+    lista.forEach((cuota) => {
 
         const socio =
             obtenerSocio(cuota.socio_id);
@@ -911,164 +933,163 @@ function renderizarCuotas(lista) {
         const categoria =
             obtenerCategoria(cuota.categoria_id);
 
-        const nombreSocio =
-            socio
-                ? construirNombreCompleto(socio)
-                : "Socio no encontrado";
+        const fila =
+            document.createElement("tr");
 
-        const nombrePeriodo =
-            obtenerNombrePeriodo(periodo);
+        const estadoClase =
+            obtenerClaseEstado(cuota.estado);
 
-        const nombreCategoria =
-            obtenerNombreCategoria(categoria);
+        fila.innerHTML = `
 
-        const monto =
-            formatearMoneda(cuota.monto);
+            <td>
+                <strong>
+                    ${escaparHTML(
+                        socio
+                            ? construirNombreCompleto(socio)
+                            : "Socio no encontrado"
+                    )}
+                </strong>
 
-        const estado =
-            cuota.estado || "pendiente";
+                ${
+                    socio?.rut
+                        ? `
+                            <small
+                                class="texto-secundario"
+                            >
+                                ${escaparHTML(socio.rut)}
+                            </small>
+                          `
+                        : ""
+                }
+            </td>
 
-        const claseEstado =
-            obtenerClaseEstado(estado);
+            <td>
+                ${escaparHTML(
+                    periodo?.anio ||
+                    obtenerNombrePeriodo(cuota.periodo_id)
+                )}
+            </td>
 
-        fila.innerHTML =
-            '<td><strong>' +
-            escaparHTML(nombreSocio) +
-            '</strong></td>' +
+            <td>
+                ${escaparHTML(
+                    categoria?.nombre ||
+                    obtenerNombreCategoria(
+                        cuota.categoria_id
+                    )
+                )}
+            </td>
 
-            '<td>' +
-            escaparHTML(nombrePeriodo) +
-            '</td>' +
+            <td>
+                ${formatearFecha(
+                    cuota.fecha_emision
+                )}
+            </td>
 
-            '<td>' +
-            escaparHTML(nombreCategoria) +
-            '</td>' +
+            <td>
+                ${formatearFecha(
+                    cuota.fecha_vencimiento
+                )}
+            </td>
 
-            '<td>' +
-            formatearFecha(
-                cuota.fecha_emision
-            ) +
-            '</td>' +
+            <td>
+                <strong class="monto-cuota">
+                    ${formatearMoneda(
+                        cuota.monto
+                    )}
+                </strong>
+            </td>
 
-            '<td>' +
-            formatearFecha(
-                cuota.fecha_vencimiento
-            ) +
-            '</td>' +
+            <td>
+                <span
+                    class="estado-cuota ${estadoClase}"
+                >
+                    ${escaparHTML(
+                        traducirEstado(cuota.estado)
+                    )}
+                </span>
+            </td>
 
-            '<td><strong>' +
-            monto +
-            '</strong></td>' +
+            <td>
 
-            '<td>' +
-            '<span class="' +
-            claseEstado +
-            '">' +
-            traducirEstado(estado) +
-            '</span>' +
-            '</td>' +
+                <div class="acciones-socio">
 
-            '<td>' +
-            '<button type="button" ' +
-            'class="boton-tabla" ' +
-            'data-accion="editar" ' +
-            'data-id="' +
-            cuota.id +
-            '">' +
-            'Editar' +
-            '</button>' +
-            '</td>';
+                    <button
+                        type="button"
+                        class="boton-accion"
+                        title="Editar cuota"
+                        onclick="abrirModalEditarCuota('${cuota.id}')"
+                    >
+                        ✏️
+                    </button>
+
+                </div>
+
+            </td>
+        `;
 
         tabla.appendChild(fila);
-    });
-
-    const botonesEditar =
-        tabla.querySelectorAll(
-            '[data-accion="editar"]'
-        );
-
-    botonesEditar.forEach(function (boton) {
-
-        boton.addEventListener(
-            "click",
-            function () {
-
-                abrirModalEditarCuota(
-                    Number(
-                        boton.dataset.id
-                    )
-                );
-            }
-        );
     });
 }
 
 
-// ============================================================
-// ACTUALIZAR RESUMEN
-// ============================================================
+/* =========================================================
+   ACTUALIZAR RESUMEN
+   ========================================================= */
 
-function actualizarResumen() {
+function actualizarResumen(lista) {
 
     const pagadas =
-        cuotas.filter(function (cuota) {
-
-            return cuota.estado === "pagada";
-
-        }).length;
+        lista.filter(
+            (cuota) =>
+                cuota.estado === "pagada"
+        ).length;
 
     const pendientes =
-        cuotas.filter(function (cuota) {
-
-            return cuota.estado === "pendiente";
-
-        }).length;
+        lista.filter(
+            (cuota) =>
+                cuota.estado === "pendiente"
+        ).length;
 
     const parciales =
-        cuotas.filter(function (cuota) {
+        lista.filter(
+            (cuota) =>
+                cuota.estado === "parcial"
+        ).length;
 
-            return cuota.estado === "parcial";
 
-        }).length;
-
-    const elementoPagadas =
+    const totalPagadas =
         document.getElementById(
             "totalCuotasPagadas"
         );
 
-    const elementoPendientes =
+    const totalPendientes =
         document.getElementById(
             "totalCuotasPendientes"
         );
 
-    const elementoParciales =
+    const totalParciales =
         document.getElementById(
             "totalCuotasParciales"
         );
 
-    if (elementoPagadas) {
 
-        elementoPagadas.textContent =
-            pagadas;
+    if (totalPagadas) {
+        totalPagadas.textContent = pagadas;
     }
 
-    if (elementoPendientes) {
-
-        elementoPendientes.textContent =
-            pendientes;
+    if (totalPendientes) {
+        totalPendientes.textContent = pendientes;
     }
 
-    if (elementoParciales) {
-
-        elementoParciales.textContent =
-            parciales;
+    if (totalParciales) {
+        totalParciales.textContent = parciales;
     }
 }
 
 
-// ============================================================
-// CONTADOR
-// ============================================================
+/* =========================================================
+   ACTUALIZAR CONTADOR
+   ========================================================= */
 
 function actualizarContador(
     visible,
@@ -1084,61 +1105,61 @@ function actualizarContador(
         return;
     }
 
-    if (total === 0) {
-
-        contador.textContent =
-            "No existen cuotas registradas.";
-
-        return;
-    }
-
-    if (visible !== total) {
-
-        contador.textContent =
-            visible +
-            " de " +
-            total +
-            " cuotas";
-
-        return;
-    }
-
     contador.textContent =
-        total === 1
-            ? "1 cuota registrada"
-            : total + " cuotas registradas";
+        visible === total
+            ? `${total} cuota${total === 1 ? "" : "s"}`
+            : `${visible} de ${total} cuotas`;
 }
 
 
-// ============================================================
-// ABRIR MODAL NUEVA CUOTA
-// ============================================================
+/* =========================================================
+   ABRIR MODAL NUEVA CUOTA
+   ========================================================= */
 
 function abrirModalNuevaCuota() {
 
     const modal =
         document.getElementById("modalCuota");
 
-    const titulo =
-        document.getElementById(
-            "modalTituloCuota"
-        );
-
     const formulario =
         document.getElementById("formCuota");
 
-    if (!modal || !titulo || !formulario) {
+    if (!modal || !formulario) {
         return;
     }
 
     formulario.reset();
 
-    document.getElementById(
-        "cuotaId"
-    ).value = "";
+    const titulo =
+        document.getElementById(
+            "tituloModalCuota"
+        );
 
-    titulo.textContent =
-        "Nueva cuota";
+    const id =
+        document.getElementById(
+            "cuotaId"
+        );
+
+    const botonGuardar =
+        document.getElementById(
+            "guardarCuota"
+        );
+
+
+    if (titulo) {
+        titulo.textContent =
+            "Nueva cuota";
+    }
+
+    if (id) {
+        id.value = "";
+    }
+
+    if (botonGuardar) {
+        botonGuardar.textContent =
+            "Guardar cuota";
+    }
+
 
     const estado =
         document.getElementById(
@@ -1146,151 +1167,180 @@ function abrirModalNuevaCuota() {
         );
 
     if (estado) {
-
-        estado.value =
-            "pendiente";
+        estado.value = "pendiente";
     }
 
-    const fecha =
-        document.getElementById(
-            "fechaEmision"
-        );
 
-    if (fecha) {
-
-        fecha.value =
-            obtenerFechaActual();
-    }
-
-    const periodoPrincipal =
-        document.getElementById(
-            "periodoSelect"
-        );
-
-    const periodoModal =
-        document.getElementById(
-            "periodoCuotaSelect"
-        );
-
-    if (
-        periodoPrincipal &&
-        periodoModal &&
-        periodoPrincipal.value
-    ) {
-
-        periodoModal.value =
-            periodoPrincipal.value;
-    }
-
-    modal.style.display =
-        "flex";
-
-    const socio =
-        document.getElementById(
-            "socioSelect"
-        );
-
-    if (socio) {
-
-        socio.focus();
-    }
+    mostrarModalCuota();
 }
 
 
-// ============================================================
-// ABRIR MODAL EDITAR
-// ============================================================
+/* =========================================================
+   ABRIR MODAL EDITAR CUOTA
+   ========================================================= */
 
-function abrirModalEditarCuota(id) {
+function abrirModalEditarCuota(cuotaId) {
 
     const cuota =
-        cuotas.find(function (elemento) {
-
-            return Number(elemento.id) === Number(id);
-
-        });
+        cuotas.find(
+            (item) =>
+                String(item.id) ===
+                String(cuotaId)
+        );
 
     if (!cuota) {
 
         alert(
-            "No fue posible encontrar la cuota seleccionada."
+            "No se encontró la cuota seleccionada."
         );
 
         return;
     }
+
 
     const modal =
         document.getElementById("modalCuota");
 
     const titulo =
         document.getElementById(
-            "modalTituloCuota"
+            "tituloModalCuota"
         );
 
-    if (!modal || !titulo) {
-        return;
+    const id =
+        document.getElementById(
+            "cuotaId"
+        );
+
+    const socio =
+        document.getElementById(
+            "socioCuota"
+        );
+
+    const periodo =
+        document.getElementById(
+            "periodoCuota"
+        );
+
+    const categoria =
+        document.getElementById(
+            "categoriaCuota"
+        );
+
+    const fechaEmision =
+        document.getElementById(
+            "fechaEmisionCuota"
+        );
+
+    const fechaVencimiento =
+        document.getElementById(
+            "fechaVencimientoCuota"
+        );
+
+    const monto =
+        document.getElementById(
+            "montoCuota"
+        );
+
+    const estado =
+        document.getElementById(
+            "estadoCuota"
+        );
+
+    const observaciones =
+        document.getElementById(
+            "observacionesCuota"
+        );
+
+    const botonGuardar =
+        document.getElementById(
+            "guardarCuota"
+        );
+
+
+    if (titulo) {
+        titulo.textContent =
+            "Editar cuota";
     }
 
-    titulo.textContent =
-        "Editar cuota";
+    if (id) {
+        id.value = cuota.id;
+    }
 
-    document.getElementById(
-        "cuotaId"
-    ).value =
-        cuota.id;
+    if (socio) {
+        socio.value = cuota.socio_id || "";
+    }
 
-    document.getElementById(
-        "socioSelect"
-    ).value =
-        cuota.socio_id;
+    if (periodo) {
+        periodo.value = cuota.periodo_id || "";
+    }
 
-    document.getElementById(
-        "periodoCuotaSelect"
-    ).value =
-        cuota.periodo_id;
+    if (categoria) {
+        categoria.value =
+            cuota.categoria_id || "";
+    }
 
-    document.getElementById(
-        "categoriaSelect"
-    ).value =
-        cuota.categoria_id || "";
+    if (fechaEmision) {
+        fechaEmision.value =
+            cuota.fecha_emision
+                ? cuota.fecha_emision.substring(0, 10)
+                : "";
+    }
 
-    document.getElementById(
-        "montoCuota"
-    ).value =
-        cuota.monto || "";
+    if (fechaVencimiento) {
+        fechaVencimiento.value =
+            cuota.fecha_vencimiento
+                ? cuota.fecha_vencimiento.substring(0, 10)
+                : "";
+    }
 
-    document.getElementById(
-        "fechaEmision"
-    ).value =
-        cuota.fecha_emision || "";
+    if (monto) {
+        monto.value =
+            cuota.monto ?? "";
+    }
 
-    document.getElementById(
-        "fechaVencimiento"
-    ).value =
-        cuota.fecha_vencimiento || "";
+    if (estado) {
+        estado.value =
+            cuota.estado || "pendiente";
+    }
 
-    document.getElementById(
-        "estadoCuota"
-    ).value =
-        cuota.estado || "pendiente";
+    if (observaciones) {
+        observaciones.value =
+            cuota.observaciones || "";
+    }
 
-    document.getElementById(
-        "observacionesCuota"
-    ).value =
-        cuota.observaciones || "";
+    if (botonGuardar) {
+        botonGuardar.textContent =
+            "Guardar cambios";
+    }
 
-    modal.style.display =
-        "flex";
-
-    document.getElementById(
-        "socioSelect"
-    ).focus();
+    mostrarModalCuota();
 }
 
 
-// ============================================================
-// CERRAR MODAL
-// ============================================================
+/* =========================================================
+   MOSTRAR MODAL
+   ========================================================= */
+
+function mostrarModalCuota() {
+
+    const modal =
+        document.getElementById("modalCuota");
+
+    if (!modal) {
+        return;
+    }
+
+    modal.style.display = "flex";
+
+    modal.classList.remove("oculto");
+
+    document.body.style.overflow = "hidden";
+}
+
+
+/* =========================================================
+   CERRAR MODAL
+   ========================================================= */
 
 function cerrarModalCuota() {
 
@@ -1301,74 +1351,93 @@ function cerrarModalCuota() {
         return;
     }
 
-    modal.style.display =
-        "none";
+    modal.style.display = "none";
 
-    const formulario =
-        document.getElementById(
-            "formCuota"
-        );
+    modal.classList.add("oculto");
 
-    if (formulario) {
-
-        formulario.reset();
-    }
-
-    const cuotaId =
-        document.getElementById(
-            "cuotaId"
-        );
-
-    if (cuotaId) {
-
-        cuotaId.value =
-            "";
-    }
+    document.body.style.overflow = "";
 }
 
 
-// ============================================================
-// GUARDAR CUOTA
-// ============================================================
+/* =========================================================
+   GUARDAR CUOTA
+   ========================================================= */
 
 async function guardarCuota(event) {
 
     event.preventDefault();
 
-    const boton =
+
+    if (
+        !perfilUsuario ||
+        (
+            perfilUsuario.rol !== "administrador" &&
+            perfilUsuario.rol !== "tesorero"
+        )
+    ) {
+
+        alert(
+            "No tienes permisos para administrar cuotas."
+        );
+
+        return;
+    }
+
+
+    const cuotaId =
+        document.getElementById(
+            "cuotaId"
+        )?.value || null;
+
+    const socioId =
+        document.getElementById(
+            "socioCuota"
+        )?.value || null;
+
+    const periodoId =
+        document.getElementById(
+            "periodoCuota"
+        )?.value || null;
+
+    const categoriaId =
+        document.getElementById(
+            "categoriaCuota"
+        )?.value || null;
+
+    const fechaEmision =
+        document.getElementById(
+            "fechaEmisionCuota"
+        )?.value || null;
+
+    const fechaVencimiento =
+        document.getElementById(
+            "fechaVencimientoCuota"
+        )?.value || null;
+
+    const montoValor =
+        document.getElementById(
+            "montoCuota"
+        )?.value;
+
+    const estado =
+        document.getElementById(
+            "estadoCuota"
+        )?.value || "pendiente";
+
+    const observaciones =
+        document.getElementById(
+            "observacionesCuota"
+        )?.value?.trim() || null;
+
+    const botonGuardar =
         document.getElementById(
             "guardarCuota"
         );
 
-    const cuotaId =
-        obtenerValor("cuotaId");
 
-    const socioId =
-        obtenerValor("socioSelect");
-
-    const periodoId =
-        obtenerValor("periodoCuotaSelect");
-
-    const categoriaId =
-        obtenerValor("categoriaSelect");
-
-    const monto =
-        obtenerValor("montoCuota");
-
-    const fechaEmision =
-        obtenerValor("fechaEmision");
-
-    const fechaVencimiento =
-        obtenerValor("fechaVencimiento");
-
-    const estado =
-        obtenerValor("estadoCuota") ||
-        "pendiente";
-
-    const observaciones =
-        obtenerValor(
-            "observacionesCuota"
-        );
+    /* -----------------------------------------------------
+       VALIDACIONES
+       ----------------------------------------------------- */
 
     if (!socioId) {
 
@@ -1382,136 +1451,157 @@ async function guardarCuota(event) {
     if (!periodoId) {
 
         alert(
-            "Debe seleccionar un periodo financiero."
+            "Debe seleccionar un período financiero."
         );
 
         return;
     }
 
-    if (!monto || Number(monto) <= 0) {
+    if (!categoriaId) {
 
         alert(
-            "Debe ingresar un monto valido."
+            "Debe seleccionar una categoría."
         );
 
         return;
     }
 
-    const datosCuota = {
+    if (!montoValor) {
 
-        socio_id:
-            Number(socioId),
+        alert(
+            "Debe ingresar el monto de la cuota."
+        );
 
-        periodo_id:
-            Number(periodoId),
-
-        categoria_id:
-            categoriaId
-                ? Number(categoriaId)
-                : null,
-
-        fecha_emision:
-            fechaEmision ||
-            obtenerFechaActual(),
-
-        fecha_vencimiento:
-            fechaVencimiento ||
-            null,
-
-        monto:
-            Number(monto),
-
-        estado:
-            estado,
-
-        observaciones:
-            observaciones ||
-            null
-    };
-
-    if (boton) {
-
-        boton.disabled =
-            true;
-
-        boton.textContent =
-            cuotaId
-                ? "Actualizando..."
-                : "Guardando...";
+        return;
     }
+
+
+    const monto =
+        Number(montoValor);
+
+
+    if (
+        !Number.isFinite(monto) ||
+        monto <= 0
+    ) {
+
+        alert(
+            "El monto de la cuota debe ser mayor que cero."
+        );
+
+        return;
+    }
+
+
+    if (!fechaEmision) {
+
+        alert(
+            "Debe ingresar la fecha de emisión."
+        );
+
+        return;
+    }
+
+
+    if (
+        fechaVencimiento &&
+        fechaVencimiento < fechaEmision
+    ) {
+
+        alert(
+            "La fecha de vencimiento no puede ser anterior a la fecha de emisión."
+        );
+
+        return;
+    }
+
+
+    /* -----------------------------------------------------
+       BLOQUEAR BOTÓN
+       ----------------------------------------------------- */
+
+    if (botonGuardar) {
+
+        botonGuardar.disabled = true;
+
+        botonGuardar.textContent =
+            cuotaId
+                ? "Guardando..."
+                : "Creando...";
+    }
+
 
     try {
 
+        const datos = {
+
+            socio_id: socioId,
+
+            periodo_id: periodoId,
+
+            categoria_id: categoriaId,
+
+            fecha_emision: fechaEmision,
+
+            fecha_vencimiento:
+                fechaVencimiento || null,
+
+            monto: monto,
+
+            estado: estado,
+
+            observaciones:
+                observaciones
+        };
+
+
+        /* -------------------------------------------------
+           ACTUALIZAR
+           ------------------------------------------------- */
+
         if (cuotaId) {
 
-            const resultado =
+            const { error } =
                 await supabaseClient
                     .from("cuotas")
-                    .update(
-                        {
-                            ...datosCuota,
-                            updated_at:
-                                new Date().toISOString()
-                        }
-                    )
-                    .eq(
-                        "id",
-                        Number(cuotaId)
-                    );
+                    .update(datos)
+                    .eq("id", cuotaId);
 
-            if (resultado.error) {
-
-                console.error(
-                    "Error al actualizar cuota:",
-                    resultado.error
-                );
-
-                alert(
-                    obtenerMensajeError(
-                        resultado.error
-                    )
-                );
-
-                return;
+            if (error) {
+                throw error;
             }
 
+
             alert(
-                "Cuota actualizada correctamente."
+                "La cuota fue actualizada correctamente."
             );
 
-        } else {
+        }
 
-            const resultado =
+        /* -------------------------------------------------
+           CREAR
+           ------------------------------------------------- */
+
+        else {
+
+            datos.created_by =
+                usuarioActual.id;
+
+            const { error } =
                 await supabaseClient
                     .from("cuotas")
-                    .insert(
-                        {
-                            ...datosCuota,
-                            created_by:
-                                usuarioActual.id
-                        }
-                    );
+                    .insert(datos);
 
-            if (resultado.error) {
-
-                console.error(
-                    "Error al crear cuota:",
-                    resultado.error
-                );
-
-                alert(
-                    obtenerMensajeError(
-                        resultado.error
-                    )
-                );
-
-                return;
+            if (error) {
+                throw error;
             }
 
+
             alert(
-                "Cuota registrada correctamente."
+                "La cuota fue creada correctamente."
             );
         }
+
 
         cerrarModalCuota();
 
@@ -1520,210 +1610,158 @@ async function guardarCuota(event) {
     } catch (error) {
 
         console.error(
-            "Error inesperado:",
+            "Error guardando cuota:",
             error
         );
 
-        alert(
-            "Ocurrio un error inesperado al guardar la cuota."
-        );
+
+        /*
+         * Error típico cuando existe una cuota
+         * única para socio + período.
+         */
+        if (
+            error?.code === "23505" ||
+            error?.message
+                ?.toLowerCase()
+                .includes("duplicate")
+        ) {
+
+            alert(
+                "Ya existe una cuota registrada para este socio y período."
+            );
+
+        } else {
+
+            alert(
+                "No fue posible guardar la cuota.\n\n" +
+                obtenerMensajeError(error)
+            );
+        }
 
     } finally {
 
-        if (boton) {
+        if (botonGuardar) {
 
-            boton.disabled =
-                false;
+            botonGuardar.disabled = false;
 
-            boton.textContent =
-                "Guardar cuota";
+            botonGuardar.textContent =
+                cuotaId
+                    ? "Guardar cambios"
+                    : "Guardar cuota";
         }
     }
 }
 
 
-// ============================================================
-// ============================================================
-// REPORTE DETALLADO DE CUOTAS - PDF
-// ============================================================
-// ============================================================
-
-
-// ============================================================
-// CARGAR LIBRERIAS PDF
-// ============================================================
+/* =========================================================
+   CARGAR LIBRERÍAS PDF
+   ========================================================= */
 
 async function cargarLibreriasPDF() {
 
-    if (
-        window.jspdf &&
-        window.jspdf.jsPDF
-    ) {
+    /*
+     * jsPDF
+     */
 
-        return true;
+    if (!window.jspdf) {
+
+        await cargarScript(
+            "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+        );
     }
 
-    return new Promise(function (resolve) {
 
-        const script =
-            document.createElement("script");
+    /*
+     * AutoTable
+     */
 
-        script.src =
-            "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+    if (
+        !window.jspdf?.jsPDF?.API?.autoTable
+    ) {
 
-        script.onload =
-            function () {
-
-                const scriptTabla =
-                    document.createElement("script");
-
-                scriptTabla.src =
-                    "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js";
-
-                scriptTabla.onload =
-                    function () {
-
-                        resolve(true);
-                    };
-
-                scriptTabla.onerror =
-                    function () {
-
-                        resolve(false);
-                    };
-
-                document.head.appendChild(
-                    scriptTabla
-                );
-            };
-
-        script.onerror =
-            function () {
-
-                resolve(false);
-            };
-
-        document.head.appendChild(
-            script
+        await cargarScript(
+            "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"
         );
-    });
+    }
+
+
+    if (!window.jspdf?.jsPDF) {
+
+        throw new Error(
+            "No fue posible cargar jsPDF."
+        );
+    }
 }
 
 
-// ============================================================
-// GENERAR REPORTE PDF
-// ============================================================
+/* =========================================================
+   CARGAR SCRIPT
+   ========================================================= */
+
+function cargarScript(src) {
+
+    return new Promise(
+        (resolve, reject) => {
+
+            const script =
+                document.createElement("script");
+
+            script.src = src;
+
+            script.onload = resolve;
+
+            script.onerror = () =>
+                reject(
+                    new Error(
+                        `No fue posible cargar ${src}`
+                    )
+                );
+
+            document.head.appendChild(script);
+        }
+    );
+}
+
+
+/* =========================================================
+   GENERAR REPORTE PDF
+   ========================================================= */
 
 async function generarReporteCuotasPDF() {
 
-    const boton =
-        document.getElementById(
-            "generarReporteCuotasButton"
-        );
-
-    const periodoSelect =
-        document.getElementById(
-            "periodoSelect"
-        );
-
-    const estadoSelect =
-        document.getElementById(
-            "filtroEstadoCuota"
-        );
-
-    const periodoId =
-        periodoSelect
-            ? periodoSelect.value
-            : "";
-
-    const estado =
-        estadoSelect
-            ? estadoSelect.value
-            : "todos";
-
-
-    // ========================================================
-    // VALIDAR PERIODO
-    // ========================================================
-
-    if (!periodoId) {
-
-        alert(
-            "Seleccione un período financiero antes de generar el reporte."
-        );
-
-        return;
-    }
-
-
-    const periodo =
-        obtenerPeriodo(periodoId);
-
-
-    if (!periodo) {
-
-        alert(
-            "No fue posible identificar el período seleccionado."
-        );
-
-        return;
-    }
-
-
-    // ========================================================
-    // ESTADO DEL BOTON
-    // ========================================================
-
-    if (boton) {
-
-        boton.disabled =
-            true;
-
-        boton.dataset.textoOriginal =
-            boton.textContent;
-
-        boton.textContent =
-            "Generando PDF...";
-    }
-
-
     try {
 
-        // ====================================================
-        // CARGAR LIBRERIAS
-        // ====================================================
-
-        const librerias =
-            await cargarLibreriasPDF();
-
-        if (!librerias) {
-
-            alert(
-                "No fue posible cargar las herramientas necesarias para generar el PDF."
-            );
-
-            return;
-        }
+        await cargarLibreriasPDF();
 
 
-        // ====================================================
-        // CONSULTAR RPC
-        // ====================================================
+        const periodoId =
+            document.getElementById(
+                "periodoSelect"
+            )?.value || null;
 
-        const estadoRPC =
-            estado === "todos"
-                ? null
-                : estado;
+        const estado =
+            document.getElementById(
+                "filtroEstadoCuota"
+            )?.value || null;
 
-        const resultado =
+
+        /*
+         * El reporte utiliza la RPC existente
+         * para obtener el detalle completo de las
+         * cuotas y sus pagos.
+         */
+
+        const { data, error } =
             await supabaseClient.rpc(
                 "reporte_detallado_cuotas",
                 {
                     p_periodo_id:
-                        Number(periodoId),
+                        periodoId
+                            ? Number(periodoId)
+                            : null,
 
                     p_estado:
-                        estadoRPC,
+                        estado || null,
 
                     p_socio_id:
                         null
@@ -1731,596 +1769,407 @@ async function generarReporteCuotasPDF() {
             );
 
 
-        if (resultado.error) {
+        if (error) {
+            throw error;
+        }
 
-            console.error(
-                "Error al generar reporte detallado:",
-                resultado.error
-            );
+
+        const registros =
+            Array.isArray(data)
+                ? data
+                : [];
+
+
+        if (!registros.length) {
 
             alert(
-                obtenerMensajeError(
-                    resultado.error
-                )
+                "No existen datos para generar el reporte con los filtros seleccionados."
             );
 
             return;
         }
 
 
-        const datos =
-            resultado.data || [];
+        const {
+            jsPDF
+        } = window.jspdf;
 
 
-        if (datos.length === 0) {
-
-            alert(
-                "No existen registros de cuotas para los criterios seleccionados."
-            );
-
-            return;
-        }
+        const pdf =
+            new jsPDF({
+                orientation: "landscape",
+                unit: "mm",
+                format: "a4"
+            });
 
 
-        // ====================================================
-        // CREAR PDF
-        // ====================================================
+        const periodoTexto =
+            periodoId
+                ? obtenerNombrePeriodo(periodoId)
+                : "Todos los períodos";
 
-        const jsPDF =
-            window.jspdf.jsPDF;
 
-        const doc =
-            new jsPDF(
-                {
-                    orientation: "landscape",
-                    unit: "mm",
-                    format: "a4"
+        agregarEncabezadoPiePDF(
+            pdf,
+            "REPORTE DETALLADO DE CUOTAS",
+            periodoTexto
+        );
+
+
+        const columnas = [
+
+            "Socio",
+
+            "RUT",
+
+            "Período",
+
+            "Categoría",
+
+            "Emisión",
+
+            "Vencimiento",
+
+            "Cuota",
+
+            "Pagado",
+
+            "Saldo",
+
+            "Estado",
+
+            "Detalle pagos"
+        ];
+
+
+        const filas =
+            registros.map(
+                (registro) => {
+
+                    const socio =
+                        registro.socio ||
+                        registro.socio_nombre ||
+                        "";
+
+                    const rut =
+                        registro.rut ||
+                        registro.socio_rut ||
+                        "";
+
+                    const periodo =
+                        registro.periodo ||
+                        registro.periodo_anio ||
+                        "";
+
+                    const categoria =
+                        registro.categoria ||
+                        registro.categoria_nombre ||
+                        "";
+
+                    const monto =
+                        Number(
+                            registro.monto ||
+                            0
+                        );
+
+                    const pagado =
+                        Number(
+                            registro.pagado ||
+                            registro.total_pagado ||
+                            0
+                        );
+
+                    const saldo =
+                        Number(
+                            registro.saldo ??
+                            (monto - pagado)
+                        );
+
+                    const pagos =
+                        normalizarPagos(
+                            registro
+                        );
+
+                    return [
+
+                        socio,
+
+                        rut,
+
+                        periodo,
+
+                        categoria,
+
+                        formatearFecha(
+                            registro.fecha_emision
+                        ),
+
+                        formatearFecha(
+                            registro.fecha_vencimiento
+                        ),
+
+                        formatearMoneda(
+                            monto
+                        ),
+
+                        formatearMoneda(
+                            pagado
+                        ),
+
+                        formatearMoneda(
+                            saldo
+                        ),
+
+                        traducirEstadoReporte(
+                            registro.estado
+                        ),
+
+                        construirDetallePagosPDF(
+                            pagos
+                        )
+                    ];
                 }
             );
 
 
-        // ====================================================
-        // CONFIGURACION GENERAL
-        // ====================================================
+        pdf.autoTable({
 
-        const margen =
-            12;
+            head: [columnas],
 
-        let posicionY =
-            14;
+            body: filas,
 
+            startY: 30,
 
-        // ====================================================
-        // TITULO
-        // ====================================================
+            theme: "grid",
 
-        doc.setFont(
-            "helvetica",
-            "bold"
-        );
+            styles: {
 
-        doc.setFontSize(
-            16
-        );
+                fontSize: 7,
 
-        doc.text(
-            "SISTEMA FINANCIERO",
-            margen,
-            posicionY
-        );
+                cellPadding: 2,
 
-        posicionY +=
-            7;
+                valign: "middle"
+            },
 
+            headStyles: {
 
-        doc.setFontSize(
-            12
-        );
+                fontSize: 7,
 
-        doc.text(
-            "Comunidad Juan Cheuquelen",
-            margen,
-            posicionY
-        );
+                fontStyle: "bold"
+            },
 
-        posicionY +=
-            8;
+            columnStyles: {
 
+                0: {
+                    cellWidth: 38
+                },
 
-        doc.setFont(
-            "helvetica",
-            "bold"
-        );
+                1: {
+                    cellWidth: 25
+                },
 
-        doc.setFontSize(
-            14
-        );
+                2: {
+                    cellWidth: 18
+                },
 
-        doc.text(
-            "Reporte detallado de cuotas",
-            margen,
-            posicionY
-        );
+                3: {
+                    cellWidth: 28
+                },
 
-        posicionY +=
-            7;
+                4: {
+                    cellWidth: 22
+                },
 
+                5: {
+                    cellWidth: 22
+                },
 
-        // ====================================================
-        // INFORMACION DEL REPORTE
-        // ====================================================
+                6: {
+                    cellWidth: 22
+                },
 
-        doc.setFont(
-            "helvetica",
-            "normal"
-        );
+                7: {
+                    cellWidth: 22
+                },
 
-        doc.setFontSize(
-            9
-        );
+                8: {
+                    cellWidth: 22
+                },
 
-        const nombrePeriodo =
-            obtenerNombrePeriodo(
-                periodo
-            );
+                9: {
+                    cellWidth: 20
+                },
 
-        doc.text(
-            "Período: " +
-            nombrePeriodo,
-            margen,
-            posicionY
-        );
+                10: {
+                    cellWidth: 50
+                }
+            },
 
-        posicionY +=
-            5;
+            didDrawPage: () => {
 
-
-        doc.text(
-            "Estado consultado: " +
-            traducirEstadoReporte(estado),
-            margen,
-            posicionY
-        );
-
-        posicionY +=
-            5;
-
-
-        doc.text(
-            "Fecha de generación: " +
-            formatearFecha(
-                obtenerFechaActual()
-            ),
-            margen,
-            posicionY
-        );
-
-        posicionY +=
-            8;
-
-
-        // ====================================================
-        // RESUMEN
-        // ====================================================
-
-        const resumen =
-            calcularResumenReporte(
-                datos
-            );
-
-
-        doc.setFont(
-            "helvetica",
-            "bold"
-        );
-
-        doc.setFontSize(
-            10
-        );
-
-        doc.text(
-            "Resumen:",
-            margen,
-            posicionY
-        );
-
-        posicionY +=
-            5;
-
-
-        doc.setFont(
-            "helvetica",
-            "normal"
-        );
-
-        doc.text(
-            "Cuotas: " +
-            resumen.totalCuotas,
-            margen,
-            posicionY
-        );
-
-        doc.text(
-            "Pagadas: " +
-            resumen.pagadas,
-            margen + 42,
-            posicionY
-        );
-
-        doc.text(
-            "Parciales: " +
-            resumen.parciales,
-            margen + 82,
-            posicionY
-        );
-
-        doc.text(
-            "Pendientes: " +
-            resumen.pendientes,
-            margen + 125,
-            posicionY
-        );
-
-        posicionY +=
-            5;
-
-
-        doc.text(
-            "Monto cuotas: " +
-            formatearMoneda(
-                resumen.montoTotal
-            ),
-            margen,
-            posicionY
-        );
-
-        doc.text(
-            "Total pagado: " +
-            formatearMoneda(
-                resumen.totalPagado
-            ),
-            margen + 70,
-            posicionY
-        );
-
-        doc.text(
-            "Saldo pendiente: " +
-            formatearMoneda(
-                resumen.saldoPendiente
-            ),
-            margen + 145,
-            posicionY
-        );
-
-        posicionY +=
-            8;
-
-
-        // ====================================================
-        // TABLA PRINCIPAL
-        // ====================================================
-
-        const filas =
-            [];
-
-
-        datos.forEach(function (registro) {
-
-            const pagos =
-                normalizarPagos(
-                    registro.pagos
+                agregarEncabezadoPiePDF(
+                    pdf,
+                    "REPORTE DETALLADO DE CUOTAS",
+                    periodoTexto
                 );
-
-
-            const detallePagos =
-                construirDetallePagosPDF(
-                    pagos
-                );
-
-
-            filas.push(
-                [
-                    registro.socio_nombre || "—",
-
-                    registro.socio_rut || "—",
-
-                    registro.categoria_nombre || "—",
-
-                    formatearFecha(
-                        registro.fecha_emision
-                    ),
-
-                    formatearFecha(
-                        registro.fecha_vencimiento
-                    ),
-
-                    formatearMoneda(
-                        registro.monto_cuota
-                    ),
-
-                    traducirEstado(
-                        registro.estado_cuota
-                    ),
-
-                    formatearMoneda(
-                        registro.total_pagado
-                    ),
-
-                    formatearMoneda(
-                        registro.saldo_pendiente
-                    ),
-
-                    String(
-                        registro.cantidad_pagos || 0
-                    ),
-
-                    registro.modalidad_pago ||
-                    "Sin pagos",
-
-                    detallePagos
-                ]
-            );
+            }
         });
 
 
-        doc.autoTable(
-            {
-                startY: posicionY,
+        const resumen =
+            calcularResumenReporte(
+                registros
+            );
 
-                head: [
-                    [
-                        "Socio",
-                        "RUT",
-                        "Categoría",
-                        "Emisión",
-                        "Vencimiento",
-                        "Cuota",
-                        "Estado",
-                        "Pagado",
-                        "Saldo",
-                        "N° pagos",
-                        "Modalidad",
-                        "Detalle de pagos"
-                    ]
-                ],
 
-                body:
-                    filas,
+        let finalY =
+            pdf.lastAutoTable?.finalY ||
+            30;
 
-                theme:
-                    "grid",
 
-                styles:
-                    {
-                        font:
-                            "helvetica",
+        if (
+            finalY + 30 >
+            pdf.internal.pageSize.getHeight() - 15
+        ) {
 
-                        fontSize:
-                            7,
+            pdf.addPage();
 
-                        cellPadding:
-                            2,
+            finalY = 20;
+        }
 
-                        valign:
-                            "top",
 
-                        overflow:
-                            "linebreak"
-                    },
+        pdf.setFontSize(8);
 
-                headStyles:
-                    {
-                        fontStyle:
-                            "bold",
+        pdf.setFont(undefined, "bold");
 
-                        halign:
-                            "center"
-                    },
-
-                columnStyles:
-                    {
-                        0:
-                            {
-                                cellWidth:
-                                    34
-                            },
-
-                        1:
-                            {
-                                cellWidth:
-                                    24
-                            },
-
-                        2:
-                            {
-                                cellWidth:
-                                    25
-                            },
-
-                        3:
-                            {
-                                cellWidth:
-                                    18
-                            },
-
-                        4:
-                            {
-                                cellWidth:
-                                    20
-                            },
-
-                        5:
-                            {
-                                cellWidth:
-                                    20
-                            },
-
-                        6:
-                            {
-                                cellWidth:
-                                    18
-                            },
-
-                        7:
-                            {
-                                cellWidth:
-                                    20
-                            },
-
-                        8:
-                            {
-                                cellWidth:
-                                    20
-                            },
-
-                        9:
-                            {
-                                cellWidth:
-                                    13
-                            },
-
-                        10:
-                            {
-                                cellWidth:
-                                    25
-                            },
-
-                        11:
-                            {
-                                cellWidth:
-                                    65
-                            }
-                    },
-
-                margin:
-                    {
-                        left:
-                            margen,
-
-                        right:
-                            margen
-                    },
-
-                didDrawPage:
-                    function (data) {
-
-                        agregarEncabezadoPiePDF(
-                            doc,
-                            data,
-                            nombrePeriodo
-                        );
-                    }
-            }
+        pdf.text(
+            "Resumen",
+            14,
+            finalY + 10
         );
 
 
-        // ====================================================
-        // NOMBRE DEL ARCHIVO
-        // ====================================================
+        pdf.setFont(undefined, "normal");
 
-        const anio =
-            periodo.anio ||
-            "periodo";
-
-        const fecha =
-            obtenerFechaActual();
-
-        const nombreArchivo =
-            "reporte_detallado_cuotas_" +
-            anio +
-            "_" +
-            fecha +
-            ".pdf";
-
-
-        doc.save(
-            nombreArchivo
+        pdf.text(
+            `Cuotas: ${resumen.total}`,
+            14,
+            finalY + 17
         );
 
+        pdf.text(
+            `Pagadas: ${resumen.pagadas}`,
+            55,
+            finalY + 17
+        );
+
+        pdf.text(
+            `Parciales: ${resumen.parciales}`,
+            95,
+            finalY + 17
+        );
+
+        pdf.text(
+            `Pendientes: ${resumen.pendientes}`,
+            145,
+            finalY + 17
+        );
+
+        pdf.text(
+            `Total emitido: ${formatearMoneda(resumen.totalCuotas)}`,
+            205,
+            finalY + 17
+        );
+
+        pdf.text(
+            `Total pagado: ${formatearMoneda(resumen.totalPagado)}`,
+            270,
+            finalY + 17
+        );
+
+
+        const fechaArchivo =
+            obtenerFechaActual()
+                .replaceAll("-", "");
+
+
+        pdf.save(
+            `reporte-cuotas-${fechaArchivo}.pdf`
+        );
 
     } catch (error) {
 
         console.error(
-            "Error inesperado al generar PDF:",
+            "Error generando reporte:",
             error
         );
 
         alert(
-            "Ocurrió un error inesperado al generar el reporte PDF."
+            "No fue posible generar el reporte PDF.\n\n" +
+            obtenerMensajeError(error)
         );
-
-
-    } finally {
-
-        if (boton) {
-
-            boton.disabled =
-                false;
-
-            boton.textContent =
-                boton.dataset.textoOriginal ||
-                "Generar reporte PDF";
-        }
     }
 }
 
 
-// ============================================================
-// NORMALIZAR PAGOS
-// ============================================================
+/* =========================================================
+   NORMALIZAR PAGOS
+   ========================================================= */
 
-function normalizarPagos(pagos) {
+function normalizarPagos(registro) {
 
-    if (!pagos) {
-        return [];
+    if (
+        Array.isArray(
+            registro?.pagos
+        )
+    ) {
+
+        return registro.pagos;
     }
 
-    if (Array.isArray(pagos)) {
-        return pagos;
-    }
 
-    if (typeof pagos === "string") {
+    if (
+        typeof registro?.pagos ===
+        "string"
+    ) {
 
         try {
 
-            const resultado =
-                JSON.parse(pagos);
+            const pagos =
+                JSON.parse(
+                    registro.pagos
+                );
 
-            return Array.isArray(resultado)
-                ? resultado
+            return Array.isArray(pagos)
+                ? pagos
                 : [];
 
-        } catch (error) {
-
-            console.error(
-                "No fue posible interpretar los pagos:",
-                error
-            );
+        } catch {
 
             return [];
         }
     }
 
+
     return [];
 }
 
 
-// ============================================================
-// CONSTRUIR DETALLE DE PAGOS PARA PDF
-// ============================================================
+/* =========================================================
+   CONSTRUIR DETALLE PAGOS PDF
+   ========================================================= */
 
-function construirDetallePagosPDF(pagos) {
+function construirDetallePagosPDF(
+    pagos
+) {
 
-    if (!pagos || pagos.length === 0) {
-
-        return "Sin pagos registrados";
+    if (!pagos.length) {
+        return "Sin pagos";
     }
 
-    return pagos.map(
-        function (pago, indice) {
 
-            const numero =
-                indice + 1;
+    return pagos
+        .map((pago) => {
 
             const fecha =
                 formatearFecha(
@@ -2329,147 +2178,83 @@ function construirDetallePagosPDF(pagos) {
 
             const monto =
                 formatearMoneda(
-                    pago.monto
+                    Number(
+                        pago.monto || 0
+                    )
                 );
 
             const medio =
                 pago.medio_pago ||
-                "—";
+                "Sin medio";
 
-            const comprobante =
-                pago.numero_comprobante ||
-                "—";
+            return `${fecha} - ${monto} - ${medio}`;
 
-            const banco =
-                pago.banco_origen ||
-                "—";
-
-            const observacion =
-                pago.observacion ||
-                "—";
-
-            const estado =
-                pago.estado ||
-                "activo";
-
-            let detalle =
-                numero +
-                ". " +
-                fecha +
-                " | " +
-                monto +
-                " | " +
-                medio;
-
-            if (
-                comprobante !== "—"
-            ) {
-
-                detalle +=
-                    " | Comp.: " +
-                    comprobante;
-            }
-
-            if (
-                banco !== "—"
-            ) {
-
-                detalle +=
-                    " | Banco: " +
-                    banco;
-            }
-
-            if (
-                observacion !== "—"
-            ) {
-
-                detalle +=
-                    " | Obs.: " +
-                    observacion;
-            }
-
-            if (
-                estado !== "activo"
-            ) {
-
-                detalle +=
-                    " | Estado: " +
-                    estado;
-            }
-
-            return detalle;
-        }
-    ).join(
-        "\n"
-    );
+        })
+        .join("\n");
 }
 
 
-// ============================================================
-// RESUMEN DEL REPORTE
-// ============================================================
+/* =========================================================
+   CALCULAR RESUMEN REPORTE
+   ========================================================= */
 
-function calcularResumenReporte(datos) {
+function calcularResumenReporte(
+    registros
+) {
 
-    let montoTotal =
-        0;
+    let totalCuotas = 0;
 
-    let totalPagado =
-        0;
+    let totalPagado = 0;
 
-    let saldoPendiente =
-        0;
+    let pagadas = 0;
 
-    let pagadas =
-        0;
+    let parciales = 0;
 
-    let parciales =
-        0;
-
-    let pendientes =
-        0;
+    let pendientes = 0;
 
 
-    datos.forEach(
-        function (registro) {
+    registros.forEach(
+        (registro) => {
 
-            montoTotal +=
+            const monto =
                 Number(
-                    registro.monto_cuota
-                ) || 0;
+                    registro.monto ||
+                    0
+                );
 
-            totalPagado +=
+            const pagado =
                 Number(
-                    registro.total_pagado
-                ) || 0;
-
-            saldoPendiente +=
-                Number(
-                    registro.saldo_pendiente
-                ) || 0;
+                    registro.pagado ||
+                    registro.total_pagado ||
+                    0
+                );
 
 
-            switch (
-                registro.estado_cuota
+            totalCuotas += monto;
+
+            totalPagado += pagado;
+
+
+            if (
+                registro.estado ===
+                "pagada"
             ) {
 
-                case "pagada":
+                pagadas++;
 
-                    pagadas++;
+            } else if (
+                registro.estado ===
+                "parcial"
+            ) {
 
-                    break;
+                parciales++;
 
-                case "parcial":
+            } else if (
+                registro.estado ===
+                "pendiente"
+            ) {
 
-                    parciales++;
-
-                    break;
-
-                case "pendiente":
-
-                    pendientes++;
-
-                    break;
+                pendientes++;
             }
         }
     );
@@ -2477,208 +2262,240 @@ function calcularResumenReporte(datos) {
 
     return {
 
-        totalCuotas:
-            datos.length,
+        total:
+            registros.length,
 
-        pagadas:
-            pagadas,
+        pagadas,
 
-        parciales:
-            parciales,
+        parciales,
 
-        pendientes:
-            pendientes,
+        pendientes,
 
-        montoTotal:
-            montoTotal,
+        totalCuotas,
 
-        totalPagado:
-            totalPagado,
-
-        saldoPendiente:
-            saldoPendiente
+        totalPagado
     };
 }
 
 
-// ============================================================
-// TRADUCIR ESTADO DEL REPORTE
-// ============================================================
+/* =========================================================
+   TRADUCIR ESTADO REPORTE
+   ========================================================= */
 
-function traducirEstadoReporte(estado) {
-
-    switch (estado) {
-
-        case "todos":
-            return "Todos";
-
-        case "pagada":
-            return "Pagadas";
-
-        case "parcial":
-            return "Parciales";
-
-        case "pendiente":
-            return "Pendientes";
-
-        case "anulada":
-            return "Anuladas";
-
-        default:
-            return estado || "Todos";
-    }
-}
-
-
-// ============================================================
-// ENCABEZADO Y PIE DEL PDF
-// ============================================================
-
-function agregarEncabezadoPiePDF(
-    doc,
-    data,
-    nombrePeriodo
+function traducirEstadoReporte(
+    estado
 ) {
 
-    const numeroPagina =
-        doc.internal.getNumberOfPages();
-
-    const anchoPagina =
-        doc.internal.pageSize.getWidth();
-
-    const altoPagina =
-        doc.internal.pageSize.getHeight();
+    return traducirEstado(estado);
+}
 
 
-    // ========================================================
-    // PIE DE PAGINA
-    // ========================================================
+/* =========================================================
+   ENCABEZADO / PIE PDF
+   ========================================================= */
 
-    doc.setFont(
-        "helvetica",
-        "normal"
+function agregarEncabezadoPiePDF(
+    pdf,
+    titulo,
+    periodo
+) {
+
+    const ancho =
+        pdf.internal.pageSize.getWidth();
+
+    const alto =
+        pdf.internal.pageSize.getHeight();
+
+
+    pdf.setFontSize(13);
+
+    pdf.setFont(undefined, "bold");
+
+    pdf.text(
+        "COMUNIDAD INDÍGENA JUAN CHEUQUELÉN",
+        14,
+        12
     );
 
-    doc.setFontSize(
-        7
+
+    pdf.setFontSize(8);
+
+    pdf.setFont(undefined, "normal");
+
+    pdf.text(
+        "RUT: 65.169.427-2",
+        14,
+        17
     );
 
-    doc.text(
-        "Sistema Financiero - Comunidad Juan Cheuquelen",
+    pdf.text(
+        "Personería Jurídica N.º 2314",
+        14,
+        22
+    );
+
+
+    pdf.setFontSize(11);
+
+    pdf.setFont(undefined, "bold");
+
+    pdf.text(
+        titulo,
+        ancho - 14,
         12,
-        altoPagina - 8
-    );
-
-    doc.text(
-        "Período: " +
-        nombrePeriodo,
-        anchoPagina / 2,
-        altoPagina - 8,
         {
-            align:
-                "center"
+            align: "right"
         }
     );
 
-    doc.text(
-        "Página " +
-        numeroPagina,
-        anchoPagina - 12,
-        altoPagina - 8,
+
+    pdf.setFontSize(8);
+
+    pdf.setFont(undefined, "normal");
+
+    pdf.text(
+        `Período: ${periodo}`,
+        ancho - 14,
+        17,
         {
-            align:
-                "right"
+            align: "right"
+        }
+    );
+
+
+    pdf.text(
+        `Generado: ${formatearFecha(new Date())}`,
+        ancho - 14,
+        22,
+        {
+            align: "right"
+        }
+    );
+
+
+    pdf.setFontSize(7);
+
+    pdf.text(
+        "Sistema Financiero - Comunidad Indígena Juan Cheuquelén",
+        14,
+        alto - 8
+    );
+
+
+    pdf.text(
+        `Página ${pdf.internal.getNumberOfPages()}`,
+        ancho - 14,
+        alto - 8,
+        {
+            align: "right"
         }
     );
 }
 
 
-// ============================================================
-// OBTENER VALOR
-// ============================================================
+/* =========================================================
+   OBTENER VALOR
+   ========================================================= */
 
-function obtenerValor(id) {
+function obtenerValor(
+    objeto,
+    propiedades,
+    valorPorDefecto = ""
+) {
 
-    const elemento =
-        document.getElementById(id);
+    if (!objeto) {
+        return valorPorDefecto;
+    }
 
-    if (!elemento) {
+    for (
+        const propiedad of propiedades
+    ) {
+
+        if (
+            objeto[propiedad] !==
+            undefined &&
+            objeto[propiedad] !==
+            null &&
+            objeto[propiedad] !== ""
+        ) {
+
+            return objeto[propiedad];
+        }
+    }
+
+    return valorPorDefecto;
+}
+
+
+/* =========================================================
+   CONSTRUIR NOMBRE COMPLETO
+   ========================================================= */
+
+function construirNombreCompleto(
+    socio
+) {
+
+    if (!socio) {
         return "";
     }
 
-    return elemento.value.trim();
-}
-
-
-// ============================================================
-// CONSTRUIR NOMBRE
-// ============================================================
-
-function construirNombreCompleto(socio) {
 
     return [
+
         socio.nombres,
+
         socio.apellido_paterno,
+
         socio.apellido_materno
+
     ]
-        .filter(function (parte) {
-
-            return (
+        .filter(
+            (parte) =>
                 parte &&
-                String(parte).trim() !== ""
-            );
-
-        })
-        .join(" ");
+                String(parte).trim()
+        )
+        .join(" ")
+        .trim();
 }
 
 
-// ============================================================
-// FECHA ACTUAL
-// ============================================================
+/* =========================================================
+   OBTENER FECHA ACTUAL
+   ========================================================= */
 
 function obtenerFechaActual() {
 
     const fecha =
         new Date();
 
-    const anio =
+    const year =
         fecha.getFullYear();
 
-    const mes =
+    const month =
         String(
             fecha.getMonth() + 1
-        ).padStart(
-            2,
-            "0"
-        );
+        ).padStart(2, "0");
 
-    const dia =
+    const day =
         String(
             fecha.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
+        ).padStart(2, "0");
 
-    return (
-        anio +
-        "-" +
-        mes +
-        "-" +
-        dia
-    );
+
+    return `${year}-${month}-${day}`;
 }
 
 
-// ============================================================
-// FORMATEAR MONEDA
-// ============================================================
+/* =========================================================
+   FORMATEAR MONEDA
+   ========================================================= */
 
-function formatearMoneda(valor) {
+function formatearMoneda(
+    valor
+) {
 
     const numero =
-        Number(valor) || 0;
+        Number(valor || 0);
 
     return numero.toLocaleString(
         "es-CL",
@@ -2691,185 +2508,239 @@ function formatearMoneda(valor) {
 }
 
 
-// ============================================================
-// FORMATEAR FECHA
-// ============================================================
+/* =========================================================
+   FORMATEAR FECHA
+   ========================================================= */
 
-function formatearFecha(fecha) {
+function formatearFecha(
+    fecha
+) {
 
     if (!fecha) {
-        return "—";
+        return "-";
     }
 
-    const partes =
-        String(fecha).split("-");
 
-    if (partes.length !== 3) {
+    const fechaObjeto =
+        fecha instanceof Date
+            ? fecha
+            : new Date(fecha);
 
-        return fecha;
+
+    if (
+        Number.isNaN(
+            fechaObjeto.getTime()
+        )
+    ) {
+        return "-";
     }
 
-    return (
-        partes[2] +
-        "-" +
-        partes[1] +
-        "-" +
-        partes[0]
-    );
+
+    const dia =
+        String(
+            fechaObjeto.getDate()
+        ).padStart(2, "0");
+
+    const mes =
+        String(
+            fechaObjeto.getMonth() + 1
+        ).padStart(2, "0");
+
+    const anio =
+        fechaObjeto.getFullYear();
+
+
+    return `${dia}-${mes}-${anio}`;
 }
 
 
-// ============================================================
-// TRADUCIR ESTADO
-// ============================================================
+/* =========================================================
+   TRADUCIR ESTADO
+   ========================================================= */
 
-function traducirEstado(estado) {
+function traducirEstado(
+    estado
+) {
 
-    switch (estado) {
+    const estados = {
 
-        case "pendiente":
-            return "Pendiente";
+        pagada: "Pagada",
 
-        case "parcial":
-            return "Parcial";
+        pendiente: "Pendiente",
 
-        case "pagada":
-            return "Pagada";
+        parcial: "Parcial",
 
-        case "anulada":
-            return "Anulada";
+        anulada: "Anulada",
 
-        default:
-            return estado || "—";
+        activa: "Activa",
+
+        inactiva: "Inactiva"
+    };
+
+
+    return estados[estado] ||
+        estado ||
+        "Sin estado";
+}
+
+
+/* =========================================================
+   OBTENER CLASE ESTADO
+   ========================================================= */
+
+function obtenerClaseEstado(
+    estado
+) {
+
+    const clases = {
+
+        pagada: "pagada",
+
+        pendiente: "pendiente",
+
+        parcial: "parcial",
+
+        anulada: "anulada"
+    };
+
+
+    return clases[estado] ||
+        "pendiente";
+}
+
+
+/* =========================================================
+   ESCAPAR HTML
+   ========================================================= */
+
+function escaparHTML(
+    valor
+) {
+
+    if (
+        valor ===
+        null ||
+        valor ===
+        undefined
+    ) {
+        return "";
     }
+
+
+    return String(valor)
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 }
 
 
-// ============================================================
-// CLASE ESTADO
-// ============================================================
+/* =========================================================
+   OBTENER MENSAJE ERROR
+   ========================================================= */
 
-function obtenerClaseEstado(estado) {
-
-    switch (estado) {
-
-        case "pagada":
-            return "estado-activo";
-
-        case "pendiente":
-            return "estado-inactivo";
-
-        case "parcial":
-            return "estado-parcial";
-
-        case "anulada":
-            return "estado-inactivo";
-
-        default:
-            return "estado-inactivo";
-    }
-}
-
-
-// ============================================================
-// ESCAPAR HTML
-// ============================================================
-
-function escaparHTML(texto) {
-
-    return String(texto)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-
-// ============================================================
-// MENSAJES DE ERROR
-// ============================================================
-
-function obtenerMensajeError(error) {
+function obtenerMensajeError(
+    error
+) {
 
     if (!error) {
-
-        return "Ocurrio un error desconocido.";
+        return "Error desconocido.";
     }
 
-    console.error(
-        "Detalle del error:",
-        error
-    );
 
-    if (error.code === "23505") {
+    if (
+        typeof error ===
+        "string"
+    ) {
+        return error;
+    }
 
-        return (
-            "Ya existe una cuota para el socio y periodo seleccionados."
+
+    if (
+        error.message
+    ) {
+        return error.message;
+    }
+
+
+    if (
+        error.details
+    ) {
+        return error.details;
+    }
+
+
+    if (
+        error.hint
+    ) {
+        return error.hint;
+    }
+
+
+    try {
+
+        return JSON.stringify(
+            error
         );
+
+    } catch {
+
+        return "Error desconocido.";
     }
-
-    if (error.code === "23503") {
-
-        return (
-            "No fue posible guardar la cuota porque uno de los registros relacionados no existe."
-        );
-    }
-
-    if (error.code === "23514") {
-
-        return (
-            "Los datos ingresados no cumplen las reglas establecidas para las cuotas."
-        );
-    }
-
-    if (error.code === "42501") {
-
-        return (
-            "No tiene permisos para realizar esta operacion."
-        );
-    }
-
-    return (
-        error.message ||
-        "No fue posible completar la operacion."
-    );
 }
 
 
-// ============================================================
-// CERRAR SESION
-// ============================================================
+/* =========================================================
+   CERRAR SESIÓN
+   ========================================================= */
 
 async function cerrarSesion() {
 
-    const confirmar =
-        confirm(
-            "¿Esta seguro de que desea cerrar la sesion?"
-        );
+    try {
 
-    if (!confirmar) {
-        return;
-    }
+        const {
+            error
+        } =
+            await supabaseClient.auth.signOut();
 
-    const resultado =
-        await supabaseClient.auth.signOut();
+        if (error) {
+            throw error;
+        }
 
-    if (resultado.error) {
+        window.location.href =
+            "login.html";
+
+    } catch (error) {
 
         console.error(
-            "Error al cerrar sesion:",
-            resultado.error
+            "Error cerrando sesión:",
+            error
         );
 
         alert(
-            "No fue posible cerrar la sesion."
+            "No fue posible cerrar la sesión.\n\n" +
+            obtenerMensajeError(error)
         );
-
-        return;
     }
-
-    window.location.replace(
-        "login.html"
-    );
 }
