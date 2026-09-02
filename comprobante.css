@@ -1,22 +1,20 @@
 /* ============================================================
    COMPROBANTE DE PAGO DE CUOTA
    Comunidad Indígena Juan Cheuquelén
-   Diseño para impresión A4 vertical
+   Archivo: comprobante.css
    ============================================================ */
 
 :root {
-    --azul-principal: #164a72;
+    --azul: #164a72;
     --azul-oscuro: #0d3554;
     --azul-claro: #eaf3f9;
-    --azul-borde: #9db9cc;
-    --gris-texto: #39454f;
-    --gris-suave: #f5f7f9;
+    --borde: #9db9cc;
     --gris-borde: #cfd8df;
+    --gris-fondo: #f5f7f9;
+    --gris-texto: #56656f;
     --blanco: #ffffff;
     --negro: #111111;
 }
-
-/* ---------- Base ---------- */
 
 * {
     box-sizing: border-box;
@@ -26,549 +24,321 @@ html,
 body {
     margin: 0;
     padding: 0;
-    min-height: 100%;
 }
 
 body {
     background: #e9edf1;
     color: var(--negro);
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 11px;
-    line-height: 1.35;
+    font-size: 10px;
+    line-height: 1.3;
 }
 
-button,
-a {
-    font-family: inherit;
-}
+/* ---------------- Pantalla ---------------- */
 
-/* ---------- Contenedor de pantalla ---------- */
-
-.pagina-comprobante {
-    width: 210mm;
-    min-height: 297mm;
+.estado-carga,
+.error-carga {
+    width: min(210mm, calc(100% - 24px));
     margin: 20px auto;
-    padding: 9mm;
-    background: var(--blanco);
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14);
-}
-
-/* ---------- Barra de acciones ---------- */
-
-.acciones-comprobante,
-#accionesComprobante,
-.no-print {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0 auto 14px;
-    max-width: 210mm;
-}
-
-.acciones-comprobante button,
-#accionesComprobante button,
-.no-print button,
-.acciones-comprobante a,
-#accionesComprobante a {
-    appearance: none;
-    border: 1px solid var(--azul-principal);
-    border-radius: 6px;
-    padding: 8px 13px;
-    background: var(--azul-principal);
-    color: var(--blanco);
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.acciones-comprobante button:hover,
-#accionesComprobante button:hover,
-.no-print button:hover,
-.acciones-comprobante a:hover,
-#accionesComprobante a:hover {
-    background: var(--azul-oscuro);
-}
-
-.acciones-comprobante button:disabled,
-#accionesComprobante button:disabled,
-.no-print button:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-}
-
-/* ---------- Mensajes ---------- */
-
-#cargandoComprobante {
-    width: 210mm;
-    margin: 20px auto;
-    padding: 20px;
+    padding: 14px;
+    border-radius: 7px;
     text-align: center;
     background: var(--blanco);
     border: 1px solid var(--gris-borde);
-    border-radius: 8px;
 }
 
-#errorComprobante {
-    width: 210mm;
-    margin: 12px auto;
-    padding: 12px 15px;
-    border: 1px solid #d6a6a6;
-    border-radius: 6px;
-    background: #fff3f3;
+.error-carga {
     color: #8a2020;
-    font-weight: 600;
+    background: #fff3f3;
+    border-color: #d7aaaa;
+    font-weight: 700;
 }
 
-/* ============================================================
-   BLOQUE DEL COMPROBANTE
-   ============================================================ */
+.acciones-comprobante {
+    width: min(210mm, calc(100% - 24px));
+    margin: 16px auto;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.acciones-comprobante button {
+    border: 1px solid var(--azul);
+    border-radius: 6px;
+    padding: 8px 12px;
+    background: var(--azul);
+    color: var(--blanco);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.acciones-comprobante button:hover {
+    background: var(--azul-oscuro);
+}
+
+.acciones-comprobante button:disabled {
+    opacity: .65;
+    cursor: wait;
+}
+
+.hoja {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 18px auto;
+    padding: 8mm;
+    background: var(--blanco);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .14);
+}
+
+/* ---------------- Ejemplares ---------------- */
 
 .comprobante {
     position: relative;
-    width: 100%;
-    min-height: 135mm;
-    border: 1.4px solid var(--azul-principal);
+    height: 133mm;
+    padding: 5.5mm 6mm;
+    border: 1.2px solid var(--azul);
     background: var(--blanco);
     overflow: hidden;
 }
 
-/* Cada ejemplar ocupa aproximadamente la mitad de la hoja */
-
-.comprobante-ejemplar {
-    position: relative;
-    min-height: 132mm;
-    padding: 7mm 7mm 6mm;
-    background: var(--blanco);
-}
-
-/* Original y copia */
-
 .comprobante-original {
-    border-bottom: 1px dashed #657681;
+    border-bottom: 0;
 }
 
 .comprobante-copia {
-    padding-top: 7mm;
+    border-top: 0;
 }
 
-/* ---------- Marca ORIGINAL / COPIA ---------- */
-
-.etiqueta-ejemplar {
+.tipo-copia {
     position: absolute;
-    top: 6mm;
-    right: 6mm;
-    padding: 3px 8px;
-    border: 1px solid var(--azul-principal);
+    top: 5mm;
+    right: 5mm;
+    z-index: 3;
+    padding: 2px 7px;
+    border: 1px solid var(--azul);
     border-radius: 3px;
     background: var(--azul-claro);
     color: var(--azul-oscuro);
-    font-size: 9px;
+    font-size: 7.5px;
     font-weight: 800;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
+    letter-spacing: .5px;
 }
 
-.comprobante-copia .etiqueta-ejemplar {
-    background: #f2f4f6;
+.tipo-copia.copia {
     border-color: #8798a4;
+    background: #f2f4f6;
     color: #45545e;
 }
 
-/* ---------- Encabezado ---------- */
+/* ---------------- Encabezado ---------------- */
 
-.encabezado-comprobante {
+.encabezado {
     display: grid;
-    grid-template-columns: 1fr 42mm;
+    grid-template-columns: 1fr 38mm;
+    gap: 5mm;
     align-items: start;
-    gap: 6mm;
-    padding-bottom: 4mm;
-    border-bottom: 1px solid var(--azul-borde);
+    padding-bottom: 3mm;
+    border-bottom: 1px solid var(--borde);
 }
 
-.encabezado-identidad {
-    min-width: 0;
-}
-
-.nombre-comunidad {
+.identidad-comunidad h1 {
     margin: 0 0 2px;
     color: var(--azul-oscuro);
-    font-size: 16px;
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: 0.15px;
+    font-size: 14px;
+    line-height: 1.1;
+    letter-spacing: .1px;
 }
 
-.subtitulo-comunidad {
+.identidad-comunidad p {
     margin: 1px 0;
     color: var(--gris-texto);
-    font-size: 9.5px;
+    font-size: 8px;
 }
 
-.titulo-documento {
-    margin: 5px 0 0;
-    color: var(--azul-principal);
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.35px;
-}
-
-/* ---------- Número ---------- */
-
-.bloque-numero {
-    min-width: 38mm;
-    padding: 4mm 3.5mm;
-    border: 1.5px solid var(--azul-principal);
+.numero-box {
+    min-width: 35mm;
+    padding: 3mm 2.5mm;
+    border: 1.4px solid var(--azul);
     border-radius: 4px;
-    text-align: center;
     background: var(--azul-claro);
+    text-align: center;
 }
 
-.bloque-numero .etiqueta-numero {
+.numero-box span {
     display: block;
     margin-bottom: 2px;
     color: var(--azul-oscuro);
-    font-size: 8.5px;
+    font-size: 7px;
     font-weight: 800;
-    text-transform: uppercase;
 }
 
-.numero-comprobante,
-#numeroComprobante,
-#numero {
+.numero-box strong {
     display: block;
     color: var(--azul-oscuro);
-    font-size: 15px;
+    font-size: 12px;
     font-weight: 900;
-    letter-spacing: 0.5px;
-    word-break: break-word;
+    letter-spacing: .4px;
+    overflow-wrap: anywhere;
 }
 
-/* ---------- Cuerpo ---------- */
+/* ---------------- Título ---------------- */
 
-.cuerpo-comprobante {
-    padding-top: 4mm;
+.titulo-documento {
+    margin: 2.5mm 0;
+    text-align: center;
 }
 
-.seccion-datos {
-    margin-bottom: 3.5mm;
+.titulo-documento h2 {
+    margin: 0;
+    color: var(--azul);
+    font-size: 11px;
+    letter-spacing: .3px;
 }
 
-.seccion-titulo {
-    margin: 0 0 2mm;
-    padding-bottom: 1.5mm;
-    border-bottom: 1px solid var(--gris-borde);
-    color: var(--azul-oscuro);
-    font-size: 9px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
+.titulo-documento p {
+    margin: 1px 0 0;
+    color: var(--gris-texto);
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: .35px;
 }
 
-.grid-datos {
+/* ---------------- Contenido ---------------- */
+
+.contenido-principal {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2mm 4mm;
+    grid-template-columns: 1.08fr .92fr;
+    gap: 4mm;
 }
 
-.dato {
+.columna {
     min-width: 0;
-    padding: 2.2mm 2.8mm;
+}
+
+.tabla-datos {
+    display: grid;
+    grid-template-columns: 34mm 1fr;
     border: 1px solid var(--gris-borde);
     border-radius: 3px;
-    background: var(--gris-suave);
+    overflow: hidden;
 }
 
-.dato-completo {
-    grid-column: 1 / -1;
+.tabla-datos > div {
+    min-height: 7mm;
+    padding: 1.8mm 2mm;
+    border-bottom: 1px solid var(--gris-borde);
 }
 
-.dato-label {
-    display: block;
-    margin-bottom: 1px;
+.tabla-datos > div:nth-last-child(-n + 2) {
+    border-bottom: 0;
+}
+
+.etiqueta-dato {
+    background: var(--gris-fondo);
     color: #65747e;
-    font-size: 7.8px;
-    font-weight: 700;
+    font-size: 6.8px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.2px;
+    letter-spacing: .2px;
 }
 
-.dato-valor {
-    display: block;
+.tabla-datos > div:not(.etiqueta-dato) {
     color: #17232c;
-    font-size: 10.2px;
+    font-size: 8.5px;
     font-weight: 600;
     overflow-wrap: anywhere;
 }
 
-.monto-destacado {
+.monto {
     background: var(--azul-claro);
-    border-color: var(--azul-borde);
+    color: var(--azul-oscuro) !important;
+    font-size: 10.5px !important;
+    font-weight: 900 !important;
 }
 
-.monto-destacado .dato-valor {
-    color: var(--azul-oscuro);
-    font-size: 13px;
-    font-weight: 900;
+.estado-pagado {
+    font-weight: 800 !important;
 }
-
-/* ---------- Concepto ---------- */
-
-.concepto-comprobante {
-    margin: 3mm 0;
-    padding: 2.8mm 3.5mm;
-    border-left: 4px solid var(--azul-principal);
-    background: var(--azul-claro);
-}
-
-.concepto-comprobante .dato-label {
-    margin-bottom: 1.5mm;
-}
-
-.concepto-comprobante .dato-valor {
-    font-size: 11px;
-    font-weight: 800;
-}
-
-/* ---------- Observaciones ---------- */
 
 .observaciones {
-    min-height: 12mm;
-}
-
-.observaciones .dato-valor {
-    min-height: 6mm;
-    font-weight: 500;
-}
-
-/* ---------- Pie y timbre ---------- */
-
-.pie-comprobante {
-    display: grid;
-    grid-template-columns: 1fr 34mm;
-    align-items: end;
-    gap: 5mm;
-    margin-top: 3mm;
-    padding-top: 2.5mm;
-    border-top: 1px solid var(--gris-borde);
-}
-
-.nota-documento {
-    color: #64727b;
-    font-size: 7.8px;
-    line-height: 1.3;
-}
-
-.nota-documento strong {
-    color: #4c5c66;
-}
-
-.timbre-comunidad {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30mm;
-    height: 18mm;
-    margin-left: auto;
-    overflow: hidden;
-}
-
-.timbre-comunidad img,
-img.timbre-comunidad {
-    display: block;
-    width: 30mm;
-    max-width: 100%;
-    height: auto;
-    max-height: 18mm;
-    object-fit: contain;
-}
-
-/* Admite también un elemento con id */
-
-#timbreComunidad {
-    display: block;
-    width: 30mm;
-    max-width: 100%;
-    height: auto;
-    max-height: 18mm;
-    object-fit: contain;
-    margin-left: auto;
-}
-
-/* ---------- Línea de corte ---------- */
-
-.linea-corte {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 8mm;
-    border-top: 1px dashed #657681;
-    border-bottom: 0;
-    color: #657681;
-    font-size: 7.5px;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-}
-
-.linea-corte span {
-    position: relative;
-    top: -0.5mm;
-    padding: 0 4mm;
-    background: var(--blanco);
-}
-
-/* ============================================================
-   COMPATIBILIDAD CON DIFERENTES NOMBRES DE CLASES/ESTRUCTURAS
-   ============================================================ */
-
-.original,
-.copia {
-    position: relative;
-}
-
-.separador-corte {
-    height: 8mm;
-    border-top: 1px dashed #657681;
-    text-align: center;
-}
-
-.separador-corte span {
-    position: relative;
-    top: -5px;
-    padding: 0 10px;
-    background: #fff;
-    color: #657681;
-    font-size: 8px;
-}
-
-.cabecera-comprobante {
-    display: grid;
-    grid-template-columns: 1fr 42mm;
-    gap: 6mm;
-    align-items: start;
-}
-
-.datos-comprobante {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2mm 4mm;
-}
-
-.campo-comprobante {
-    padding: 2.2mm 2.8mm;
+    margin-top: 2.5mm;
+    min-height: 15mm;
+    padding: 2mm 2.5mm;
     border: 1px solid var(--gris-borde);
     border-radius: 3px;
-    background: var(--gris-suave);
+    background: #fff;
 }
 
-.campo-comprobante .label {
+.observaciones strong {
     display: block;
-    color: #65747e;
-    font-size: 7.8px;
+    margin-bottom: 1mm;
+    color: var(--azul-oscuro);
+    font-size: 6.8px;
+    letter-spacing: .25px;
+}
+
+.observaciones p {
+    margin: 0;
+    color: #29363e;
+    font-size: 8px;
+    overflow-wrap: anywhere;
+}
+
+/* ---------------- Timbre ---------------- */
+
+.timbre-wrap {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 25mm;
+    margin-top: 2.5mm;
+}
+
+.timbre {
+    display: block;
+    width: 27mm;
+    height: 18mm;
+    object-fit: contain;
+}
+
+/* ---------------- Pie ---------------- */
+
+.pie-documento {
+    margin-top: 2.5mm;
+    padding-top: 1.5mm;
+    border-top: 1px solid var(--gris-borde);
+    color: var(--gris-texto);
+    font-size: 6.7px;
+}
+
+.pie-documento p {
+    margin: 0;
+}
+
+.pie-documento strong {
+    color: #44535c;
+}
+
+/* ---------------- Línea de corte ---------------- */
+
+.linea-corte {
+    height: 9mm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-top: 1px dashed #657681;
+    color: #657681;
+    font-size: 7px;
     font-weight: 700;
-    text-transform: uppercase;
+    letter-spacing: .3px;
 }
 
-.campo-comprobante .valor {
-    display: block;
-    margin-top: 1px;
-    color: #17232c;
-    font-size: 10.2px;
-    font-weight: 600;
+.tijeras {
+    font-size: 11px;
 }
 
-/* ============================================================
-   MODO IMPRESIÓN
-   ============================================================ */
-
-.modo-impresion {
-    background: #ffffff !important;
-}
-
-.modo-impresion .acciones-comprobante,
-.modo-impresion #accionesComprobante,
-.modo-impresion .no-print,
-.modo-impresion #cargandoComprobante,
-.modo-impresion #errorComprobante {
-    display: none !important;
-}
-
-[data-ocultar-impresion="true"] {
-    display: none !important;
-}
-
-/* ============================================================
-   RESPONSIVE PARA PANTALLA
-   ============================================================ */
-
-@media screen and (max-width: 900px) {
-    body {
-        background: #f2f4f6;
-    }
-
-    .pagina-comprobante {
-        width: calc(100% - 24px);
-        min-height: auto;
-        margin: 12px;
-        padding: 12px;
-    }
-
-    .acciones-comprobante,
-    #accionesComprobante,
-    .no-print,
-    #cargandoComprobante,
-    #errorComprobante {
-        width: calc(100% - 24px);
-    }
-
-    .encabezado-comprobante,
-    .cabecera-comprobante {
-        grid-template-columns: 1fr;
-    }
-
-    .bloque-numero {
-        width: 100%;
-    }
-
-    .pie-comprobante {
-        grid-template-columns: 1fr;
-    }
-
-    .timbre-comunidad,
-    #timbreComunidad {
-        margin-left: 0;
-    }
-}
-
-@media screen and (max-width: 600px) {
-    .grid-datos,
-    .datos-comprobante {
-        grid-template-columns: 1fr;
-    }
-
-    .dato-completo {
-        grid-column: auto;
-    }
-
-    .comprobante-ejemplar {
-        padding: 6mm 5mm;
-    }
-
-    .nombre-comunidad {
-        font-size: 14px;
-    }
-
-    .etiqueta-ejemplar {
-        position: static;
-        display: inline-block;
-        margin-bottom: 4mm;
-    }
-}
-
-/* ============================================================
-   IMPRESIÓN A4
-   ============================================================ */
+/* ---------------- Impresión ---------------- */
 
 @page {
     size: A4 portrait;
@@ -579,200 +349,166 @@ img.timbre-comunidad {
     html,
     body {
         width: 210mm;
-        min-width: 210mm;
         height: 297mm;
         margin: 0 !important;
         padding: 0 !important;
-        background: #ffffff !important;
+        background: #fff !important;
     }
 
     body {
-        color: #111111;
-        font-size: 10px;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
 
-    .pagina-comprobante {
+    .no-print,
+    #estadoCarga,
+    #errorCarga {
+        display: none !important;
+    }
+
+    .hoja {
         width: 210mm;
         height: 297mm;
         min-height: 297mm;
         margin: 0 !important;
         padding: 8mm;
         box-shadow: none !important;
-        background: #ffffff !important;
-    }
-
-    .acciones-comprobante,
-    #accionesComprobante,
-    .no-print,
-    #cargandoComprobante,
-    #errorComprobante {
-        display: none !important;
+        background: #fff !important;
     }
 
     .comprobante {
-        width: 100%;
-        min-height: 0;
-        height: 280mm;
-        border: 1.2px solid var(--azul-principal);
-        overflow: hidden;
-    }
-
-    .comprobante-ejemplar {
-        height: 135mm;
-        min-height: 135mm;
-        padding: 6mm 6.5mm 5mm;
-        overflow: hidden;
+        height: 133mm;
+        min-height: 133mm;
+        padding: 5mm 5.5mm;
         break-inside: avoid;
         page-break-inside: avoid;
-    }
-
-    .comprobante-original {
-        border-bottom: 0;
-    }
-
-    .comprobante-copia {
-        padding-top: 6mm;
     }
 
     .linea-corte {
-        height: 10mm;
-        border-top: 1px dashed #657681;
-        border-bottom: 0;
+        height: 9mm;
         break-inside: avoid;
         page-break-inside: avoid;
     }
 
-    .encabezado-comprobante,
-    .cabecera-comprobante {
-        grid-template-columns: 1fr 39mm;
-        gap: 5mm;
-        padding-bottom: 3mm;
+    .encabezado {
+        grid-template-columns: 1fr 37mm;
     }
 
-    .nombre-comunidad {
-        font-size: 14px;
-    }
-
-    .subtitulo-comunidad {
-        font-size: 8.5px;
-    }
-
-    .titulo-documento {
-        font-size: 11.5px;
-        margin-top: 4px;
-    }
-
-    .bloque-numero {
-        min-width: 35mm;
-        padding: 3mm 2.5mm;
-    }
-
-    .numero-comprobante,
-    #numeroComprobante,
-    #numero {
+    .identidad-comunidad h1 {
         font-size: 13px;
     }
 
-    .cuerpo-comprobante {
-        padding-top: 3mm;
-    }
-
-    .seccion-datos {
-        margin-bottom: 2.5mm;
-    }
-
-    .seccion-titulo {
-        margin-bottom: 1.5mm;
-        padding-bottom: 1mm;
-        font-size: 8px;
-    }
-
-    .grid-datos,
-    .datos-comprobante {
-        gap: 1.5mm 3mm;
-    }
-
-    .dato,
-    .campo-comprobante {
-        padding: 1.7mm 2.2mm;
-    }
-
-    .dato-label,
-    .campo-comprobante .label {
-        font-size: 7px;
-    }
-
-    .dato-valor,
-    .campo-comprobante .valor {
-        font-size: 9px;
-    }
-
-    .monto-destacado .dato-valor {
-        font-size: 11.5px;
-    }
-
-    .concepto-comprobante {
-        margin: 2mm 0;
-        padding: 2mm 2.5mm;
-    }
-
-    .concepto-comprobante .dato-valor {
-        font-size: 10px;
-    }
-
-    .observaciones {
-        min-height: 9mm;
-    }
-
-    .observaciones .dato-valor {
-        min-height: 4mm;
-    }
-
-    .pie-comprobante {
-        grid-template-columns: 1fr 30mm;
-        gap: 4mm;
-        margin-top: 2mm;
-        padding-top: 2mm;
-    }
-
-    .nota-documento {
-        font-size: 6.8px;
-    }
-
-    .timbre-comunidad,
-    #timbreComunidad {
-        width: 27mm;
-        max-height: 16mm;
-    }
-
-    .timbre-comunidad img,
-    img.timbre-comunidad {
-        width: 27mm;
-        max-height: 16mm;
-    }
-
-    .etiqueta-ejemplar {
-        top: 5mm;
-        right: 5mm;
-        padding: 2px 6px;
+    .identidad-comunidad p {
         font-size: 7.5px;
     }
 
-    .separador-corte {
-        height: 10mm;
+    .numero-box {
+        min-width: 34mm;
+        padding: 2.7mm 2.2mm;
+    }
+
+    .numero-box strong {
+        font-size: 11px;
+    }
+
+    .titulo-documento {
+        margin: 2mm 0;
+    }
+
+    .titulo-documento h2 {
+        font-size: 10.5px;
+    }
+
+    .contenido-principal {
+        gap: 3mm;
+    }
+
+    .tabla-datos {
+        grid-template-columns: 32mm 1fr;
+    }
+
+    .tabla-datos > div {
+        min-height: 6.5mm;
+        padding: 1.5mm 1.8mm;
+    }
+
+    .etiqueta-dato {
+        font-size: 6.3px;
+    }
+
+    .tabla-datos > div:not(.etiqueta-dato) {
+        font-size: 8px;
+    }
+
+    .monto {
+        font-size: 10px !important;
+    }
+
+    .observaciones {
+        min-height: 13mm;
+        margin-top: 2mm;
+        padding: 1.7mm 2mm;
+    }
+
+    .observaciones strong {
+        font-size: 6.3px;
+    }
+
+    .observaciones p {
+        font-size: 7.5px;
+    }
+
+    .timbre-wrap {
+        height: 22mm;
+        margin-top: 2mm;
+    }
+
+    .timbre {
+        width: 25mm;
+        height: 17mm;
+    }
+
+    .pie-documento {
+        margin-top: 2mm;
+        padding-top: 1.2mm;
+        font-size: 6.3px;
+    }
+
+    .tipo-copia {
+        top: 4.5mm;
+        right: 4.5mm;
+        font-size: 7px;
     }
 }
 
-/* Evita que elementos internos se partan durante la impresión */
+@media screen and (max-width: 700px) {
+    .hoja {
+        width: calc(100% - 20px);
+        min-height: auto;
+        padding: 10px;
+    }
 
-.dato,
-.campo-comprobante,
-.bloque-numero,
-.concepto-comprobante,
-.pie-comprobante,
-.encabezado-comprobante {
-    break-inside: avoid;
-    page-break-inside: avoid;
+    .comprobante {
+        height: auto;
+        min-height: 0;
+    }
+
+    .encabezado,
+    .contenido-principal {
+        grid-template-columns: 1fr;
+    }
+
+    .numero-box {
+        width: 100%;
+    }
+
+    .timbre-wrap {
+        justify-content: flex-start;
+    }
+}
+
+
+.estado-anulado {
+    color: #8a2020 !important;
+    font-weight: 900 !important;
 }
