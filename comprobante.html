@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Comprobante de pago de cuota</title>
+    <link rel="stylesheet" href="comprobante.css">
+</head>
+<body>
+
+    <!-- Estado inicial mientras se consulta el comprobante en Supabase -->
+    <div id="estadoCarga" class="estado-carga" role="status" aria-live="polite">
+        Cargando comprobante...
+    </div>
+
+    <!--
+        Hoja completa del comprobante.
+        Se divide en ORIGINAL (tesorero) y COPIA (socio).
+        El mismo número de comprobante se muestra en ambas partes.
+    -->
+    <main id="hojaComprobante" class="hoja" style="display: none;">
+
+        <!-- =====================================================
+             ORIGINAL — TESORERO
+             ===================================================== -->
+        <section class="comprobante comprobante-original" aria-label="Original para tesorero">
+
+            <header class="encabezado">
+                <h1>COMUNIDAD INDÍGENA JUAN CHEUQUELÉN</h1>
+                <p>
+                    RUT: 65.169.427-2
+                    &nbsp; | &nbsp;
+                    PERSONERÍA JURÍDICA N.º 2314
+                    &nbsp; | &nbsp;
+                    FUNDADA EL 27 DE JULIO DE 2017
+                </p>
+            </header>
+
+            <div class="cabecera-documento">
+                <span class="tipo-copia original">ORIGINAL — TESORERO</span>
+
+                <div class="numero-box" aria-label="Número de comprobante">
+                    <span>COMPROBANTE N.º</span>
+                    <strong id="numeroOriginal">—</strong>
+                </div>
+            </div>
+
+            <div class="titulo-documento">
+                <h2>COMPROBANTE DE PAGO DE CUOTA</h2>
+                <p>DOCUMENTO INTERNO DE RESPALDO</p>
+            </div>
+
+            <div class="contenido-principal">
+
+                <div class="columna">
+                    <div class="tabla-datos">
+                        <div class="etiqueta-dato">SOCIO/A</div>
+                        <div id="socioOriginal">—</div>
+
+                        <div class="etiqueta-dato">RUT</div>
+                        <div id="rutOriginal">—</div>
+
+                        <div class="etiqueta-dato">PERÍODO</div>
+                        <div id="periodoOriginal">—</div>
+
+                        <div class="etiqueta-dato">CONCEPTO</div>
+                        <div>Cuota socio</div>
+                    </div>
+
+                    <div class="observaciones">
+                        <strong>OBSERVACIONES</strong>
+                        <p id="observacionOriginal">—</p>
+                    </div>
+                </div>
+
+                <div class="columna derecha">
+                    <div class="tabla-datos tabla-pago">
+                        <div class="etiqueta-dato">FECHA DE EMISIÓN</div>
+                        <div id="fechaOriginal">—</div>
+
+                        <div class="etiqueta-dato">MONTO PAGADO</div>
+                        <div id="montoOriginal" class="monto">$ 0</div>
+
+                        <div class="etiqueta-dato">MEDIO DE PAGO</div>
+                        <div id="medioOriginal">—</div>
+
+                        <div class="etiqueta-dato">ESTADO</div>
+                        <div id="estadoOriginal" class="estado-pagado">PAGADO</div>
+                    </div>
+
+                    <div class="timbre-wrap">
+                        <img
+                            src="assets/timbre-comunidad.jpeg"
+                            alt="Timbre oficial de la Comunidad Indígena Juan Cheuquelén"
+                            class="timbre"
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <footer class="pie-documento">
+                <span aria-hidden="true"></span>
+                <p>
+                    Documento interno de respaldo de pago de cuota.<br>
+                    <strong>No constituye documento tributario.</strong>
+                </p>
+                <span aria-hidden="true"></span>
+            </footer>
+        </section>
+
+        <!-- Línea de corte entre original y copia -->
+        <div class="linea-corte" aria-hidden="true">
+            <span class="tijeras">✂</span>
+            <span>CORTAR POR ESTA LÍNEA</span>
+        </div>
+
+        <!-- =====================================================
+             COPIA — SOCIO
+             ===================================================== -->
+        <section class="comprobante comprobante-copia" aria-label="Copia para socio">
+
+            <header class="encabezado">
+                <h1>COMUNIDAD INDÍGENA JUAN CHEUQUELÉN</h1>
+                <p>
+                    RUT: 65.169.427-2
+                    &nbsp; | &nbsp;
+                    PERSONERÍA JURÍDICA N.º 2314
+                    &nbsp; | &nbsp;
+                    FUNDADA EL 27 DE JULIO DE 2017
+                </p>
+            </header>
+
+            <div class="cabecera-documento">
+                <span class="tipo-copia copia">COPIA — SOCIO</span>
+
+                <div class="numero-box" aria-label="Número de comprobante">
+                    <span>COMPROBANTE N.º</span>
+                    <strong id="numeroCopia">—</strong>
+                </div>
+            </div>
+
+            <div class="titulo-documento">
+                <h2>COMPROBANTE DE PAGO DE CUOTA</h2>
+                <p>DOCUMENTO INTERNO DE RESPALDO</p>
+            </div>
+
+            <div class="contenido-principal">
+
+                <div class="columna">
+                    <div class="tabla-datos">
+                        <div class="etiqueta-dato">SOCIO/A</div>
+                        <div id="socioCopia">—</div>
+
+                        <div class="etiqueta-dato">RUT</div>
+                        <div id="rutCopia">—</div>
+
+                        <div class="etiqueta-dato">PERÍODO</div>
+                        <div id="periodoCopia">—</div>
+
+                        <div class="etiqueta-dato">CONCEPTO</div>
+                        <div>Cuota socio</div>
+                    </div>
+
+                    <div class="observaciones">
+                        <strong>OBSERVACIONES</strong>
+                        <p id="observacionCopia">—</p>
+                    </div>
+                </div>
+
+                <div class="columna derecha">
+                    <div class="tabla-datos tabla-pago">
+                        <div class="etiqueta-dato">FECHA DE EMISIÓN</div>
+                        <div id="fechaCopia">—</div>
+
+                        <div class="etiqueta-dato">MONTO PAGADO</div>
+                        <div id="montoCopia" class="monto">$ 0</div>
+
+                        <div class="etiqueta-dato">MEDIO DE PAGO</div>
+                        <div id="medioCopia">—</div>
+
+                        <div class="etiqueta-dato">ESTADO</div>
+                        <div id="estadoCopia" class="estado-pagado">PAGADO</div>
+                    </div>
+
+                    <div class="timbre-wrap">
+                        <img
+                            src="assets/timbre-comunidad.jpeg"
+                            alt="Timbre oficial de la Comunidad Indígena Juan Cheuquelén"
+                            class="timbre"
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <footer class="pie-documento">
+                <span aria-hidden="true"></span>
+                <p>
+                    Documento interno de respaldo de pago de cuota.<br>
+                    <strong>No constituye documento tributario.</strong>
+                </p>
+                <span aria-hidden="true"></span>
+            </footer>
+        </section>
+
+    </main>
+
+    <!-- Mensaje de error: el comprobante no se muestra si la consulta falla -->
+    <div id="errorCarga" class="error-carga" style="display: none;" role="alert"></div>
+
+    <!-- Dependencias y lógica del comprobante -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="comprobante.js"></script>
+
+</body>
+</html>
