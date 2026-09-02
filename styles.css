@@ -36,6 +36,12 @@
     --azul: #5B8DEF;
     --azul-suave: #EDF3FF;
 
+    /* Identidad formal de la comunidad */
+    --comunidad-azul: #1F5F91;
+    --comunidad-azul-oscuro: #16466D;
+    --comunidad-azul-claro: #EAF3F9;
+    --comunidad-borde: #C9DCEB;
+
     --radio: 16px;
 
     --sombra:
@@ -317,6 +323,48 @@ input:focus {
 
 
 /* =========================================================
+   SELECTS Y TEXTAREAS GENERALES
+   ========================================================= */
+
+select,
+textarea {
+
+    width: 100%;
+
+    padding: 12px 14px;
+
+    border: 1px solid var(--borde);
+
+    border-radius: 10px;
+
+    background: #FCFCFE;
+
+    color: var(--texto);
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+
+select:focus,
+textarea:focus {
+
+    background: var(--blanco);
+
+    border-color: var(--primario);
+
+    box-shadow:
+        0 0 0 3px rgba(99, 91, 219, 0.10);
+}
+
+
+/* =========================================================
    BOTONES
    ========================================================= */
 
@@ -371,6 +419,212 @@ input:focus {
 
 .boton:active {
     transform: translateY(0);
+}
+
+
+/* =========================================================
+   VARIANTES DE BOTONES
+   ========================================================= */
+
+.boton-secundario {
+
+    display: inline-flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    min-height: 44px;
+
+    padding: 11px 20px;
+
+    border: 1px solid var(--borde);
+
+    border-radius: 10px;
+
+    background: var(--blanco);
+
+    color: var(--texto-secundario);
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.15s ease;
+}
+
+
+.boton-secundario:hover {
+
+    background: #F8F7FC;
+
+    border-color: #D7D4E5;
+
+    color: var(--texto);
+
+    transform: translateY(-1px);
+}
+
+
+.boton-primario {
+
+    display: inline-flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    min-height: 44px;
+
+    padding: 11px 20px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: var(--primario);
+
+    color: var(--blanco);
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.15s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.boton-primario:hover {
+
+    background: var(--primario-hover);
+
+    box-shadow:
+        0 6px 15px rgba(99, 91, 219, 0.20);
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   BOTONES DE COMPROBANTE
+   ========================================================= */
+
+.boton-comprobante {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    min-height: 34px;
+
+    padding: 7px 11px;
+
+    border: 1px solid var(--comunidad-borde);
+
+    border-radius: 8px;
+
+    background: var(--comunidad-azul-claro);
+
+    color: var(--comunidad-azul);
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.15s ease;
+}
+
+
+.boton-comprobante:hover {
+
+    background: var(--comunidad-azul);
+
+    border-color: var(--comunidad-azul);
+
+    color: var(--blanco);
+
+    transform: translateY(-1px);
+}
+
+
+.boton-comprobante:active {
+    transform: translateY(0);
+}
+
+
+.estado-comprobante {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    background: var(--comunidad-azul-claro);
+
+    color: var(--comunidad-azul);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+.estado-comprobante::before {
+
+    content: "";
+
+    width: 6px;
+
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: currentColor;
+}
+
+
+.estado-comprobante.sin-emitir {
+
+    background: #F5F5F7;
+
+    color: var(--texto-suave);
+}
+
+
+.estado-comprobante.sin-emitir::before {
+    background: var(--texto-suave);
 }
 
 
@@ -573,6 +827,26 @@ input:focus {
     font-size: 17px;
 
     flex-shrink: 0;
+}
+
+
+/* =========================================================
+   ITEM COMPROBANTES
+   ========================================================= */
+
+.menu-item.comprobantes-item:hover {
+
+    background: var(--comunidad-azul-claro);
+
+    color: var(--comunidad-azul);
+}
+
+
+.menu-item.comprobantes-item.activo {
+
+    background: var(--comunidad-azul-claro);
+
+    color: var(--comunidad-azul);
 }
 
 
@@ -813,6 +1087,32 @@ input:focus {
     color: var(--texto-secundario);
 
     font-size: 13px;
+}
+
+
+/* =========================================================
+   ACCIONES DEL ENCABEZADO
+   ========================================================= */
+
+.dashboard-header-acciones {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+}
+
+
+.dashboard-header-acciones .boton,
+.dashboard-header-acciones .boton-secundario,
+.dashboard-header-acciones .boton-primario {
+
+    margin-top: 0;
 }
 
 
@@ -1497,6 +1797,12 @@ input:focus {
     }
 
 
+    .dashboard-header-acciones {
+
+        justify-content: flex-start;
+    }
+
+
     .selector-periodo {
 
         width: 100%;
@@ -1568,6 +1874,22 @@ input:focus {
     .resumen-linea {
 
         padding: 15px 18px;
+    }
+
+
+    .dashboard-header-acciones {
+
+        width: 100%;
+
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+
+    .dashboard-header-acciones > * {
+
+        width: 100%;
     }
 
 }
@@ -2104,43 +2426,6 @@ input:focus {
 }
 
 
-.boton-secundario {
-
-    min-height: 44px;
-
-    padding: 11px 20px;
-
-    border: 1px solid var(--borde);
-
-    border-radius: 10px;
-
-    background: var(--blanco);
-
-    color: var(--texto-secundario);
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        color 0.2s ease;
-}
-
-
-.boton-secundario:hover {
-
-    background: #F8F7FC;
-
-    border-color: #D7D4E5;
-
-    color: var(--texto);
-}
-
-
 /* =========================================================
    RESPONSIVE SOCIOS
    ========================================================= */
@@ -2186,3 +2471,2013 @@ input:focus {
     }
 
 }
+
+
+/* =========================================================
+   MÓDULO CUOTAS
+   ========================================================= */
+
+.filtros-cuotas {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        210px
+        210px;
+
+    gap: 18px;
+
+    padding: 20px;
+}
+
+
+.filtros-cuotas .campo-busqueda,
+.filtros-cuotas .campo-filtro {
+
+    min-width: 0;
+}
+
+
+.filtros-cuotas label {
+
+    margin: 0;
+
+    color: var(--texto-secundario);
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+.filtros-cuotas input,
+.filtros-cuotas select {
+
+    min-height: 43px;
+}
+
+
+/* =========================================================
+   TABLA DE CUOTAS
+   ========================================================= */
+
+.tabla-cuotas {
+
+    width: 100%;
+
+    min-width: 1050px;
+
+    border-collapse: collapse;
+}
+
+
+.tabla-cuotas th {
+
+    padding: 14px 16px;
+
+    background: #FAF9FD;
+
+    border-bottom: 1px solid var(--borde);
+
+    color: var(--texto-secundario);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-align: left;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.4px;
+
+    white-space: nowrap;
+}
+
+
+.tabla-cuotas td {
+
+    padding: 14px 16px;
+
+    border-bottom: 1px solid var(--borde);
+
+    color: var(--texto);
+
+    font-size: 12px;
+
+    vertical-align: middle;
+}
+
+
+.tabla-cuotas tbody tr {
+
+    transition: background 0.15s ease;
+}
+
+
+.tabla-cuotas tbody tr:hover {
+
+    background: #FAF9FD;
+}
+
+
+.tabla-cuotas tbody tr:last-child td {
+
+    border-bottom: none;
+}
+
+
+/* =========================================================
+   ESTADOS DE CUOTA
+   ========================================================= */
+
+.estado-cuota {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+.estado-cuota::before {
+
+    content: "";
+
+    width: 6px;
+
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: currentColor;
+}
+
+
+.estado-cuota.pagada {
+
+    background: var(--verde-suave);
+
+    color: var(--verde);
+}
+
+
+.estado-cuota.pendiente {
+
+    background: var(--rojo-suave);
+
+    color: var(--rojo);
+}
+
+
+.estado-cuota.parcial {
+
+    background: var(--amarillo-suave);
+
+    color: #C79820;
+}
+
+
+.estado-cuota.anulada {
+
+    background: #F1F1F3;
+
+    color: #77758A;
+}
+
+
+/* =========================================================
+   MONTOS DE CUOTAS
+   ========================================================= */
+
+.monto-cuota {
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+.monto-pagado {
+
+    color: var(--verde);
+
+    font-weight: 700;
+}
+
+
+.monto-saldo {
+
+    color: var(--rojo);
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   RESUMEN CUOTAS
+   ========================================================= */
+
+.resumen-cuotas {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 15px;
+
+    margin-bottom: 25px;
+}
+
+
+.resumen-cuota {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 17px;
+
+    background: var(--blanco);
+
+    border: 1px solid var(--borde);
+
+    border-radius: 14px;
+
+    box-shadow: var(--sombra);
+}
+
+
+.resumen-cuota-icono {
+
+    width: 36px;
+
+    height: 36px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 10px;
+
+    font-size: 16px;
+
+    flex-shrink: 0;
+}
+
+
+.resumen-cuota strong {
+
+    display: block;
+
+    margin-bottom: 3px;
+
+    font-size: 19px;
+}
+
+
+.resumen-cuota span {
+
+    color: var(--texto-secundario);
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   MÓDULO PAGOS
+   ========================================================= */
+
+.filtros-pagos {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        190px
+        190px
+        190px;
+
+    gap: 15px;
+
+    padding: 20px;
+}
+
+
+.filtros-pagos .campo-busqueda,
+.filtros-pagos .campo-filtro {
+
+    min-width: 0;
+}
+
+
+.filtros-pagos label {
+
+    margin: 0;
+
+    color: var(--texto-secundario);
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   TABLA DE PAGOS
+   ========================================================= */
+
+.tabla-pagos {
+
+    width: 100%;
+
+    min-width: 1100px;
+
+    border-collapse: collapse;
+}
+
+
+.tabla-pagos th {
+
+    padding: 14px 16px;
+
+    background: #FAF9FD;
+
+    border-bottom: 1px solid var(--borde);
+
+    color: var(--texto-secundario);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-align: left;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.4px;
+
+    white-space: nowrap;
+}
+
+
+.tabla-pagos td {
+
+    padding: 14px 16px;
+
+    border-bottom: 1px solid var(--borde);
+
+    color: var(--texto);
+
+    font-size: 12px;
+
+    vertical-align: middle;
+}
+
+
+.tabla-pagos tbody tr:hover {
+
+    background: #FAF9FD;
+}
+
+
+.tabla-pagos tbody tr:last-child td {
+
+    border-bottom: none;
+}
+
+
+/* =========================================================
+   ESTADO DEL PAGO
+   ========================================================= */
+
+.estado-pago {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+.estado-pago::before {
+
+    content: "";
+
+    width: 6px;
+
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: currentColor;
+}
+
+
+.estado-pago.activo,
+.estado-pago.pagado {
+
+    background: var(--verde-suave);
+
+    color: var(--verde);
+}
+
+
+.estado-pago.anulado {
+
+    background: var(--rojo-suave);
+
+    color: var(--rojo);
+}
+
+
+/* =========================================================
+   HISTORIAL DE PAGOS
+   ========================================================= */
+
+.historial-pagos {
+
+    width: 100%;
+}
+
+
+.historial-resumen {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin-bottom: 20px;
+}
+
+
+.historial-resumen-item {
+
+    padding: 14px;
+
+    background: var(--comunidad-azul-claro);
+
+    border: 1px solid var(--comunidad-borde);
+
+    border-radius: 10px;
+}
+
+
+.historial-resumen-item span {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #5E7182;
+
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+
+.historial-resumen-item strong {
+
+    display: block;
+
+    color: var(--comunidad-azul-oscuro);
+
+    font-size: 17px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   TABLA HISTORIAL
+   ========================================================= */
+
+.tabla-historial {
+
+    width: 100%;
+
+    min-width: 850px;
+
+    border-collapse: collapse;
+}
+
+
+.tabla-historial th {
+
+    padding: 12px 13px;
+
+    background: var(--comunidad-azul-oscuro);
+
+    color: var(--blanco);
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    text-align: left;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.35px;
+}
+
+
+.tabla-historial td {
+
+    padding: 12px 13px;
+
+    border-bottom: 1px solid #DCE7EE;
+
+    color: #2E4050;
+
+    font-size: 11px;
+
+    vertical-align: middle;
+}
+
+
+.tabla-historial tbody tr:nth-child(even) {
+
+    background: #F8FBFD;
+}
+
+
+.tabla-historial tbody tr:hover {
+
+    background: var(--comunidad-azul-claro);
+}
+
+
+/* =========================================================
+   CABECERA FORMAL DE HISTORIAL
+   ========================================================= */
+
+.historial-encabezado {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 18px;
+
+    margin-bottom: 18px;
+
+    background: var(--blanco);
+
+    border: 1px solid var(--comunidad-borde);
+
+    border-left: 4px solid var(--comunidad-azul);
+
+    border-radius: 10px;
+}
+
+
+.historial-encabezado-timbre {
+
+    width: 82px;
+
+    height: 82px;
+
+    object-fit: contain;
+
+    flex-shrink: 0;
+}
+
+
+.historial-encabezado-texto {
+
+    flex: 1;
+}
+
+
+.historial-encabezado-texto h3 {
+
+    margin: 0 0 4px;
+
+    color: var(--comunidad-azul-oscuro);
+
+    font-size: 15px;
+
+    font-weight: 800;
+}
+
+
+.historial-encabezado-texto p {
+
+    margin: 2px 0;
+
+    color: #647789;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   COMPROBANTES
+   ========================================================= */
+
+.comprobantes-filtros {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        160px
+        160px
+        160px;
+
+    gap: 15px;
+
+    padding: 20px;
+}
+
+
+.comprobantes-filtros .campo-busqueda,
+.comprobantes-filtros .campo-filtro {
+
+    min-width: 0;
+}
+
+
+.comprobantes-filtros label {
+
+    margin: 0;
+
+    color: var(--texto-secundario);
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   TABLA DE COMPROBANTES
+   ========================================================= */
+
+.tabla-comprobantes {
+
+    width: 100%;
+
+    min-width: 1000px;
+
+    border-collapse: collapse;
+}
+
+
+.tabla-comprobantes th {
+
+    padding: 14px 15px;
+
+    background: var(--comunidad-azul-oscuro);
+
+    color: var(--blanco);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-align: left;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.4px;
+
+    white-space: nowrap;
+}
+
+
+.tabla-comprobantes td {
+
+    padding: 14px 15px;
+
+    border-bottom: 1px solid #DCE7EE;
+
+    color: #2E4050;
+
+    font-size: 12px;
+
+    vertical-align: middle;
+}
+
+
+.tabla-comprobantes tbody tr {
+
+    transition: background 0.15s ease;
+}
+
+
+.tabla-comprobantes tbody tr:nth-child(even) {
+
+    background: #F8FBFD;
+}
+
+
+.tabla-comprobantes tbody tr:hover {
+
+    background: var(--comunidad-azul-claro);
+}
+
+
+.numero-comprobante {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 6px 9px;
+
+    border-radius: 7px;
+
+    background: var(--comunidad-azul-claro);
+
+    border: 1px solid var(--comunidad-borde);
+
+    color: var(--comunidad-azul-oscuro);
+
+    font-family:
+        "Consolas",
+        "Courier New",
+        monospace;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   ESTADO COMPROBANTE LISTADO
+   ========================================================= */
+
+.comprobante-estado {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    font-size: 10px;
+
+    font-weight: 700;
+}
+
+
+.comprobante-estado.emitido {
+
+    background: var(--comunidad-azul-claro);
+
+    color: var(--comunidad-azul);
+}
+
+
+.comprobante-estado.anulado {
+
+    background: var(--rojo-suave);
+
+    color: var(--rojo);
+}
+
+
+/* =========================================================
+   ACCIONES COMPROBANTES
+   ========================================================= */
+
+.acciones-comprobante {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    flex-wrap: wrap;
+}
+
+
+.boton-reimprimir {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    min-height: 32px;
+
+    padding: 6px 10px;
+
+    border: 1px solid var(--comunidad-borde);
+
+    border-radius: 8px;
+
+    background: var(--blanco);
+
+    color: var(--comunidad-azul);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.boton-reimprimir:hover {
+
+    background: var(--comunidad-azul);
+
+    border-color: var(--comunidad-azul);
+
+    color: var(--blanco);
+}
+
+
+/* =========================================================
+   TARJETA INFORMACIÓN COMPROBANTES
+   ========================================================= */
+
+.comprobante-info {
+
+    padding: 18px 20px;
+
+    margin-bottom: 20px;
+
+    background: var(--comunidad-azul-claro);
+
+    border: 1px solid var(--comunidad-borde);
+
+    border-left: 4px solid var(--comunidad-azul);
+
+    border-radius: 10px;
+}
+
+
+.comprobante-info strong {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: var(--comunidad-azul-oscuro);
+
+    font-size: 13px;
+}
+
+
+.comprobante-info p {
+
+    margin: 0;
+
+    color: #5E7182;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   COMPROBANTE DE CUOTA - IMPRESIÓN
+   ========================================================= */
+
+.comprobante-pagina {
+
+    width: 100%;
+
+    min-height: 100vh;
+
+    padding: 25px;
+
+    background: #FFFFFF;
+}
+
+
+.comprobante-documento {
+
+    width: 100%;
+
+    max-width: 850px;
+
+    margin: 0 auto;
+
+    background: #FFFFFF;
+
+    color: #1D2D3A;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+
+.comprobante-copia {
+
+    position: relative;
+
+    min-height: 450px;
+
+    padding: 28px 34px;
+
+    border: 1px solid #B9CBD8;
+
+    background: #FFFFFF;
+}
+
+
+.comprobante-copia + .comprobante-copia {
+
+    margin-top: 0;
+}
+
+
+.comprobante-original {
+
+    border-radius: 8px 8px 0 0;
+}
+
+
+.comprobante-copia-socio {
+
+    border-radius: 0 0 8px 8px;
+}
+
+
+/* =========================================================
+   ENCABEZADO COMPROBANTE
+   ========================================================= */
+
+.comprobante-cabecera {
+
+    display: grid;
+
+    grid-template-columns: 90px minmax(0, 1fr) 175px;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding-bottom: 18px;
+
+    border-bottom: 2px solid var(--comunidad-azul);
+}
+
+
+.comprobante-timbre {
+
+    width: 80px;
+
+    height: 80px;
+
+    object-fit: contain;
+
+    object-position: center;
+}
+
+
+.comprobante-identidad {
+
+    min-width: 0;
+}
+
+
+.comprobante-identidad h1 {
+
+    margin: 0 0 4px;
+
+    color: var(--comunidad-azul-oscuro);
+
+    font-size: 17px;
+
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.comprobante-identidad h2 {
+
+    margin: 5px 0 7px;
+
+    color: #273B4A;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+
+.comprobante-identidad p {
+
+    margin: 2px 0;
+
+    color: #5E7182;
+
+    font-size: 9px;
+
+    line-height: 1.35;
+}
+
+
+.comprobante-numero {
+
+    padding: 13px;
+
+    border: 1px solid var(--comunidad-borde);
+
+    border-radius: 8px;
+
+    background: var(--comunidad-azul-claro);
+
+    text-align: center;
+}
+
+
+.comprobante-numero span {
+
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #61798A;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.7px;
+}
+
+
+.comprobante-numero strong {
+
+    display: block;
+
+    color: var(--comunidad-azul-oscuro);
+
+    font-family:
+        "Consolas",
+        "Courier New",
+        monospace;
+
+    font-size: 14px;
+
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   DESTINO ORIGINAL / COPIA
+   ========================================================= */
+
+.comprobante-destino {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin: 18px 0;
+
+    padding: 8px 12px;
+
+    border-radius: 6px;
+
+    background: var(--comunidad-azul-oscuro);
+
+    color: var(--blanco);
+}
+
+
+.comprobante-destino strong {
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.6px;
+
+    text-transform: uppercase;
+}
+
+
+.comprobante-destino span {
+
+    font-size: 9px;
+
+    opacity: 0.9;
+}
+
+
+/* =========================================================
+   DATOS DEL COMPROBANTE
+   ========================================================= */
+
+.comprobante-datos {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 10px 20px;
+
+    margin-top: 18px;
+}
+
+
+.comprobante-dato {
+
+    padding: 9px 0;
+
+    border-bottom: 1px solid #E1E9EF;
+}
+
+
+.comprobante-dato label {
+
+    display: block;
+
+    margin: 0 0 4px;
+
+    color: #708392;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.45px;
+}
+
+
+.comprobante-dato strong {
+
+    display: block;
+
+    color: #273B4A;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    line-height: 1.35;
+}
+
+
+.comprobante-dato-completo {
+
+    grid-column: 1 / -1;
+}
+
+
+/* =========================================================
+   MONTO DESTACADO
+   ========================================================= */
+
+.comprobante-monto {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    margin: 20px 0;
+
+    padding: 15px 18px;
+
+    border: 1px solid var(--comunidad-borde);
+
+    border-radius: 8px;
+
+    background: #F7FAFC;
+}
+
+
+.comprobante-monto span {
+
+    color: #5E7182;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.4px;
+}
+
+
+.comprobante-monto strong {
+
+    color: var(--comunidad-azul-oscuro);
+
+    font-size: 23px;
+
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   PIE COMPROBANTE
+   ========================================================= */
+
+.comprobante-pie {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-end;
+
+    gap: 25px;
+
+    margin-top: 25px;
+
+    padding-top: 15px;
+
+    border-top: 1px solid #DDE6EC;
+}
+
+
+.comprobante-observacion {
+
+    flex: 1;
+}
+
+
+.comprobante-observacion label {
+
+    display: block;
+
+    margin: 0 0 5px;
+
+    color: #708392;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+}
+
+
+.comprobante-observacion p {
+
+    margin: 0;
+
+    color: #4E6271;
+
+    font-size: 9px;
+
+    line-height: 1.45;
+}
+
+
+.comprobante-pie-timbre {
+
+    width: 95px;
+
+    height: 65px;
+
+    object-fit: contain;
+
+    opacity: 0.95;
+}
+
+
+/* =========================================================
+   LÍNEA DE CORTE
+   ========================================================= */
+
+.comprobante-linea-corte {
+
+    position: relative;
+
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+
+.comprobante-linea-corte::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+
+    right: 0;
+
+    top: 50%;
+
+    border-top: 1px dashed #8298A8;
+}
+
+
+.comprobante-linea-corte span {
+
+    position: relative;
+
+    z-index: 1;
+
+    padding: 0 12px;
+
+    background: #FFFFFF;
+
+    color: #7A8B98;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.7px;
+}
+
+
+/* =========================================================
+   CONTROLES DE IMPRESIÓN COMPROBANTE
+   ========================================================= */
+
+.comprobante-controles {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin: 20px auto;
+
+    max-width: 850px;
+}
+
+
+.comprobante-controles .boton,
+.comprobante-controles .boton-secundario {
+
+    margin-top: 0;
+}
+
+
+/* =========================================================
+   INFORMACIÓN DE IMPRESIONES
+   ========================================================= */
+
+.info-impresiones {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 9px 12px;
+
+    border-radius: 7px;
+
+    background: #F6F8FA;
+
+    border: 1px solid #E0E6EB;
+
+    color: #657684;
+
+    font-size: 9px;
+}
+
+
+.info-impresiones strong {
+
+    color: #405463;
+}
+
+
+/* =========================================================
+   MENSAJES
+   ========================================================= */
+
+.mensaje-exito {
+
+    padding: 12px 15px;
+
+    border-radius: 9px;
+
+    background: var(--verde-suave);
+
+    border: 1px solid rgba(54, 179, 126, 0.18);
+
+    color: #24855E;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+.mensaje-error {
+
+    padding: 12px 15px;
+
+    border-radius: 9px;
+
+    background: var(--rojo-suave);
+
+    border: 1px solid rgba(232, 93, 117, 0.18);
+
+    color: #B53E56;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+.mensaje-info {
+
+    padding: 12px 15px;
+
+    border-radius: 9px;
+
+    background: var(--comunidad-azul-claro);
+
+    border: 1px solid var(--comunidad-borde);
+
+    color: var(--comunidad-azul-oscuro);
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   ESTADO VACÍO
+   ========================================================= */
+
+.estado-vacio {
+
+    padding: 45px 25px;
+
+    text-align: center;
+
+    color: var(--texto-secundario);
+
+    font-size: 13px;
+}
+
+
+.estado-vacio strong {
+
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: var(--texto);
+
+    font-size: 15px;
+}
+
+
+.estado-vacio span {
+
+    display: block;
+
+    color: var(--texto-suave);
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   CARGANDO
+   ========================================================= */
+
+.cargando {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 35px;
+
+    color: var(--texto-secundario);
+
+    font-size: 12px;
+}
+
+
+.cargando::before {
+
+    content: "";
+
+    width: 15px;
+
+    height: 15px;
+
+    border: 2px solid #D8D6E8;
+
+    border-top-color: var(--primario);
+
+    border-radius: 50%;
+
+    animation: girar 0.7s linear infinite;
+}
+
+
+@keyframes girar {
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================================
+   UTILIDADES
+   ========================================================= */
+
+.texto-centro {
+    text-align: center;
+}
+
+
+.texto-derecha {
+    text-align: right;
+}
+
+
+.texto-secundario {
+    color: var(--texto-secundario);
+}
+
+
+.negrita {
+    font-weight: 700;
+}
+
+
+.oculto {
+    display: none !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE CUOTAS Y PAGOS
+   ========================================================= */
+
+@media (max-width: 950px) {
+
+    .filtros-cuotas,
+    .filtros-pagos,
+    .comprobantes-filtros {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+
+    .resumen-cuotas,
+    .historial-resumen {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .filtros-cuotas,
+    .filtros-pagos,
+    .comprobantes-filtros {
+
+        grid-template-columns: 1fr;
+
+        padding: 16px;
+    }
+
+
+    .resumen-cuotas,
+    .historial-resumen {
+
+        grid-template-columns: 1fr;
+    }
+
+
+    .historial-encabezado {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .historial-encabezado-timbre {
+
+        width: 70px;
+
+        height: 70px;
+    }
+
+
+    .comprobante-controles {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        padding: 0 15px;
+    }
+
+
+    .comprobante-controles > * {
+
+        width: 100%;
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE COMPROBANTE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .comprobante-pagina {
+
+        padding: 10px;
+    }
+
+
+    .comprobante-copia {
+
+        padding: 20px;
+
+        min-height: auto;
+    }
+
+
+    .comprobante-cabecera {
+
+        grid-template-columns: 65px minmax(0, 1fr);
+
+        gap: 12px;
+    }
+
+
+    .comprobante-timbre {
+
+        width: 60px;
+
+        height: 60px;
+    }
+
+
+    .comprobante-numero {
+
+        grid-column: 1 / -1;
+
+        width: 100%;
+    }
+
+
+    .comprobante-identidad h1 {
+
+        font-size: 14px;
+    }
+
+
+    .comprobante-identidad h2 {
+
+        font-size: 11px;
+    }
+
+
+    .comprobante-datos {
+
+        grid-template-columns: 1fr;
+    }
+
+
+    .comprobante-dato-completo {
+
+        grid-column: auto;
+    }
+
+
+    .comprobante-monto {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 7px;
+    }
+
+
+    .comprobante-pie {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+}
+
+
+/* =========================================================
+   IMPRESIÓN
+   ========================================================= */
+
+@media print {
+
+    html,
+    body {
+
+        margin: 0;
+
+        padding: 0;
+
+        background: #FFFFFF !important;
+    }
+
+
+    body {
+
+        -webkit-print-color-adjust: exact;
+
+        print-color-adjust: exact;
+    }
+
+
+    .sidebar,
+    .topbar,
+    .dashboard-header,
+    .comprobante-controles,
+    .boton,
+    .boton-secundario,
+    .boton-primario,
+    .modal,
+    .no-imprimir {
+
+        display: none !important;
+    }
+
+
+    .app {
+
+        display: block;
+
+        min-height: auto;
+
+        background: #FFFFFF;
+    }
+
+
+    .contenido {
+
+        width: 100%;
+
+        margin: 0;
+
+        padding: 0;
+    }
+
+
+    .comprobante-pagina {
+
+        width: 100%;
+
+        min-height: auto;
+
+        padding: 0;
+
+        background: #FFFFFF;
+    }
+
+
+    .comprobante-documento {
+
+        width: 100%;
+
+        max-width: none;
+
+        margin: 0;
+
+        box-shadow: none;
+    }
+
+
+    .comprobante-copia {
+
+        page-break-inside: avoid;
+
+        break-inside: avoid;
+    }
+
+
+    .comprobante-linea-corte {
+
+        page-break-inside: avoid;
+
+        break-inside: avoid;
+    }
+
+
+    .tabla-contenedor {
+
+        overflow: visible;
+    }
+
+
+    @page {
+
+        size: A4 portrait;
+
+        margin: 8mm;
+    }
+
+}
+
+
+/* =========================================================
+   IMPRESIÓN DEL HISTORIAL
+   ========================================================= */
+
+@media print {
+
+    body.imprimiendo-historial {
+
+        background: #FFFFFF !important;
+    }
+
+
+    body.imprimiendo-historial .sidebar,
+    body.imprimiendo-historial .topbar,
+    body.imprimiendo-historial .dashboard-header,
+    body.imprimiendo-historial .modal-header,
+    body.imprimiendo-historial .modal-acciones,
+    body.imprimiendo-historial .no-imprimir {
+
+        display: none !important;
+    }
+
+
+    body.imprimiendo-historial .contenido {
+
+        width: 100%;
+
+        margin: 0;
+
+        padding: 0;
+    }
+
+
+    body.imprimiendo-historial .historial-pagos {
+
+        display: block;
+
+        width: 100%;
+    }
+
+
+    body.imprimiendo-historial .historial-encabezado {
+
+        display: flex;
+
+        margin-bottom: 10px;
+
+        border-left: 3px solid var(--comunidad-azul);
+
+        box-shadow: none;
+    }
+
+
+    body.imprimiendo-historial .historial-encabezado-timbre {
+
+        width: 60px;
+
+        height: 60px;
+    }
+
+
+    body.imprimiendo-historial .historial-resumen {
+
+        margin-bottom: 10px;
+    }
+
+
+    body.imprimiendo-historial .tabla-historial {
+
+        min-width: 0;
+
+        width: 100%;
+    }
+
+
+    body.imprimiendo-historial .tabla-historial th {
+
+        padding: 7px 6px;
+
+        font-size: 7px;
+    }
+
+
+    body.imprimiendo-historial .tabla-historial td {
+
+        padding: 7px 6px;
+
+        font-size: 8px;
+    }
+
+
+    @page {
+
+        size: A4 landscape;
+
+        margin: 8mm;
+    }
+
+}
+
+
+/* =========================================================
+   FIN DEL ARCHIVO
+   ========================================================= */
