@@ -1936,6 +1936,43 @@ async function abrirHistorial(
         resultado.data || [];
 
 
+    // ------------------------------------------------------------
+    // COMPROBANTES ASOCIADOS A LOS PAGOS
+    // ------------------------------------------------------------
+    let comprobantesPorPago = {};
+
+    if (pagos.length > 0) {
+
+        const idsPagos = pagos.map(function (pago) {
+            return Number(pago.id);
+        });
+
+        const resultadoComprobantes =
+            await supabaseClient
+                .from("comprobantes_cuota")
+                .select("id, pago_id, numero, estado, fecha_emision")
+                .in("pago_id", idsPagos);
+
+        if (resultadoComprobantes.error) {
+
+            console.warn(
+                "No fue posible cargar los comprobantes asociados al historial:",
+                resultadoComprobantes.error
+            );
+
+        } else {
+
+            (resultadoComprobantes.data || []).forEach(function (comprobante) {
+
+                comprobantesPorPago[Number(comprobante.pago_id)] = comprobante;
+
+            });
+
+        }
+
+    }
+
+
     let html =
 
         "<div class='historial-resumen'>" +
@@ -2013,6 +2050,8 @@ async function abrirHistorial(
 
         "<th>Banco</th>" +
 
+        "<th>Comprobante cuota</th>" +
+
         "<th>Estado</th>" +
 
         "<th>Acción</th>" +
@@ -2060,6 +2099,21 @@ async function abrirHistorial(
                 escaparHTML(
                     pago.banco_origen ||
                     "—"
+                ) +
+                "</td>" +
+
+                "<td>" +
+                (
+                    comprobantesPorPago[Number(pago.id)]
+                        ? "<button type='button' " +
+                          "class='boton-tabla boton-comprobante-pago' " +
+                          "data-comprobante-id='" +
+                          comprobantesPorPago[Number(pago.id)].id +
+                          "'>" +
+                          "🧾 " +
+                          escaparHTML(comprobantesPorPago[Number(pago.id)].numero) +
+                          "</button>"
+                        : "<span class='estado-comprobante-pendiente'>Sin emitir</span>"
                 ) +
                 "</td>" +
 
@@ -2127,6 +2181,35 @@ async function abrirHistorial(
                             ),
                             cuotaId
                         );
+
+                    }
+                );
+
+            }
+        );
+
+
+    contenido
+        .querySelectorAll(
+            ".boton-comprobante-pago"
+        )
+        .forEach(
+            function (boton) {
+
+                boton.addEventListener(
+                    "click",
+                    function () {
+
+                        const comprobanteId =
+                            boton.dataset.comprobanteId;
+
+                        if (!comprobanteId) {
+                            return;
+                        }
+
+                        window.location.href =
+                            "comprobante.html?id=" +
+                            encodeURIComponent(comprobanteId);
 
                     }
                 );
