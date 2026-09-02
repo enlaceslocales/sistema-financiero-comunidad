@@ -2749,6 +2749,12 @@ function imprimirHistorial() {
     // DOCUMENTO DE IMPRESIÓN
     // ========================================================
 
+    const timbreUrl =
+        new URL(
+            "timbre-comunidad.jpeg",
+            window.location.href
+        ).href;
+
     ventana.document.open();
 
 
@@ -2958,7 +2964,7 @@ function imprimirHistorial() {
 
         "<h1>COMUNIDAD INDÍGENA JUAN CHEUQUELÉN</h1>" +
 
-        "<p>RUT: 65.169.427-2 &nbsp;|&nbsp; Personería Jurídica N.º 2314 &nbsp;|&nbsp; Fundada 27 de julio de 2017</p>" +
+        "<p>RUT: 65.169.427-2 &nbsp;|&nbsp; PJ N.º 2314 &nbsp;|&nbsp; Fundada 27 de julio de 2017</p>" +
 
         "</div>" +
 
@@ -2992,7 +2998,7 @@ function imprimirHistorial() {
 
         "<div class='informacion-emision'>" +
 
-        "<p><strong>Documento emitido por:</strong> Tesorería</p>" +
+        "<p><strong>Documento emitido por:</strong> Tesorero</p>" +
 
         "<p><strong>Socio:</strong> " +
         escaparHTML(
@@ -3027,7 +3033,11 @@ function imprimirHistorial() {
         // TIMBRE
         // ====================================================
 
-        "<img class='timbre' src='assets/timbre-comunidad.jpeg' alt='Timbre oficial de la Comunidad Indígena Juan Cheuquelén'>" +
+        "<img class='timbre' src='" +
+escaparHTML(
+            timbreUrl
+        ) +
+        "' alt='Timbre oficial de la Comunidad Indígena Juan Cheuquelén'>" +
 
 
         "</div>" +
@@ -3062,14 +3072,75 @@ function imprimirHistorial() {
     ventana.focus();
 
 
-    setTimeout(
-        function () {
+    const imagenTimbre =
+        ventana.document.querySelector(
+            ".timbre"
+        );
 
-            ventana.print();
 
-        },
-        300
-    );
+    let impresionRealizada =
+        false;
+
+
+    function imprimirVentanaHistorial() {
+
+        if (impresionRealizada) {
+            return;
+        }
+
+        impresionRealizada = true;
+
+        ventana.focus();
+
+        ventana.print();
+
+    }
+
+
+    if (
+        imagenTimbre &&
+        !imagenTimbre.complete
+    ) {
+
+        imagenTimbre.addEventListener(
+            "load",
+            imprimirVentanaHistorial,
+            {
+                once: true
+            }
+        );
+
+        imagenTimbre.addEventListener(
+            "error",
+            function () {
+
+                console.error(
+                    "No fue posible cargar el timbre oficial para impresión:",
+                    timbreUrl
+                );
+
+                imprimirVentanaHistorial();
+
+            },
+            {
+                once: true
+            }
+        );
+
+        setTimeout(
+            imprimirVentanaHistorial,
+            2000
+        );
+
+    }
+    else {
+
+        setTimeout(
+            imprimirVentanaHistorial,
+            300
+        );
+
+    }
 
 }
 
