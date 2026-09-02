@@ -17,12 +17,12 @@ let cuentas = [];
 // ============================================================
 
 document.addEventListener(
-"DOMContentLoaded",
-async function () {
+    "DOMContentLoaded",
+    async function () {
 
-await verificarSesion();
+        await verificarSesion();
 
-}
+    }
 );
 
 
@@ -32,109 +32,109 @@ await verificarSesion();
 
 async function verificarSesion() {
 
-const resultado =
-await supabaseClient.auth.getSession();
+    const resultado =
+        await supabaseClient.auth.getSession();
 
-const session =
-resultado.data.session;
+    const session =
+        resultado.data.session;
 
-if (resultado.error) {
+    if (resultado.error) {
 
-console.error(
-"Error al comprobar sesión:",
-resultado.error
-);
+        console.error(
+            "Error al comprobar sesión:",
+            resultado.error
+        );
 
-window.location.href =
-"login.html";
+        window.location.href =
+            "login.html";
 
-return;
-}
+        return;
+    }
 
-if (!session) {
+    if (!session) {
 
-window.location.href =
-"login.html";
+        window.location.href =
+            "login.html";
 
-return;
-}
+        return;
+    }
 
-usuarioActual =
-session.user;
-
-
-// ========================================================
-// PERFIL
-// ========================================================
-
-const resultadoPerfil =
-await supabaseClient
-.from("profiles")
-.select(
-"nombre, email, rol, activo"
-)
-.eq(
-"id",
-usuarioActual.id
-)
-.single();
-
-if (resultadoPerfil.error) {
-
-console.error(
-"Error al obtener perfil:",
-resultadoPerfil.error
-);
-
-alert(
-"No fue posible cargar el perfil del usuario."
-);
-
-return;
-}
-
-const perfil =
-resultadoPerfil.data;
-
-if (!perfil) {
-
-await supabaseClient.auth.signOut();
-
-window.location.href =
-"login.html";
-
-return;
-}
-
-if (!perfil.activo) {
-
-alert(
-"Este usuario se encuentra desactivado."
-);
-
-await supabaseClient.auth.signOut();
-
-window.location.href =
-"login.html";
-
-return;
-}
-
-perfilUsuario =
-perfil;
+    usuarioActual =
+        session.user;
 
 
-mostrarUsuario();
+    // ========================================================
+    // PERFIL
+    // ========================================================
 
-configurarEventos();
+    const resultadoPerfil =
+        await supabaseClient
+            .from("profiles")
+            .select(
+                "nombre, email, rol, activo"
+            )
+            .eq(
+                "id",
+                usuarioActual.id
+            )
+            .single();
 
-await cargarSocios();
+    if (resultadoPerfil.error) {
 
-await cargarPeriodos();
+        console.error(
+            "Error al obtener perfil:",
+            resultadoPerfil.error
+        );
 
-await cargarCuentas();
+        alert(
+            "No fue posible cargar el perfil del usuario."
+        );
 
-await cargarCuotas();
+        return;
+    }
+
+    const perfil =
+        resultadoPerfil.data;
+
+    if (!perfil) {
+
+        await supabaseClient.auth.signOut();
+
+        window.location.href =
+            "login.html";
+
+        return;
+    }
+
+    if (!perfil.activo) {
+
+        alert(
+            "Este usuario se encuentra desactivado."
+        );
+
+        await supabaseClient.auth.signOut();
+
+        window.location.href =
+            "login.html";
+
+        return;
+    }
+
+    perfilUsuario =
+        perfil;
+
+
+    mostrarUsuario();
+
+    configurarEventos();
+
+    await cargarSocios();
+
+    await cargarPeriodos();
+
+    await cargarCuentas();
+
+    await cargarCuotas();
 
 }
 
@@ -145,32 +145,32 @@ await cargarCuotas();
 
 function mostrarUsuario() {
 
-const nombre =
-document.getElementById(
-"nombreUsuario"
-);
+    const nombre =
+        document.getElementById(
+            "nombreUsuario"
+        );
 
-const rol =
-document.getElementById(
-"rolUsuario"
-);
+    const rol =
+        document.getElementById(
+            "rolUsuario"
+        );
 
-if (nombre) {
+    if (nombre) {
 
-nombre.textContent =
-perfilUsuario.nombre ||
-"Usuario";
+        nombre.textContent =
+            perfilUsuario.nombre ||
+            "Usuario";
 
-}
+    }
 
-if (rol) {
+    if (rol) {
 
-rol.textContent =
-traducirRol(
-perfilUsuario.rol
-);
+        rol.textContent =
+            traducirRol(
+                perfilUsuario.rol
+            );
 
-}
+    }
 
 }
 
@@ -181,21 +181,21 @@ perfilUsuario.rol
 
 function traducirRol(rol) {
 
-switch (rol) {
+    switch (rol) {
 
-case "administrador":
-return "Administrador";
+        case "administrador":
+            return "Administrador";
 
-case "tesorero":
-return "Tesorero";
+        case "tesorero":
+            return "Tesorero";
 
-case "consulta":
-return "Consulta";
+        case "consulta":
+            return "Consulta";
 
-default:
-return "Usuario";
+        default:
+            return "Usuario";
 
-}
+    }
 
 }
 
@@ -217,206 +217,206 @@ function configurarEventos() {
 
 
 
-const buscar =
-document.getElementById(
-"buscarSocio"
-);
+    const buscar =
+        document.getElementById(
+            "buscarSocio"
+        );
 
-if (buscar) {
+    if (buscar) {
 
-buscar.addEventListener(
-"input",
-aplicarFiltros
-);
+        buscar.addEventListener(
+            "input",
+            aplicarFiltros
+        );
 
-}
+    }
 
 
-const estado =
-document.getElementById(
-"filtroEstado"
-);
+    const estado =
+        document.getElementById(
+            "filtroEstado"
+        );
 
-if (estado) {
+    if (estado) {
 
-estado.addEventListener(
-"change",
-aplicarFiltros
-);
+        estado.addEventListener(
+            "change",
+            aplicarFiltros
+        );
 
-}
+    }
 
 
-const periodo =
-document.getElementById(
-"periodoSelect"
-);
+    const periodo =
+        document.getElementById(
+            "periodoSelect"
+        );
 
-if (periodo) {
+    if (periodo) {
 
-periodo.addEventListener(
-"change",
-aplicarFiltros
-);
+        periodo.addEventListener(
+            "change",
+            aplicarFiltros
+        );
 
-}
+    }
 
 
-const formulario =
-document.getElementById(
-"formPago"
-);
+    const formulario =
+        document.getElementById(
+            "formPago"
+        );
 
-if (formulario) {
+    if (formulario) {
 
-formulario.addEventListener(
-"submit",
-guardarPago
-);
+        formulario.addEventListener(
+            "submit",
+            guardarPago
+        );
 
-}
+    }
 
 
-const cerrarPago =
-document.getElementById(
-"cerrarModalPago"
-);
+    const cerrarPago =
+        document.getElementById(
+            "cerrarModalPago"
+        );
 
-if (cerrarPago) {
+    if (cerrarPago) {
 
-cerrarPago.addEventListener(
-"click",
-cerrarModalPago
-);
+        cerrarPago.addEventListener(
+            "click",
+            cerrarModalPago
+        );
 
-}
+    }
 
 
-const cancelarPago =
-document.getElementById(
-"cancelarPago"
-);
+    const cancelarPago =
+        document.getElementById(
+            "cancelarPago"
+        );
 
-if (cancelarPago) {
+    if (cancelarPago) {
 
-cancelarPago.addEventListener(
-"click",
-cerrarModalPago
-);
+        cancelarPago.addEventListener(
+            "click",
+            cerrarModalPago
+        );
 
-}
+    }
 
 
-const cerrarHistorial =
-document.getElementById(
-"cerrarHistorial"
-);
+    const cerrarHistorial =
+        document.getElementById(
+            "cerrarHistorial"
+        );
 
-if (cerrarHistorial) {
+    if (cerrarHistorial) {
 
-cerrarHistorial.addEventListener(
-"click",
-cerrarModalHistorial
-);
+        cerrarHistorial.addEventListener(
+            "click",
+            cerrarModalHistorial
+        );
 
-}
+    }
 
 
-const cerrarHistorialInferior =
-document.getElementById(
-"cerrarHistorialInferior"
-);
+    const cerrarHistorialInferior =
+        document.getElementById(
+            "cerrarHistorialInferior"
+        );
 
-if (cerrarHistorialInferior) {
+    if (cerrarHistorialInferior) {
 
-cerrarHistorialInferior.addEventListener(
-"click",
-cerrarModalHistorial
-);
+        cerrarHistorialInferior.addEventListener(
+            "click",
+            cerrarModalHistorial
+        );
 
-}
+    }
 
 
-const imprimir =
-document.getElementById(
-"imprimirHistorial"
-);
+    const imprimir =
+        document.getElementById(
+            "imprimirHistorial"
+        );
 
-if (imprimir) {
+    if (imprimir) {
 
-imprimir.addEventListener(
-"click",
-imprimirHistorial
-);
+        imprimir.addEventListener(
+            "click",
+            imprimirHistorial
+        );
 
-}
+    }
 
 
-const modalPago =
-document.getElementById(
-"modalPago"
-);
+    const modalPago =
+        document.getElementById(
+            "modalPago"
+        );
 
-if (modalPago) {
+    if (modalPago) {
 
-modalPago.addEventListener(
-"click",
-function (event) {
+        modalPago.addEventListener(
+            "click",
+            function (event) {
 
-if (
-event.target ===
-modalPago
-) {
+                if (
+                    event.target ===
+                    modalPago
+                ) {
 
-cerrarModalPago();
+                    cerrarModalPago();
 
-}
+                }
 
-}
-);
+            }
+        );
 
-}
+    }
 
 
-const modalHistorial =
-document.getElementById(
-"modalHistorial"
-);
+    const modalHistorial =
+        document.getElementById(
+            "modalHistorial"
+        );
 
-if (modalHistorial) {
+    if (modalHistorial) {
 
-modalHistorial.addEventListener(
-"click",
-function (event) {
+        modalHistorial.addEventListener(
+            "click",
+            function (event) {
 
-if (
-event.target ===
-modalHistorial
-) {
+                if (
+                    event.target ===
+                    modalHistorial
+                ) {
 
-cerrarModalHistorial();
+                    cerrarModalHistorial();
 
-}
+                }
 
-}
-);
+            }
+        );
 
-}
+    }
 
 
-const logout =
-document.getElementById(
-"logoutButton"
-);
+    const logout =
+        document.getElementById(
+            "logoutButton"
+        );
 
-if (logout) {
+    if (logout) {
 
-logout.addEventListener(
-"click",
-cerrarSesion
-);
+        logout.addEventListener(
+            "click",
+            cerrarSesion
+        );
 
-}
+    }
 
 }
 
@@ -427,38 +427,38 @@ cerrarSesion
 
 async function cargarSocios() {
 
-const resultado =
-await supabaseClient
-.from("socios")
-.select(
-"id, nombres, apellido_paterno, apellido_materno, rut, estado"
-)
-.order(
-"apellido_paterno",
-{
-ascending: true,
-nullsFirst: false
-}
-)
-.order(
-"nombres",
-{
-ascending: true
-}
-);
+    const resultado =
+        await supabaseClient
+            .from("socios")
+            .select(
+                "id, nombres, apellido_paterno, apellido_materno, rut, estado"
+            )
+            .order(
+                "apellido_paterno",
+                {
+                    ascending: true,
+                    nullsFirst: false
+                }
+            )
+            .order(
+                "nombres",
+                {
+                    ascending: true
+                }
+            );
 
-if (resultado.error) {
+    if (resultado.error) {
 
-console.error(
-"Error al cargar socios:",
-resultado.error
-);
+        console.error(
+            "Error al cargar socios:",
+            resultado.error
+        );
 
-return;
-}
+        return;
+    }
 
-socios =
-resultado.data || [];
+    socios =
+        resultado.data || [];
 
 }
 
@@ -469,70 +469,70 @@ resultado.data || [];
 
 async function cargarPeriodos() {
 
-const resultado =
-await supabaseClient
-.from("periodos_financieros")
-.select(
-"id, anio, estado"
-)
-.order(
-"anio",
-{
-ascending: false
-}
-);
+    const resultado =
+        await supabaseClient
+            .from("periodos_financieros")
+            .select(
+                "id, anio, estado"
+            )
+            .order(
+                "anio",
+                {
+                    ascending: false
+                }
+            );
 
-if (resultado.error) {
+    if (resultado.error) {
 
-console.error(
-"Error al cargar períodos:",
-resultado.error
-);
+        console.error(
+            "Error al cargar períodos:",
+            resultado.error
+        );
 
-return;
-}
+        return;
+    }
 
-periodos =
-resultado.data || [];
-
-
-const select =
-document.getElementById(
-"periodoSelect"
-);
-
-if (!select) {
-return;
-}
-
-select.innerHTML =
-'<option value="">Todos los períodos</option>';
+    periodos =
+        resultado.data || [];
 
 
-periodos.forEach(
-function (periodo) {
+    const select =
+        document.getElementById(
+            "periodoSelect"
+        );
 
-const option =
-document.createElement(
-"option"
-);
+    if (!select) {
+        return;
+    }
 
-option.value =
-periodo.id;
+    select.innerHTML =
+        '<option value="">Todos los períodos</option>';
 
-option.textContent =
-periodo.anio +
-" — " +
-capitalizar(
-periodo.estado
-);
 
-select.appendChild(
-option
-);
+    periodos.forEach(
+        function (periodo) {
 
-}
-);
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                periodo.id;
+
+            option.textContent =
+                periodo.anio +
+                " — " +
+                capitalizar(
+                    periodo.estado
+                );
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
 
 }
 
@@ -543,76 +543,76 @@ option
 
 async function cargarCuentas() {
 
-const resultado =
-await supabaseClient
-.from("cuentas")
-.select(
-"id, nombre, tipo, banco, numero_cuenta, activo"
-)
-.eq(
-"activo",
-true
-)
-.order(
-"nombre",
-{
-ascending: true
-}
-);
+    const resultado =
+        await supabaseClient
+            .from("cuentas")
+            .select(
+                "id, nombre, tipo, banco, numero_cuenta, activo"
+            )
+            .eq(
+                "activo",
+                true
+            )
+            .order(
+                "nombre",
+                {
+                    ascending: true
+                }
+            );
 
-if (resultado.error) {
+    if (resultado.error) {
 
-console.error(
-"Error al cargar cuentas:",
-resultado.error
-);
+        console.error(
+            "Error al cargar cuentas:",
+            resultado.error
+        );
 
-alert(
-"No fue posible cargar las cuentas financieras."
-);
+        alert(
+            "No fue posible cargar las cuentas financieras."
+        );
 
-return;
-}
+        return;
+    }
 
-cuentas =
-resultado.data || [];
-
-
-const select =
-document.getElementById(
-"cuentaPago"
-);
-
-if (!select) {
-return;
-}
-
-select.innerHTML =
-'<option value="">Seleccione una cuenta</option>';
+    cuentas =
+        resultado.data || [];
 
 
-cuentas.forEach(
-function (cuenta) {
+    const select =
+        document.getElementById(
+            "cuentaPago"
+        );
 
-const option =
-document.createElement(
-"option"
-);
+    if (!select) {
+        return;
+    }
 
-option.value =
-cuenta.id;
+    select.innerHTML =
+        '<option value="">Seleccione una cuenta</option>';
 
-option.textContent =
-construirNombreCuenta(
-cuenta
-);
 
-select.appendChild(
-option
-);
+    cuentas.forEach(
+        function (cuenta) {
 
-}
-);
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                cuenta.id;
+
+            option.textContent =
+                construirNombreCuenta(
+                    cuenta
+                );
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
 
 }
 
@@ -622,43 +622,43 @@ option
 // ============================================================
 
 function construirNombreCuenta(
-cuenta
+    cuenta
 ) {
 
-let texto =
-cuenta.nombre;
+    let texto =
+        cuenta.nombre;
 
-if (
-cuenta.tipo ===
-"bancaria"
-) {
+    if (
+        cuenta.tipo ===
+        "bancaria"
+    ) {
 
-if (cuenta.banco) {
+        if (cuenta.banco) {
 
-texto +=
-" — " +
-cuenta.banco;
+            texto +=
+                " — " +
+                cuenta.banco;
 
-}
+        }
 
-if (cuenta.numero_cuenta) {
+        if (cuenta.numero_cuenta) {
 
-texto +=
-" (" +
-cuenta.numero_cuenta +
-")";
+            texto +=
+                " (" +
+                cuenta.numero_cuenta +
+                ")";
 
-}
+        }
 
-}
-else {
+    }
+    else {
 
-texto +=
-" — Efectivo";
+        texto +=
+            " — Efectivo";
 
-}
+    }
 
-return texto;
+    return texto;
 
 }
 
@@ -669,68 +669,66 @@ return texto;
 
 async function cargarCuotas() {
 
-const tabla =
-document.getElementById(
-"tablaPagos"
-);
+    const tabla =
+        document.getElementById(
+            "tablaPagos"
+        );
 
-if (tabla) {
+    if (tabla) {
 
-tabla.innerHTML =
-'<tr>' +
+        tabla.innerHTML =
+            '<tr>' +
             '<td colspan="8" class="tabla-cargando">' +
-            '<td colspan="7" class="tabla-cargando">' +
-'Cargando cuotas...' +
-'</td>' +
-'</tr>';
+            'Cargando cuotas...' +
+            '</td>' +
+            '</tr>';
 
-}
-
-
-const resultado =
-await supabaseClient
-.from("cuotas")
-.select(
-"id, socio_id, periodo_id, monto, estado, fecha_emision"
-)
-.order(
-"fecha_emision",
-{
-ascending: false
-}
-);
+    }
 
 
-if (resultado.error) {
+    const resultado =
+        await supabaseClient
+            .from("cuotas")
+            .select(
+                "id, socio_id, periodo_id, monto, estado, fecha_emision"
+            )
+            .order(
+                "fecha_emision",
+                {
+                    ascending: false
+                }
+            );
 
-console.error(
-"Error al cargar cuotas:",
-resultado.error
-);
 
-if (tabla) {
+    if (resultado.error) {
 
-tabla.innerHTML =
-'<tr>' +
+        console.error(
+            "Error al cargar cuotas:",
+            resultado.error
+        );
+
+        if (tabla) {
+
+            tabla.innerHTML =
+                '<tr>' +
                 '<td colspan="8" class="tabla-cargando">' +
-                '<td colspan="7" class="tabla-cargando">' +
-'No fue posible cargar las cuotas.' +
-'</td>' +
-'</tr>';
+                'No fue posible cargar las cuotas.' +
+                '</td>' +
+                '</tr>';
 
-}
+        }
 
-return;
-}
-
-
-cuotas =
-resultado.data || [];
+        return;
+    }
 
 
-await cargarTotalesPagos();
+    cuotas =
+        resultado.data || [];
 
-aplicarFiltros();
+
+    await cargarTotalesPagos();
+
+    aplicarFiltros();
 
 }
 
@@ -741,103 +739,103 @@ aplicarFiltros();
 
 async function cargarTotalesPagos() {
 
-if (
-cuotas.length === 0
-) {
-return;
-}
+    if (
+        cuotas.length === 0
+    ) {
+        return;
+    }
 
 
-const ids =
-cuotas.map(
-function (cuota) {
+    const ids =
+        cuotas.map(
+            function (cuota) {
 
-return cuota.id;
+                return cuota.id;
 
-}
-);
+            }
+        );
 
 
-const resultado =
-await supabaseClient
-.from("pagos_cuotas")
-.select(
-"id, cuota_id, monto, estado"
-)
+    const resultado =
+        await supabaseClient
+            .from("pagos_cuotas")
+            .select(
+                "id, cuota_id, monto, estado"
+            )
             .eq("estado", "activo")
-.in(
-"cuota_id",
-ids
-);
+            .in(
+                "cuota_id",
+                ids
+            );
 
 
-if (resultado.error) {
+    if (resultado.error) {
 
-console.error(
-"Error al cargar pagos:",
-resultado.error
-);
+        console.error(
+            "Error al cargar pagos:",
+            resultado.error
+        );
 
-cuotas.forEach(
-function (cuota) {
+        cuotas.forEach(
+            function (cuota) {
 
-cuota.total_pagado =
-0;
+                cuota.total_pagado =
+                    0;
 
-}
-);
+            }
+        );
 
-return;
-}
-
-
-const pagos =
-resultado.data || [];
+        return;
+    }
 
 
-cuotas.forEach(
-function (cuota) {
-
-const pagosCuota =
-pagos.filter(
-function (pago) {
-
-return (
-Number(
-pago.cuota_id
-) ===
-Number(
-cuota.id
-) &&
-pago.estado ===
-"activo"
-);
-
-}
-);
+    const pagos =
+        resultado.data || [];
 
 
-cuota.total_pagado =
-pagosCuota.reduce(
-function (
-total,
-pago
-) {
+    cuotas.forEach(
+        function (cuota) {
 
-return (
-total +
-Number(
-pago.monto ||
-0
-)
-);
+            const pagosCuota =
+                pagos.filter(
+                    function (pago) {
 
-},
-0
-);
+                        return (
+                            Number(
+                                pago.cuota_id
+                            ) ===
+                            Number(
+                                cuota.id
+                            ) &&
+                            pago.estado ===
+                            "activo"
+                        );
 
-}
-);
+                    }
+                );
+
+
+            cuota.total_pagado =
+                pagosCuota.reduce(
+                    function (
+                        total,
+                        pago
+                    ) {
+
+                        return (
+                            total +
+                            Number(
+                                pago.monto ||
+                                0
+                            )
+                        );
+
+                    },
+                    0
+                );
+
+        }
+    );
 
 }
 
@@ -848,140 +846,140 @@ pago.monto ||
 
 function aplicarFiltros() {
 
-const buscar =
-document.getElementById(
-"buscarSocio"
-);
+    const buscar =
+        document.getElementById(
+            "buscarSocio"
+        );
 
-const estado =
-document.getElementById(
-"filtroEstado"
-);
+    const estado =
+        document.getElementById(
+            "filtroEstado"
+        );
 
-const periodo =
-document.getElementById(
-"periodoSelect"
-);
-
-
-const texto =
-buscar
-? buscar.value
-.trim()
-.toLowerCase()
-: "";
+    const periodo =
+        document.getElementById(
+            "periodoSelect"
+        );
 
 
-const estadoSeleccionado =
-estado
-? estado.value
-: "todos";
+    const texto =
+        buscar
+            ? buscar.value
+                .trim()
+                .toLowerCase()
+            : "";
 
 
-const periodoSeleccionado =
-periodo
-? periodo.value
-: "";
+    const estadoSeleccionado =
+        estado
+            ? estado.value
+            : "todos";
 
 
-const lista =
-cuotas.filter(
-function (cuota) {
-
-const socio =
-obtenerSocio(
-cuota.socio_id
-);
+    const periodoSeleccionado =
+        periodo
+            ? periodo.value
+            : "";
 
 
-const nombre =
-socio
-? construirNombreCompleto(
-socio
-).toLowerCase()
-: "";
+    const lista =
+        cuotas.filter(
+            function (cuota) {
+
+                const socio =
+                    obtenerSocio(
+                        cuota.socio_id
+                    );
 
 
-const rut =
-socio &&
-socio.rut
-? String(
-socio.rut
-).toLowerCase()
-: "";
+                const nombre =
+                    socio
+                        ? construirNombreCompleto(
+                            socio
+                        ).toLowerCase()
+                        : "";
 
 
-const monto =
-Number(
-cuota.monto ||
-0
-);
+                const rut =
+                    socio &&
+                    socio.rut
+                        ? String(
+                            socio.rut
+                        ).toLowerCase()
+                        : "";
 
 
-const pagado =
-Number(
-cuota.total_pagado ||
-0
-);
+                const monto =
+                    Number(
+                        cuota.monto ||
+                        0
+                    );
 
 
-const estadoCalculado =
-determinarEstado(
-monto,
-pagado,
-cuota.estado
-);
+                const pagado =
+                    Number(
+                        cuota.total_pagado ||
+                        0
+                    );
 
 
-const coincideBusqueda =
-texto === "" ||
-nombre.includes(
-texto
-) ||
-rut.includes(
-texto
-);
+                const estadoCalculado =
+                    determinarEstado(
+                        monto,
+                        pagado,
+                        cuota.estado
+                    );
 
 
-const coincideEstado =
-estadoSeleccionado ===
-"todos" ||
-estadoCalculado ===
-estadoSeleccionado;
+                const coincideBusqueda =
+                    texto === "" ||
+                    nombre.includes(
+                        texto
+                    ) ||
+                    rut.includes(
+                        texto
+                    );
 
 
-const coincidePeriodo =
-periodoSeleccionado ===
-"" ||
-String(
-cuota.periodo_id
-) ===
-String(
-periodoSeleccionado
-);
+                const coincideEstado =
+                    estadoSeleccionado ===
+                        "todos" ||
+                    estadoCalculado ===
+                        estadoSeleccionado;
 
 
-return (
-coincideBusqueda &&
-coincideEstado &&
-coincidePeriodo
-);
-
-}
-);
-
-
-renderizarCuotas(
-lista
-);
+                const coincidePeriodo =
+                    periodoSeleccionado ===
+                        "" ||
+                    String(
+                        cuota.periodo_id
+                    ) ===
+                    String(
+                        periodoSeleccionado
+                    );
 
 
-actualizarContador(
-lista.length
-);
+                return (
+                    coincideBusqueda &&
+                    coincideEstado &&
+                    coincidePeriodo
+                );
+
+            }
+        );
 
 
-actualizarResumen();
+    renderizarCuotas(
+        lista
+    );
+
+
+    actualizarContador(
+        lista.length
+    );
+
+
+    actualizarResumen();
 
 }
 
@@ -991,40 +989,40 @@ actualizarResumen();
 // ============================================================
 
 function determinarEstado(
-monto,
-pagado,
-estadoOriginal
+    monto,
+    pagado,
+    estadoOriginal
 ) {
 
-if (
-estadoOriginal ===
-"anulada"
-) {
+    if (
+        estadoOriginal ===
+        "anulada"
+    ) {
 
-return "anulada";
+        return "anulada";
 
-}
-
-
-if (
-pagado <= 0
-) {
-
-return "pendiente";
-
-}
+    }
 
 
-if (
-pagado < monto
-) {
+    if (
+        pagado <= 0
+    ) {
 
-return "parcial";
+        return "pendiente";
 
-}
+    }
 
 
-return "pagada";
+    if (
+        pagado < monto
+    ) {
+
+        return "parcial";
+
+    }
+
+
+    return "pagada";
 
 }
 
@@ -1034,222 +1032,221 @@ return "pagada";
 // ============================================================
 
 function renderizarCuotas(
-lista
+    lista
 ) {
 
-const tabla =
-document.getElementById(
-"tablaPagos"
-);
+    const tabla =
+        document.getElementById(
+            "tablaPagos"
+        );
 
-if (!tabla) {
-return;
-}
-
-
-tabla.innerHTML =
-"";
+    if (!tabla) {
+        return;
+    }
 
 
-if (
-lista.length === 0
-) {
+    tabla.innerHTML =
+        "";
 
-tabla.innerHTML =
-'<tr>' +
+
+    if (
+        lista.length === 0
+    ) {
+
+        tabla.innerHTML =
+            '<tr>' +
             '<td colspan="8" class="tabla-cargando">' +
-            '<td colspan="7" class="tabla-cargando">' +
-'No se encontraron cuotas.' +
-'</td>' +
-'</tr>';
+            'No se encontraron cuotas.' +
+            '</td>' +
+            '</tr>';
 
-return;
-}
-
-
-lista.forEach(
-function (cuota) {
-
-const socio =
-obtenerSocio(
-cuota.socio_id
-);
+        return;
+    }
 
 
-const periodo =
-obtenerPeriodo(
-cuota.periodo_id
-);
+    lista.forEach(
+        function (cuota) {
+
+            const socio =
+                obtenerSocio(
+                    cuota.socio_id
+                );
 
 
-const monto =
-Number(
-cuota.monto ||
-0
-);
+            const periodo =
+                obtenerPeriodo(
+                    cuota.periodo_id
+                );
 
 
-const pagado =
-Number(
-cuota.total_pagado ||
-0
-);
+            const monto =
+                Number(
+                    cuota.monto ||
+                    0
+                );
 
 
-const saldo =
-Math.max(
-monto -
-pagado,
-0
-);
+            const pagado =
+                Number(
+                    cuota.total_pagado ||
+                    0
+                );
 
 
-const estado =
-determinarEstado(
-monto,
-pagado,
-cuota.estado
-);
+            const saldo =
+                Math.max(
+                    monto -
+                    pagado,
+                    0
+                );
 
 
-const fila =
-document.createElement(
-"tr"
-);
+            const estado =
+                determinarEstado(
+                    monto,
+                    pagado,
+                    cuota.estado
+                );
 
 
-fila.innerHTML =
-'<td><strong>' +
-escaparHTML(
-socio
-? construirNombreCompleto(
-socio
-)
-: "Socio no encontrado"
-) +
-'</strong></td>' +
-
-'<td>' +
-escaparHTML(
-periodo
-? String(
-periodo.anio
-)
-: "—"
-) +
-'</td>' +
-
-'<td><strong>' +
-formatearMoneda(
-monto
-) +
-'</strong></td>' +
-
-'<td>' +
-formatearMoneda(
-pagado
-) +
-'</td>' +
-
-'<td><strong>' +
-formatearMoneda(
-saldo
-) +
-'</strong></td>' +
-
-'<td>' +
-'<span class="' +
-obtenerClaseEstado(
-estado
-) +
-'">' +
-traducirEstado(
-estado
-) +
-'</span>' +
-'</td>' +
-
-'<td>' +
-
-(
-saldo > 0
-? '<button type="button" ' +
-'class="boton-tabla" ' +
-'data-accion="pagar" ' +
-'data-id="' +
-cuota.id +
-'">' +
-'Registrar pago' +
-'</button>'
-: ''
-) +
-
-' <button type="button" ' +
-'class="boton-tabla" ' +
-'data-accion="historial" ' +
-'data-id="' +
-cuota.id +
-'">' +
-'Ver pagos' +
-'</button>' +
-
-'</td>';
+            const fila =
+                document.createElement(
+                    "tr"
+                );
 
 
-tabla.appendChild(
-fila
-);
+            fila.innerHTML =
+                '<td><strong>' +
+                escaparHTML(
+                    socio
+                        ? construirNombreCompleto(
+                            socio
+                        )
+                        : "Socio no encontrado"
+                ) +
+                '</strong></td>' +
 
-}
-);
+                '<td>' +
+                escaparHTML(
+                    periodo
+                        ? String(
+                            periodo.anio
+                        )
+                        : "—"
+                ) +
+                '</td>' +
+
+                '<td><strong>' +
+                formatearMoneda(
+                    monto
+                ) +
+                '</strong></td>' +
+
+                '<td>' +
+                formatearMoneda(
+                    pagado
+                ) +
+                '</td>' +
+
+                '<td><strong>' +
+                formatearMoneda(
+                    saldo
+                ) +
+                '</strong></td>' +
+
+                '<td>' +
+                '<span class="' +
+                obtenerClaseEstado(
+                    estado
+                ) +
+                '">' +
+                traducirEstado(
+                    estado
+                ) +
+                '</span>' +
+                '</td>' +
+
+                '<td>' +
+
+                (
+                    saldo > 0
+                        ? '<button type="button" ' +
+                          'class="boton-tabla" ' +
+                          'data-accion="pagar" ' +
+                          'data-id="' +
+                          cuota.id +
+                          '">' +
+                          'Registrar pago' +
+                          '</button>'
+                        : ''
+                ) +
+
+                ' <button type="button" ' +
+                'class="boton-tabla" ' +
+                'data-accion="historial" ' +
+                'data-id="' +
+                cuota.id +
+                '">' +
+                'Ver pagos' +
+                '</button>' +
+
+                '</td>';
 
 
-tabla
-.querySelectorAll(
-'[data-accion="pagar"]'
-)
-.forEach(
-function (boton) {
+            tabla.appendChild(
+                fila
+            );
 
-boton.addEventListener(
-"click",
-function () {
-
-abrirModalPago(
-Number(
-boton.dataset.id
-)
-);
-
-}
-);
-
-}
-);
+        }
+    );
 
 
-tabla
-.querySelectorAll(
-'[data-accion="historial"]'
-)
-.forEach(
-function (boton) {
+    tabla
+        .querySelectorAll(
+            '[data-accion="pagar"]'
+        )
+        .forEach(
+            function (boton) {
 
-boton.addEventListener(
-"click",
-function () {
+                boton.addEventListener(
+                    "click",
+                    function () {
 
-abrirHistorial(
-Number(
-boton.dataset.id
-)
-);
+                        abrirModalPago(
+                            Number(
+                                boton.dataset.id
+                            )
+                        );
 
-}
-);
+                    }
+                );
 
-}
-);
+            }
+        );
+
+
+    tabla
+        .querySelectorAll(
+            '[data-accion="historial"]'
+        )
+        .forEach(
+            function (boton) {
+
+                boton.addEventListener(
+                    "click",
+                    function () {
+
+                        abrirHistorial(
+                            Number(
+                                boton.dataset.id
+                            )
+                        );
+
+                    }
+                );
+
+            }
+        );
 
 }
 
@@ -1259,183 +1256,183 @@ boton.dataset.id
 // ============================================================
 
 function abrirModalPago(
-id
+    id
 ) {
 
-const cuota =
-cuotas.find(
-function (elemento) {
+    const cuota =
+        cuotas.find(
+            function (elemento) {
 
-return Number(
-elemento.id
-) ===
-Number(id);
+                return Number(
+                    elemento.id
+                ) ===
+                Number(id);
 
-}
-);
-
-
-if (!cuota) {
-
-alert(
-"No fue posible encontrar la cuota."
-);
-
-return;
-}
+            }
+        );
 
 
-const socio =
-obtenerSocio(
-cuota.socio_id
-);
+    if (!cuota) {
+
+        alert(
+            "No fue posible encontrar la cuota."
+        );
+
+        return;
+    }
 
 
-const periodo =
-obtenerPeriodo(
-cuota.periodo_id
-);
+    const socio =
+        obtenerSocio(
+            cuota.socio_id
+        );
 
 
-const monto =
-Number(
-cuota.monto ||
-0
-);
+    const periodo =
+        obtenerPeriodo(
+            cuota.periodo_id
+        );
 
 
-const pagado =
-Number(
-cuota.total_pagado ||
-0
-);
+    const monto =
+        Number(
+            cuota.monto ||
+            0
+        );
 
 
-const saldo =
-Math.max(
-monto -
-pagado,
-0
-);
+    const pagado =
+        Number(
+            cuota.total_pagado ||
+            0
+        );
 
 
-if (
-saldo <= 0
-) {
-
-alert(
-"Esta cuota ya se encuentra completamente pagada."
-);
-
-return;
-}
+    const saldo =
+        Math.max(
+            monto -
+            pagado,
+            0
+        );
 
 
-document.getElementById(
-"pagoCuotaId"
-).value =
-cuota.id;
+    if (
+        saldo <= 0
+    ) {
+
+        alert(
+            "Esta cuota ya se encuentra completamente pagada."
+        );
+
+        return;
+    }
 
 
-document.getElementById(
-"pagoSocio"
-).textContent =
-socio
-? construirNombreCompleto(
-socio
-)
-: "—";
+    document.getElementById(
+        "pagoCuotaId"
+    ).value =
+        cuota.id;
 
 
-document.getElementById(
-"pagoPeriodo"
-).textContent =
-periodo
-? periodo.anio
-: "—";
+    document.getElementById(
+        "pagoSocio"
+    ).textContent =
+        socio
+            ? construirNombreCompleto(
+                socio
+            )
+            : "—";
 
 
-document.getElementById(
-"pagoMontoCuota"
-).textContent =
-formatearMoneda(
-monto
-);
+    document.getElementById(
+        "pagoPeriodo"
+    ).textContent =
+        periodo
+            ? periodo.anio
+            : "—";
 
 
-document.getElementById(
-"pagoPagado"
-).textContent =
-formatearMoneda(
-pagado
-);
+    document.getElementById(
+        "pagoMontoCuota"
+    ).textContent =
+        formatearMoneda(
+            monto
+        );
 
 
-document.getElementById(
-"pagoSaldo"
-).textContent =
-formatearMoneda(
-saldo
-);
+    document.getElementById(
+        "pagoPagado"
+    ).textContent =
+        formatearMoneda(
+            pagado
+        );
 
 
-document.getElementById(
-"pagoMonto"
-).value =
-"";
+    document.getElementById(
+        "pagoSaldo"
+    ).textContent =
+        formatearMoneda(
+            saldo
+        );
 
 
-document.getElementById(
-"pagoMonto"
-).max =
-saldo;
+    document.getElementById(
+        "pagoMonto"
+    ).value =
+        "";
 
 
-document.getElementById(
-"medioPago"
-).value =
-"";
+    document.getElementById(
+        "pagoMonto"
+    ).max =
+        saldo;
 
 
-document.getElementById(
-"cuentaPago"
-).value =
-"";
+    document.getElementById(
+        "medioPago"
+    ).value =
+        "";
 
 
-document.getElementById(
-"fechaPago"
-).value =
-obtenerFechaActual();
+    document.getElementById(
+        "cuentaPago"
+    ).value =
+        "";
 
 
-document.getElementById(
-"numeroComprobante"
-).value =
-"";
+    document.getElementById(
+        "fechaPago"
+    ).value =
+        obtenerFechaActual();
 
 
-document.getElementById(
-"bancoOrigen"
-).value =
-"";
+    document.getElementById(
+        "numeroComprobante"
+    ).value =
+        "";
 
 
-document.getElementById(
-"observacionPago"
-).value =
-"";
+    document.getElementById(
+        "bancoOrigen"
+    ).value =
+        "";
 
 
-document.getElementById(
-"modalPago"
-).style.display =
-"flex";
+    document.getElementById(
+        "observacionPago"
+    ).value =
+        "";
 
 
-document.getElementById(
-"pagoMonto"
-).focus();
+    document.getElementById(
+        "modalPago"
+    ).style.display =
+        "flex";
+
+
+    document.getElementById(
+        "pagoMonto"
+    ).focus();
 
 }
 
@@ -1448,228 +1445,111 @@ async function guardarPago(event) {
     if (event) {
         event.preventDefault();
     }
-async function guardarPago(
-    event
-) {
 
-    event.preventDefault();
-
-
-const cuotaId =
-Number(
+    const cuotaId =
+        Number(
             document.getElementById("pagoCuotaId")?.value || 0
-            document.getElementById(
-                "pagoCuotaId"
-            ).value
-);
+        );
 
-
-const monto =
-Number(
+    const monto =
+        Number(
             document.getElementById("pagoMonto")?.value || 0
-            document.getElementById(
-                "pagoMonto"
-            ).value
-);
+        );
 
     const medioPago =
         document.getElementById("medioPago")?.value || "";
 
-const cuentaId =
-Number(
+    const cuentaId =
+        Number(
             document.getElementById("cuentaPago")?.value || 0
-            document.getElementById(
-                "cuentaPago"
-            ).value
-);
-
-
-    const medioPago =
-        document.getElementById(
-            "medioPago"
-        ).value;
-
-
-const fechaPago =
-        document.getElementById("fechaPago")?.value || "";
-        document.getElementById(
-            "fechaPago"
-        ).value;
-
-
-const comprobante =
-        document.getElementById("numeroComprobante")?.value.trim() || "";
-        document.getElementById(
-            "numeroComprobante"
-        ).value.trim();
-
-
-const bancoOrigen =
-        document.getElementById("bancoOrigen")?.value.trim() || "";
-        document.getElementById(
-            "bancoOrigen"
-        ).value.trim();
-
-
-const observacion =
-        document.getElementById("observacionPago")?.value.trim() || "";
-        document.getElementById(
-            "observacionPago"
-        ).value.trim();
-
-
-if (!cuotaId) {
-        alert("No se ha seleccionado una cuota.");
-
-        alert(
-            "No se ha seleccionado una cuota."
         );
 
-return;
-}
+    const fechaPago =
+        document.getElementById("fechaPago")?.value || "";
+
+    const comprobante =
+        document.getElementById("numeroComprobante")?.value.trim() || "";
+
+    const bancoOrigen =
+        document.getElementById("bancoOrigen")?.value.trim() || "";
+
+    const observacion =
+        document.getElementById("observacionPago")?.value.trim() || "";
+
+    if (!cuotaId) {
+        alert("No se ha seleccionado una cuota.");
+        return;
+    }
 
     if (!monto || monto <= 0) {
         alert("Debe ingresar un monto válido.");
+        return;
+    }
 
-    if (
-        !monto ||
-        monto <= 0
-    ) {
-
-        alert(
-            "Debe ingresar un monto válido."
-        );
-
-return;
-}
-
-
-const cuota =
+    const cuota =
         cuotas.find(function (elemento) {
             return Number(elemento.id) === cuotaId;
         });
-        cuotas.find(
-            function (elemento) {
 
-                return Number(
-                    elemento.id
-                ) === cuotaId;
-
-            }
-        );
-
-
-if (!cuota) {
+    if (!cuota) {
         alert("No fue posible encontrar la cuota.");
+        return;
+    }
 
-        alert(
-            "No fue posible encontrar la cuota."
-        );
-
-return;
-}
-
-
-const saldo =
-Math.max(
+    const saldo =
+        Math.max(
             Number(cuota.monto || 0) -
             Number(cuota.total_pagado || 0),
-            Number(
-                cuota.monto ||
-                0
-            ) -
-            Number(
-                cuota.total_pagado ||
-                0
-            ),
-0
-);
+            0
+        );
 
     if (monto > saldo) {
-
-    if (
-        monto > saldo
-    ) {
-
-alert(
-"El monto ingresado supera el saldo pendiente de la cuota.\n\n" +
-"Saldo pendiente: " +
+        alert(
+            "El monto ingresado supera el saldo pendiente de la cuota.\n\n" +
+            "Saldo pendiente: " +
             formatearMoneda(saldo)
-            formatearMoneda(
-                saldo
-            )
-);
+        );
+        return;
+    }
 
-return;
-}
-
-
-if (!medioPago) {
+    if (!medioPago) {
         alert("Debe seleccionar el medio de pago.");
+        return;
+    }
 
-        alert(
-            "Debe seleccionar el medio de pago."
-        );
-
-return;
-}
-
-
-if (!cuentaId) {
+    if (!cuentaId) {
         alert("Debe seleccionar la cuenta de destino.");
+        return;
+    }
 
-        alert(
-            "Debe seleccionar la cuenta de destino."
-        );
-
-return;
-}
-
-
-if (!fechaPago) {
+    if (!fechaPago) {
         alert("Debe indicar la fecha del pago.");
         return;
     }
 
     if (!usuarioActual || !usuarioActual.id) {
         alert("No se pudo identificar al usuario autenticado.");
-        alert(
-            "Debe indicar la fecha del pago."
-        );
+        return;
+    }
 
-return;
-}
-
-
-const boton =
+    const boton =
         document.getElementById("guardarPago");
-        document.getElementById(
-            "guardarPago"
-        );
 
-
-if (boton) {
+    if (boton) {
         boton.disabled = true;
         boton.textContent = "Registrando...";
-
-        boton.disabled =
-            true;
-
-        boton.textContent =
-            "Registrando...";
-
-}
+    }
 
     let pagoRegistradoId = null;
 
-try {
+    try {
         // ========================================================
         // 1. REGISTRAR EL PAGO
         // ========================================================
 
-const resultado =
-await supabaseClient
-.from("pagos_cuotas")
+        const resultado =
+            await supabaseClient
+                .from("pagos_cuotas")
                 .insert({
                     cuota_id: cuotaId,
                     cuenta_id: cuentaId,
@@ -1687,18 +1567,12 @@ await supabaseClient
                 })
                 .select("id")
                 .single();
-                .insert(
-                    {
-                        cuota_id:
-                            cuotaId,
 
         if (resultado.error) {
             console.error(
                 "Error al registrar pago:",
                 resultado.error
             );
-                        cuenta_id:
-                            cuentaId,
 
             alert(
                 obtenerMensajeError(
@@ -1733,20 +1607,14 @@ await supabaseClient
             "Pago registrado correctamente. ID:",
             pagoRegistradoId
         );
-                        monto:
-                            monto,
 
         // ========================================================
         // 2. EMITIR COMPROBANTE
         // ========================================================
-                        medio_pago:
-                            medioPago,
 
         if (boton) {
             boton.textContent = "Generando comprobante...";
         }
-                        fecha_pago:
-                            fechaPago,
 
         const resultadoComprobante =
             await supabaseClient.rpc(
@@ -1756,27 +1624,18 @@ await supabaseClient
                         pagoRegistradoId
                 }
             );
-                        numero_comprobante:
-                            comprobante ||
-                            null,
 
         if (resultadoComprobante.error) {
             console.error(
                 "Pago registrado, pero falló la emisión del comprobante:",
                 resultadoComprobante.error
             );
-                        banco_origen:
-                            bancoOrigen ||
-                            null,
 
             alert(
                 "El pago fue registrado correctamente.\n\n" +
                 "Sin embargo, no fue posible emitir el comprobante automáticamente.\n\n" +
                 "El pago NO se ha perdido ni eliminado. Puede emitir el comprobante posteriormente desde el historial de pagos."
             );
-                        observacion:
-                            observacion ||
-                            null,
 
             cerrarModalPago();
 
@@ -1786,10 +1645,7 @@ await supabaseClient
                 console.error(
                     "El pago quedó registrado, pero no fue posible actualizar la pantalla:",
                     errorActualizacion
-                        created_by:
-                            usuarioActual.id
-                    }
-);
+                );
             }
 
             return;
@@ -1862,23 +1718,17 @@ await supabaseClient
                     );
             }
         }
-        if (resultado.error) {
 
         if (!comprobanteId) {
-console.error(
+            console.error(
                 "La emisión del comprobante terminó correctamente, pero no fue posible obtener su ID.",
                 resultadoComprobante
-                "Error al registrar pago:",
-                resultado.error
-);
+            );
 
-alert(
+            alert(
                 "El pago fue registrado correctamente y el comprobante fue emitido, pero no fue posible abrirlo automáticamente.\n\n" +
                 "Puede encontrarlo posteriormente en el historial de pagos."
-                obtenerMensajeError(
-                    resultado.error
-                )
-);
+            );
 
             cerrarModalPago();
 
@@ -1891,23 +1741,20 @@ alert(
                 );
             }
 
-return;
-}
+            return;
+        }
 
         console.log(
             "Comprobante emitido correctamente. ID:",
             comprobanteId
-
-        alert(
-            "Pago registrado correctamente."
-);
+        );
 
         // ========================================================
         // 4. ACTUALIZAR PANTALLA SIN CONFUNDIR UN ERROR DE CARGA
         //    CON UN ERROR DE REGISTRO
         // ========================================================
 
-cerrarModalPago();
+        cerrarModalPago();
 
         try {
             await cargarCuotas();
@@ -1921,22 +1768,18 @@ cerrarModalPago();
         // ========================================================
         // 5. ABRIR COMPROBANTE
         // ========================================================
-        await cargarCuotas();
 
         window.location.href =
             "comprobante.html?id=" +
             encodeURIComponent(
                 String(comprobanteId)
             );
-    }
-    catch (error) {
 
     } catch (error) {
-console.error(
+        console.error(
             "Error inesperado al registrar el pago:",
-            "Error inesperado:",
-error
-);
+            error
+        );
 
         // Si ya obtuvimos un ID, el INSERT sí ocurrió.
         // No debemos decir que el pago falló ni pedir que se repita.
@@ -1953,28 +1796,13 @@ error
                 "Revise la consola del navegador para conocer el error exacto."
             );
         }
-        alert(
-            "Ocurrió un error inesperado al registrar el pago."
-        );
-
-    }
-    finally {
 
     } finally {
-if (boton) {
+        if (boton) {
             boton.disabled = false;
             boton.textContent = "Registrar pago";
-
-            boton.disabled =
-                false;
-
-            boton.textContent =
-                "Registrar pago";
-
-}
-
-}
-
+        }
+    }
 }
 
 
@@ -1983,167 +1811,167 @@ if (boton) {
 // ============================================================
 
 async function abrirHistorial(
-cuotaId
+    cuotaId
 ) {
 
-const cuota =
-cuotas.find(
-function (elemento) {
+    const cuota =
+        cuotas.find(
+            function (elemento) {
 
-return Number(
-elemento.id
-) ===
-Number(cuotaId);
+                return Number(
+                    elemento.id
+                ) ===
+                Number(cuotaId);
 
-}
-);
-
-
-if (!cuota) {
-return;
-}
+            }
+        );
 
 
-const contenido =
-document.getElementById(
-"historialContenido"
-);
+    if (!cuota) {
+        return;
+    }
 
 
-const acciones =
-document.getElementById(
-"accionesHistorial"
-);
+    const contenido =
+        document.getElementById(
+            "historialContenido"
+        );
 
 
-const socio =
-obtenerSocio(
-cuota.socio_id
-);
+    const acciones =
+        document.getElementById(
+            "accionesHistorial"
+        );
 
 
-const periodo =
-obtenerPeriodo(
-cuota.periodo_id
-);
+    const socio =
+        obtenerSocio(
+            cuota.socio_id
+        );
 
 
-const montoCuota =
-Number(
-cuota.monto ||
-0
-);
+    const periodo =
+        obtenerPeriodo(
+            cuota.periodo_id
+        );
 
 
-const totalPagado =
-Number(
-cuota.total_pagado ||
-0
-);
+    const montoCuota =
+        Number(
+            cuota.monto ||
+            0
+        );
 
 
-const saldo =
-Math.max(
-montoCuota -
-totalPagado,
-0
-);
+    const totalPagado =
+        Number(
+            cuota.total_pagado ||
+            0
+        );
 
 
-contenido.innerHTML =
-"<div>" +
-
-"<p><strong>Socio:</strong> " +
-escaparHTML(
-socio
-? construirNombreCompleto(
-socio
-)
-: "—"
-) +
-"</p>" +
-
-"<p><strong>Período:</strong> " +
-escaparHTML(
-periodo
-? String(
-periodo.anio
-)
-: "—"
-) +
-"</p>" +
-
-"<p><strong>Monto de la cuota:</strong> " +
-formatearMoneda(
-montoCuota
-) +
-"</p>" +
-
-"<p><strong>Total pagado:</strong> " +
-formatearMoneda(
-totalPagado
-) +
-"</p>" +
-
-"<p><strong>Saldo pendiente:</strong> " +
-formatearMoneda(
-saldo
-) +
-"</p>" +
-
-"<p>Cargando pagos...</p>" +
-
-"</div>";
+    const saldo =
+        Math.max(
+            montoCuota -
+            totalPagado,
+            0
+        );
 
 
-if (acciones) {
+    contenido.innerHTML =
+        "<div>" +
 
-acciones.style.display =
-"none";
+        "<p><strong>Socio:</strong> " +
+        escaparHTML(
+            socio
+                ? construirNombreCompleto(
+                    socio
+                )
+                : "—"
+        ) +
+        "</p>" +
 
-}
+        "<p><strong>Período:</strong> " +
+        escaparHTML(
+            periodo
+                ? String(
+                    periodo.anio
+                )
+                : "—"
+        ) +
+        "</p>" +
+
+        "<p><strong>Monto de la cuota:</strong> " +
+        formatearMoneda(
+            montoCuota
+        ) +
+        "</p>" +
+
+        "<p><strong>Total pagado:</strong> " +
+        formatearMoneda(
+            totalPagado
+        ) +
+        "</p>" +
+
+        "<p><strong>Saldo pendiente:</strong> " +
+        formatearMoneda(
+            saldo
+        ) +
+        "</p>" +
+
+        "<p>Cargando pagos...</p>" +
+
+        "</div>";
 
 
-document.getElementById(
-"modalHistorial"
-).style.display =
-"flex";
+    if (acciones) {
+
+        acciones.style.display =
+            "none";
+
+    }
 
 
-const resultado =
-await supabaseClient
-.from("pagos_cuotas")
-.select(
-"id, monto, medio_pago, fecha_pago, numero_comprobante, banco_origen, observacion, estado, created_at, fecha_anulacion, motivo_anulacion"
-)
-.eq(
-"cuota_id",
-cuotaId
-)
-.order(
-"fecha_pago",
-{
-ascending: false
-}
-);
+    document.getElementById(
+        "modalHistorial"
+    ).style.display =
+        "flex";
 
 
-if (resultado.error) {
+    const resultado =
+        await supabaseClient
+            .from("pagos_cuotas")
+            .select(
+                "id, monto, medio_pago, fecha_pago, numero_comprobante, banco_origen, observacion, estado, created_at, fecha_anulacion, motivo_anulacion"
+            )
+            .eq(
+                "cuota_id",
+                cuotaId
+            )
+            .order(
+                "fecha_pago",
+                {
+                    ascending: false
+                }
+            );
 
-console.error(
-"Error al cargar historial:",
-resultado.error
-);
 
-contenido.innerHTML =
-"<p>No fue posible cargar el historial.</p>";
+    if (resultado.error) {
 
-return;
-}
+        console.error(
+            "Error al cargar historial:",
+            resultado.error
+        );
+
+        contenido.innerHTML =
+            "<p>No fue posible cargar el historial.</p>";
+
+        return;
+    }
 
 
-const pagos =
-resultado.data || [];
+    const pagos =
+        resultado.data || [];
 
 
     // ------------------------------------------------------------
@@ -2183,134 +2011,134 @@ resultado.data || [];
     }
 
 
-let html =
+    let html =
 
-"<div class='historial-resumen'>" +
+        "<div class='historial-resumen'>" +
 
-"<p><strong>Socio:</strong> " +
-escaparHTML(
-socio
-? construirNombreCompleto(
-socio
-)
-: "—"
-) +
-"</p>" +
+        "<p><strong>Socio:</strong> " +
+        escaparHTML(
+            socio
+                ? construirNombreCompleto(
+                    socio
+                )
+                : "—"
+        ) +
+        "</p>" +
 
-"<p><strong>Período:</strong> " +
-escaparHTML(
-periodo
-? String(
-periodo.anio
-)
-: "—"
-) +
-"</p>" +
+        "<p><strong>Período:</strong> " +
+        escaparHTML(
+            periodo
+                ? String(
+                    periodo.anio
+                )
+                : "—"
+        ) +
+        "</p>" +
 
-"<p><strong>Monto de la cuota:</strong> " +
-formatearMoneda(
-montoCuota
-) +
-"</p>" +
+        "<p><strong>Monto de la cuota:</strong> " +
+        formatearMoneda(
+            montoCuota
+        ) +
+        "</p>" +
 
-"<p><strong>Total pagado:</strong> " +
-formatearMoneda(
-totalPagado
-) +
-"</p>" +
+        "<p><strong>Total pagado:</strong> " +
+        formatearMoneda(
+            totalPagado
+        ) +
+        "</p>" +
 
-"<p><strong>Saldo pendiente:</strong> " +
-formatearMoneda(
-saldo
-) +
-"</p>" +
+        "<p><strong>Saldo pendiente:</strong> " +
+        formatearMoneda(
+            saldo
+        ) +
+        "</p>" +
 
-"</div>";
-
-
-if (
-pagos.length === 0
-) {
-
-html +=
-"<p>No existen pagos registrados para esta cuota.</p>";
-
-contenido.innerHTML =
-html;
-
-return;
-}
+        "</div>";
 
 
-html +=
+    if (
+        pagos.length === 0
+    ) {
 
-"<table class='tabla-socios'>" +
+        html +=
+            "<p>No existen pagos registrados para esta cuota.</p>";
 
-"<thead>" +
+        contenido.innerHTML =
+            html;
 
-"<tr>" +
+        return;
+    }
 
-"<th>Fecha</th>" +
 
-"<th>Monto</th>" +
+    html +=
 
-"<th>Medio</th>" +
+        "<table class='tabla-socios'>" +
 
-"<th>Comprobante</th>" +
+        "<thead>" +
 
-"<th>Banco</th>" +
+        "<tr>" +
+
+        "<th>Fecha</th>" +
+
+        "<th>Monto</th>" +
+
+        "<th>Medio</th>" +
+
+        "<th>Comprobante</th>" +
+
+        "<th>Banco</th>" +
 
         "<th>Comprobante cuota</th>" +
 
-"<th>Estado</th>" +
+        "<th>Estado</th>" +
 
-"<th>Acción</th>" +
+        "<th>Acción</th>" +
 
-"</tr>" +
+        "</tr>" +
 
-"</thead>" +
+        "</thead>" +
 
-"<tbody>";
+        "<tbody>";
 
 
-pagos.forEach(
-function (pago) {
+    pagos.forEach(
+        function (pago) {
 
-html +=
+            html +=
 
-"<tr>" +
+                "<tr>" +
 
-"<td>" +
-formatearFecha(
-pago.fecha_pago
-) +
-"</td>" +
+                "<td>" +
+                formatearFecha(
+                    pago.fecha_pago
+                ) +
+                "</td>" +
 
-"<td><strong>" +
-formatearMoneda(
-pago.monto
-) +
-"</strong></td>" +
+                "<td><strong>" +
+                formatearMoneda(
+                    pago.monto
+                ) +
+                "</strong></td>" +
 
-"<td>" +
-traducirMedioPago(
-pago.medio_pago
-) +
-"</td>" +
+                "<td>" +
+                traducirMedioPago(
+                    pago.medio_pago
+                ) +
+                "</td>" +
 
-"<td>" +
-escaparHTML(
-pago.numero_comprobante ||
-"—"
-) +
-"</td>" +
+                "<td>" +
+                escaparHTML(
+                    pago.numero_comprobante ||
+                    "—"
+                ) +
+                "</td>" +
 
-"<td>" +
-escaparHTML(
-pago.banco_origen ||
-"—"
-) +
-"</td>" +
+                "<td>" +
+                escaparHTML(
+                    pago.banco_origen ||
+                    "—"
+                ) +
+                "</td>" +
 
                 "<td>" +
                 (
@@ -2327,13 +2155,13 @@ pago.banco_origen ||
                 ) +
                 "</td>" +
 
-"<td>" +
-traducirEstadoPago(
-pago.estado
-) +
-"</td>" +
+                "<td>" +
+                traducirEstadoPago(
+                    pago.estado
+                ) +
+                "</td>" +
 
-"<td>" +
+                "<td>" +
 
                 (
                     comprobantesPorPago[Number(pago.id)]
@@ -2355,69 +2183,68 @@ pago.estado
                             : ""
                 ) +
 
-(
-pago.estado ===
-"activo"
+                (
+                    pago.estado ===
+                    "activo"
 
-? "<button type='button' " +
-"class='boton-tabla boton-anular-pago' " +
-"data-id='" +
-pago.id +
-"'>" +
-"Anular" +
-"</button>"
+                        ? "<button type='button' " +
+                          "class='boton-tabla boton-anular-pago' " +
+                          "data-id='" +
+                          pago.id +
+                          "'>" +
+                          "Anular" +
+                          "</button>"
 
                         : ""
-                        : "—"
-) +
+                ) +
 
-"</td>" +
+                "</td>" +
 
-"</tr>";
+                "</tr>";
 
-}
-);
-
-
-html +=
-"</tbody></table>";
+        }
+    );
 
 
-contenido.innerHTML =
-html;
+    html +=
+        "</tbody></table>";
 
 
-if (acciones) {
-
-acciones.style.display =
-"flex";
-
-}
+    contenido.innerHTML =
+        html;
 
 
-contenido
-.querySelectorAll(
-".boton-anular-pago"
-)
-.forEach(
-function (boton) {
+    if (acciones) {
 
-boton.addEventListener(
-"click",
-function () {
+        acciones.style.display =
+            "flex";
 
-anularPago(
-Number(
-boton.dataset.id
-),
-cuotaId
-);
+    }
 
-}
-);
 
-}
-);
+    contenido
+        .querySelectorAll(
+            ".boton-anular-pago"
+        )
+        .forEach(
+            function (boton) {
+
+                boton.addEventListener(
+                    "click",
+                    function () {
+
+                        anularPago(
+                            Number(
+                                boton.dataset.id
+                            ),
+                            cuotaId
+                        );
+
+                    }
+                );
+
+            }
+        );
 
 
     contenido
@@ -2480,549 +2307,549 @@ cuotaId
 
 function imprimirHistorial() {
 
-const contenido =
-document.getElementById(
-"historialContenido"
-);
+    const contenido =
+        document.getElementById(
+            "historialContenido"
+        );
 
 
-if (!contenido) {
+    if (!contenido) {
 
-return;
+        return;
 
-}
+    }
 
 
-const texto =
-contenido.textContent ||
-"";
+    const texto =
+        contenido.textContent ||
+        "";
 
 
-if (
-texto.includes(
-"Cargando pagos"
-)
-) {
+    if (
+        texto.includes(
+            "Cargando pagos"
+        )
+    ) {
 
-alert(
-"Espere mientras se carga el historial."
-);
+        alert(
+            "Espere mientras se carga el historial."
+        );
 
-return;
-}
+        return;
+    }
 
 
-if (
-texto.includes(
-"No existen pagos registrados"
-)
-) {
+    if (
+        texto.includes(
+            "No existen pagos registrados"
+        )
+    ) {
 
-alert(
-"No existen pagos registrados para imprimir."
-);
+        alert(
+            "No existen pagos registrados para imprimir."
+        );
 
-return;
-}
+        return;
+    }
 
 
-const ventana =
-window.open(
-"",
-"_blank",
-"width=1000,height=800"
-);
+    const ventana =
+        window.open(
+            "",
+            "_blank",
+            "width=1000,height=800"
+        );
 
 
-if (!ventana) {
+    if (!ventana) {
 
-alert(
-"El navegador bloqueó la ventana de impresión. Permita ventanas emergentes para este sitio."
-);
+        alert(
+            "El navegador bloqueó la ventana de impresión. Permita ventanas emergentes para este sitio."
+        );
 
-return;
-}
+        return;
+    }
 
 
-// ========================================================
-// OBTENER INFORMACIÓN DEL SOCIO Y PERÍODO
-// ========================================================
+    // ========================================================
+    // OBTENER INFORMACIÓN DEL SOCIO Y PERÍODO
+    // ========================================================
 
-const cuotaSeleccionada =
-cuotas.find(
-function (cuota) {
+    const cuotaSeleccionada =
+        cuotas.find(
+            function (cuota) {
 
-return (
-contenido.textContent
-.includes(
-construirNombreCompleto(
-obtenerSocio(
-cuota.socio_id
-) || {}
-)
-)
-);
+                return (
+                    contenido.textContent
+                        .includes(
+                            construirNombreCompleto(
+                                obtenerSocio(
+                                    cuota.socio_id
+                                ) || {}
+                            )
+                        )
+                );
 
-}
-);
+            }
+        );
 
 
-let nombreSocio =
-"Socio";
+    let nombreSocio =
+        "Socio";
 
 
-let rutSocio =
-"";
+    let rutSocio =
+        "";
 
 
-let periodoSocio =
-"";
+    let periodoSocio =
+        "";
 
 
-if (cuotaSeleccionada) {
+    if (cuotaSeleccionada) {
 
-const socio =
-obtenerSocio(
-cuotaSeleccionada.socio_id
-);
+        const socio =
+            obtenerSocio(
+                cuotaSeleccionada.socio_id
+            );
 
 
-const periodo =
-obtenerPeriodo(
-cuotaSeleccionada.periodo_id
-);
+        const periodo =
+            obtenerPeriodo(
+                cuotaSeleccionada.periodo_id
+            );
 
 
-if (socio) {
+        if (socio) {
 
-nombreSocio =
-construirNombreCompleto(
-socio
-);
+            nombreSocio =
+                construirNombreCompleto(
+                    socio
+                );
 
 
-rutSocio =
-socio.rut
-? String(
-socio.rut
-)
-: "";
+            rutSocio =
+                socio.rut
+                    ? String(
+                        socio.rut
+                    )
+                    : "";
 
-}
+        }
 
 
-if (periodo) {
+        if (periodo) {
 
-periodoSocio =
-String(
-periodo.anio
-);
+            periodoSocio =
+                String(
+                    periodo.anio
+                );
 
-}
+        }
 
-}
+    }
 
 
-// ========================================================
-// CONTENIDO A IMPRIMIR
-// ========================================================
+    // ========================================================
+    // CONTENIDO A IMPRIMIR
+    // ========================================================
 
-const contenidoImpresion =
-contenido.innerHTML
-.replace(
-/<button[\s\S]*?<\/button>/gi,
-""
-);
+    const contenidoImpresion =
+        contenido.innerHTML
+            .replace(
+                /<button[\s\S]*?<\/button>/gi,
+                ""
+            );
 
 
-// ========================================================
-// FECHA DE EMISIÓN
-// ========================================================
+    // ========================================================
+    // FECHA DE EMISIÓN
+    // ========================================================
 
-const fechaEmision =
-formatearFecha(
-obtenerFechaActual()
-);
+    const fechaEmision =
+        formatearFecha(
+            obtenerFechaActual()
+        );
 
 
-// ========================================================
-// DOCUMENTO DE IMPRESIÓN
-// ========================================================
+    // ========================================================
+    // DOCUMENTO DE IMPRESIÓN
+    // ========================================================
 
-ventana.document.open();
+    ventana.document.open();
 
 
-ventana.document.write(
-"<!DOCTYPE html>" +
+    ventana.document.write(
+        "<!DOCTYPE html>" +
 
-"<html lang='es'>" +
+        "<html lang='es'>" +
 
-"<head>" +
+        "<head>" +
 
-"<meta charset='UTF-8'>" +
+        "<meta charset='UTF-8'>" +
 
-"<title>Historial de pagos - " +
-escaparHTML(
-nombreSocio
-) +
-"</title>" +
+        "<title>Historial de pagos - " +
+        escaparHTML(
+            nombreSocio
+        ) +
+        "</title>" +
 
 
-"<style>" +
+        "<style>" +
 
-"* {" +
-"box-sizing: border-box;" +
-"}" +
+        "* {" +
+        "box-sizing: border-box;" +
+        "}" +
 
 
-"body {" +
-"font-family: Arial, Helvetica, sans-serif;" +
-"margin: 40px;" +
-"color: #222;" +
-"font-size: 13px;" +
-"}" +
+        "body {" +
+        "font-family: Arial, Helvetica, sans-serif;" +
+        "margin: 40px;" +
+        "color: #222;" +
+        "font-size: 13px;" +
+        "}" +
 
 
-".encabezado {" +
-"border-bottom: 2px solid #222;" +
-"padding-bottom: 15px;" +
-"margin-bottom: 25px;" +
-"}" +
+        ".encabezado {" +
+        "border-bottom: 2px solid #222;" +
+        "padding-bottom: 15px;" +
+        "margin-bottom: 25px;" +
+        "}" +
 
 
-".encabezado h1 {" +
-"margin: 0 0 5px 0;" +
-"font-size: 22px;" +
-"}" +
+        ".encabezado h1 {" +
+        "margin: 0 0 5px 0;" +
+        "font-size: 22px;" +
+        "}" +
 
 
-".encabezado p {" +
-"margin: 3px 0;" +
-"}" +
+        ".encabezado p {" +
+        "margin: 3px 0;" +
+        "}" +
 
 
-".titulo {" +
-"margin-bottom: 20px;" +
-"}" +
+        ".titulo {" +
+        "margin-bottom: 20px;" +
+        "}" +
 
 
-".titulo h2 {" +
-"margin: 0;" +
-"font-size: 18px;" +
-"}" +
+        ".titulo h2 {" +
+        "margin: 0;" +
+        "font-size: 18px;" +
+        "}" +
 
 
-".titulo p {" +
-"margin: 5px 0 0 0;" +
-"color: #555;" +
-"}" +
+        ".titulo p {" +
+        "margin: 5px 0 0 0;" +
+        "color: #555;" +
+        "}" +
 
 
-".historial-resumen {" +
-"border: 1px solid #ccc;" +
-"padding: 15px;" +
-"margin-bottom: 20px;" +
-"}" +
+        ".historial-resumen {" +
+        "border: 1px solid #ccc;" +
+        "padding: 15px;" +
+        "margin-bottom: 20px;" +
+        "}" +
 
 
-".historial-resumen p {" +
-"margin: 6px 0;" +
-"}" +
+        ".historial-resumen p {" +
+        "margin: 6px 0;" +
+        "}" +
 
 
-"table {" +
-"width: 100%;" +
-"border-collapse: collapse;" +
-"margin-top: 20px;" +
-"}" +
+        "table {" +
+        "width: 100%;" +
+        "border-collapse: collapse;" +
+        "margin-top: 20px;" +
+        "}" +
 
 
-"th, td {" +
-"border: 1px solid #bbb;" +
-"padding: 8px;" +
-"text-align: left;" +
-"}" +
+        "th, td {" +
+        "border: 1px solid #bbb;" +
+        "padding: 8px;" +
+        "text-align: left;" +
+        "}" +
 
 
-"th {" +
-"background: #f0f0f0;" +
-"font-weight: bold;" +
-"}" +
+        "th {" +
+        "background: #f0f0f0;" +
+        "font-weight: bold;" +
+        "}" +
 
 
-"td:nth-child(2) {" +
-"text-align: right;" +
-"}" +
+        "td:nth-child(2) {" +
+        "text-align: right;" +
+        "}" +
 
 
-// ====================================================
-// ZONA INFERIOR DEL DOCUMENTO
-// ====================================================
+        // ====================================================
+        // ZONA INFERIOR DEL DOCUMENTO
+        // ====================================================
 
-".zona-firma {" +
-"margin-top: 55px;" +
-"min-height: 150px;" +
-"display: flex;" +
-"justify-content: space-between;" +
-"align-items: flex-end;" +
-"}" +
+        ".zona-firma {" +
+        "margin-top: 55px;" +
+        "min-height: 150px;" +
+        "display: flex;" +
+        "justify-content: space-between;" +
+        "align-items: flex-end;" +
+        "}" +
 
 
-".informacion-emision {" +
-"font-size: 11px;" +
-"color: #555;" +
-"max-width: 55%;" +
-"}" +
+        ".informacion-emision {" +
+        "font-size: 11px;" +
+        "color: #555;" +
+        "max-width: 55%;" +
+        "}" +
 
 
-".informacion-emision p {" +
-"margin: 4px 0;" +
-"}" +
+        ".informacion-emision p {" +
+        "margin: 4px 0;" +
+        "}" +
 
 
-// ====================================================
-// TIMBRE CIRCULAR
-// ====================================================
+        // ====================================================
+        // TIMBRE CIRCULAR
+        // ====================================================
 
-".timbre {" +
-"width: 125px;" +
-"height: 125px;" +
-"border: 3px solid #333;" +
-"border-radius: 50%;" +
-"display: flex;" +
-"align-items: center;" +
-"justify-content: center;" +
-"position: relative;" +
-"text-align: center;" +
-"font-weight: bold;" +
-"font-size: 10px;" +
-"letter-spacing: 0.5px;" +
-"transform: rotate(-8deg);" +
-"}" +
+        ".timbre {" +
+        "width: 125px;" +
+        "height: 125px;" +
+        "border: 3px solid #333;" +
+        "border-radius: 50%;" +
+        "display: flex;" +
+        "align-items: center;" +
+        "justify-content: center;" +
+        "position: relative;" +
+        "text-align: center;" +
+        "font-weight: bold;" +
+        "font-size: 10px;" +
+        "letter-spacing: 0.5px;" +
+        "transform: rotate(-8deg);" +
+        "}" +
 
 
-".timbre::before {" +
-"content: '';" +
-"position: absolute;" +
-"width: 104px;" +
-"height: 104px;" +
-"border: 1px solid #333;" +
-"border-radius: 50%;" +
-"}" +
+        ".timbre::before {" +
+        "content: '';" +
+        "position: absolute;" +
+        "width: 104px;" +
+        "height: 104px;" +
+        "border: 1px solid #333;" +
+        "border-radius: 50%;" +
+        "}" +
 
 
-".timbre-contenido {" +
-"position: relative;" +
-"z-index: 2;" +
-"width: 90px;" +
-"line-height: 1.25;" +
-"}" +
+        ".timbre-contenido {" +
+        "position: relative;" +
+        "z-index: 2;" +
+        "width: 90px;" +
+        "line-height: 1.25;" +
+        "}" +
 
 
-".timbre-titulo {" +
-"font-size: 10px;" +
-"}" +
+        ".timbre-titulo {" +
+        "font-size: 10px;" +
+        "}" +
 
 
-".timbre-centro {" +
-"font-size: 14px;" +
-"margin: 5px 0;" +
-"letter-spacing: 1px;" +
-"}" +
+        ".timbre-centro {" +
+        "font-size: 14px;" +
+        "margin: 5px 0;" +
+        "letter-spacing: 1px;" +
+        "}" +
 
 
-".timbre-fecha {" +
-"font-size: 8px;" +
-"font-weight: normal;" +
-"}" +
+        ".timbre-fecha {" +
+        "font-size: 8px;" +
+        "font-weight: normal;" +
+        "}" +
 
 
-".pie {" +
-"margin-top: 35px;" +
-"padding-top: 10px;" +
-"border-top: 1px solid #ccc;" +
-"font-size: 11px;" +
-"color: #555;" +
-"}" +
+        ".pie {" +
+        "margin-top: 35px;" +
+        "padding-top: 10px;" +
+        "border-top: 1px solid #ccc;" +
+        "font-size: 11px;" +
+        "color: #555;" +
+        "}" +
 
 
-"@media print {" +
+        "@media print {" +
 
-"body {" +
-"margin: 20mm;" +
-"}" +
+        "body {" +
+        "margin: 20mm;" +
+        "}" +
 
-"table {" +
-"page-break-inside: auto;" +
-"}" +
+        "table {" +
+        "page-break-inside: auto;" +
+        "}" +
 
-"tr {" +
-"page-break-inside: avoid;" +
-"page-break-after: auto;" +
-"}" +
+        "tr {" +
+        "page-break-inside: avoid;" +
+        "page-break-after: auto;" +
+        "}" +
 
-".zona-firma {" +
-"page-break-inside: avoid;" +
-"}" +
+        ".zona-firma {" +
+        "page-break-inside: avoid;" +
+        "}" +
 
-".timbre {" +
-"-webkit-print-color-adjust: exact;" +
-"print-color-adjust: exact;" +
-"}" +
+        ".timbre {" +
+        "-webkit-print-color-adjust: exact;" +
+        "print-color-adjust: exact;" +
+        "}" +
 
-"}" +
+        "}" +
 
 
-"</style>" +
+        "</style>" +
 
-"</head>" +
+        "</head>" +
 
 
-"<body>" +
+        "<body>" +
 
 
-// ====================================================
-// ENCABEZADO
-// ====================================================
+        // ====================================================
+        // ENCABEZADO
+        // ====================================================
 
-"<div class='encabezado'>" +
+        "<div class='encabezado'>" +
 
-"<h1>Sistema Financiero</h1>" +
+        "<h1>Sistema Financiero</h1>" +
 
-"<p>Comunidad Indígena Juan Cheuquelen</p>" +
+        "<p>Comunidad Indígena Juan Cheuquelen</p>" +
 
-"</div>" +
+        "</div>" +
 
 
-// ====================================================
-// TÍTULO
-// ====================================================
+        // ====================================================
+        // TÍTULO
+        // ====================================================
 
-"<div class='titulo'>" +
+        "<div class='titulo'>" +
 
-"<h2>Historial de pagos de cuota</h2>" +
+        "<h2>Historial de pagos de cuota</h2>" +
 
-"<p>Documento generado desde el Sistema Financiero</p>" +
+        "<p>Documento generado desde el Sistema Financiero</p>" +
 
-"</div>" +
+        "</div>" +
 
 
-// ====================================================
-// CONTENIDO
-// ====================================================
+        // ====================================================
+        // CONTENIDO
+        // ====================================================
 
-contenidoImpresion +
+        contenidoImpresion +
 
 
-// ====================================================
-// FIRMA / TIMBRE
-// ====================================================
+        // ====================================================
+        // FIRMA / TIMBRE
+        // ====================================================
 
-"<div class='zona-firma'>" +
+        "<div class='zona-firma'>" +
 
 
-"<div class='informacion-emision'>" +
+        "<div class='informacion-emision'>" +
 
-"<p><strong>Documento emitido por:</strong> Tesorería</p>" +
+        "<p><strong>Documento emitido por:</strong> Tesorería</p>" +
 
-"<p><strong>Socio:</strong> " +
-escaparHTML(
-nombreSocio
-) +
-"</p>" +
+        "<p><strong>Socio:</strong> " +
+        escaparHTML(
+            nombreSocio
+        ) +
+        "</p>" +
 
-(
-rutSocio
-? "<p><strong>RUT:</strong> " +
-escaparHTML(
-rutSocio
-) +
-"</p>"
-: ""
-) +
+        (
+            rutSocio
+                ? "<p><strong>RUT:</strong> " +
+                  escaparHTML(
+                      rutSocio
+                  ) +
+                  "</p>"
+                : ""
+        ) +
 
-(
-periodoSocio
-? "<p><strong>Período:</strong> " +
-escaparHTML(
-periodoSocio
-) +
-"</p>"
-: ""
-) +
+        (
+            periodoSocio
+                ? "<p><strong>Período:</strong> " +
+                  escaparHTML(
+                      periodoSocio
+                  ) +
+                  "</p>"
+                : ""
+        ) +
 
-"</div>" +
+        "</div>" +
 
 
-// ====================================================
-// TIMBRE
-// ====================================================
+        // ====================================================
+        // TIMBRE
+        // ====================================================
 
-"<div class='timbre'>" +
+        "<div class='timbre'>" +
 
-"<div class='timbre-contenido'>" +
+        "<div class='timbre-contenido'>" +
 
-"<div class='timbre-titulo'>" +
-"EMITIDO POR" +
-"</div>" +
+        "<div class='timbre-titulo'>" +
+        "EMITIDO POR" +
+        "</div>" +
 
-"<div class='timbre-centro'>" +
-"TESORERÍA" +
-"</div>" +
+        "<div class='timbre-centro'>" +
+        "TESORERÍA" +
+        "</div>" +
 
-"<div class='timbre-titulo'>" +
-"COMUNIDAD INDÍGENA" +
-"</div>" +
+        "<div class='timbre-titulo'>" +
+        "COMUNIDAD INDÍGENA" +
+        "</div>" +
 
-"<div class='timbre-fecha'>" +
-fechaEmision +
-"</div>" +
+        "<div class='timbre-fecha'>" +
+        fechaEmision +
+        "</div>" +
 
-"</div>" +
+        "</div>" +
 
-"</div>" +
+        "</div>" +
 
 
-"</div>" +
+        "</div>" +
 
 
-// ====================================================
-// PIE
-// ====================================================
+        // ====================================================
+        // PIE
+        // ====================================================
 
-"<div class='pie'>" +
+        "<div class='pie'>" +
 
-"Documento generado el " +
+        "Documento generado el " +
 
-escaparHTML(
-fechaEmision
-) +
+        escaparHTML(
+            fechaEmision
+        ) +
 
-" desde el Sistema Financiero." +
+        " desde el Sistema Financiero." +
 
-"</div>" +
+        "</div>" +
 
 
-"</body>" +
+        "</body>" +
 
-"</html>"
-);
+        "</html>"
+    );
 
 
-ventana.document.close();
+    ventana.document.close();
 
 
-ventana.focus();
+    ventana.focus();
 
 
-setTimeout(
-function () {
+    setTimeout(
+        function () {
 
-ventana.print();
+            ventana.print();
 
-},
-300
-);
+        },
+        300
+    );
 
 }
 
@@ -3032,90 +2859,90 @@ ventana.print();
 // ============================================================
 
 async function anularPago(
-pagoId,
-cuotaId
+    pagoId,
+    cuotaId
 ) {
 
-const motivo =
-prompt(
-"Indique el motivo de la anulación:"
-);
+    const motivo =
+        prompt(
+            "Indique el motivo de la anulación:"
+        );
 
 
-if (
-!motivo ||
-!motivo.trim()
-) {
+    if (
+        !motivo ||
+        !motivo.trim()
+    ) {
 
-return;
+        return;
 
-}
-
-
-const confirmar =
-confirm(
-"¿Está seguro de anular este pago?"
-);
+    }
 
 
-if (!confirmar) {
-
-return;
-
-}
-
-
-const resultado =
-await supabaseClient
-.from("pagos_cuotas")
-.update(
-{
-estado:
-"anulado",
-
-fecha_anulacion:
-new Date()
-.toISOString(),
-
-anulado_por:
-usuarioActual.id,
-
-motivo_anulacion:
-motivo.trim()
-}
-)
-.eq(
-"id",
-pagoId
-);
+    const confirmar =
+        confirm(
+            "¿Está seguro de anular este pago?"
+        );
 
 
-if (resultado.error) {
+    if (!confirmar) {
 
-console.error(
-"Error al anular pago:",
-resultado.error
-);
+        return;
 
-alert(
-obtenerMensajeError(
-resultado.error
-)
-);
-
-return;
-}
+    }
 
 
-alert(
-"Pago anulado correctamente."
-);
+    const resultado =
+        await supabaseClient
+            .from("pagos_cuotas")
+            .update(
+                {
+                    estado:
+                        "anulado",
+
+                    fecha_anulacion:
+                        new Date()
+                            .toISOString(),
+
+                    anulado_por:
+                        usuarioActual.id,
+
+                    motivo_anulacion:
+                        motivo.trim()
+                }
+            )
+            .eq(
+                "id",
+                pagoId
+            );
 
 
-cerrarModalHistorial();
+    if (resultado.error) {
+
+        console.error(
+            "Error al anular pago:",
+            resultado.error
+        );
+
+        alert(
+            obtenerMensajeError(
+                resultado.error
+            )
+        );
+
+        return;
+    }
 
 
-await cargarCuotas();
+    alert(
+        "Pago anulado correctamente."
+    );
+
+
+    cerrarModalHistorial();
+
+
+    await cargarCuotas();
 
 }
 
@@ -3126,131 +2953,131 @@ await cargarCuotas();
 
 function actualizarResumen() {
 
-let pendientes = 0;
+    let pendientes = 0;
 
-let parciales = 0;
+    let parciales = 0;
 
-let pagadas = 0;
+    let pagadas = 0;
 
-let recaudado = 0;
-
-
-cuotas.forEach(
-function (cuota) {
-
-const monto =
-Number(
-cuota.monto ||
-0
-);
+    let recaudado = 0;
 
 
-const pagado =
-Number(
-cuota.total_pagado ||
-0
-);
+    cuotas.forEach(
+        function (cuota) {
+
+            const monto =
+                Number(
+                    cuota.monto ||
+                    0
+                );
 
 
-const estado =
-determinarEstado(
-monto,
-pagado,
-cuota.estado
-);
+            const pagado =
+                Number(
+                    cuota.total_pagado ||
+                    0
+                );
 
 
-if (
-estado ===
-"pendiente"
-) {
-
-pendientes++;
-
-}
-
-else if (
-estado ===
-"parcial"
-) {
-
-parciales++;
-
-}
-
-else if (
-estado ===
-"pagada"
-) {
-
-pagadas++;
-
-}
+            const estado =
+                determinarEstado(
+                    monto,
+                    pagado,
+                    cuota.estado
+                );
 
 
-recaudado +=
-pagado;
+            if (
+                estado ===
+                "pendiente"
+            ) {
 
-}
-);
+                pendientes++;
 
+            }
 
-const pendiente =
-document.getElementById(
-"totalPendientes"
-);
+            else if (
+                estado ===
+                "parcial"
+            ) {
 
+                parciales++;
 
-const parcial =
-document.getElementById(
-"totalParciales"
-);
+            }
 
+            else if (
+                estado ===
+                "pagada"
+            ) {
 
-const pagada =
-document.getElementById(
-"totalPagadas"
-);
+                pagadas++;
 
-
-const total =
-document.getElementById(
-"totalRecaudado"
-);
+            }
 
 
-if (pendiente) {
+            recaudado +=
+                pagado;
 
-pendiente.textContent =
-pendientes;
-
-}
-
-
-if (parcial) {
-
-parcial.textContent =
-parciales;
-
-}
+        }
+    );
 
 
-if (pagada) {
-
-pagada.textContent =
-pagadas;
-
-}
+    const pendiente =
+        document.getElementById(
+            "totalPendientes"
+        );
 
 
-if (total) {
+    const parcial =
+        document.getElementById(
+            "totalParciales"
+        );
 
-total.textContent =
-formatearMoneda(
-recaudado
-);
 
-}
+    const pagada =
+        document.getElementById(
+            "totalPagadas"
+        );
+
+
+    const total =
+        document.getElementById(
+            "totalRecaudado"
+        );
+
+
+    if (pendiente) {
+
+        pendiente.textContent =
+            pendientes;
+
+    }
+
+
+    if (parcial) {
+
+        parcial.textContent =
+            parciales;
+
+    }
+
+
+    if (pagada) {
+
+        pagada.textContent =
+            pagadas;
+
+    }
+
+
+    if (total) {
+
+        total.textContent =
+            formatearMoneda(
+                recaudado
+            );
+
+    }
 
 }
 
@@ -3260,25 +3087,25 @@ recaudado
 // ============================================================
 
 function actualizarContador(
-cantidad
+    cantidad
 ) {
 
-const elemento =
-document.getElementById(
-"contadorCuotas"
-);
+    const elemento =
+        document.getElementById(
+            "contadorCuotas"
+        );
 
 
-if (!elemento) {
-return;
-}
+    if (!elemento) {
+        return;
+    }
 
 
-elemento.textContent =
-cantidad === 1
-? "1 cuota encontrada"
-: cantidad +
-" cuotas encontradas";
+    elemento.textContent =
+        cantidad === 1
+            ? "1 cuota encontrada"
+            : cantidad +
+              " cuotas encontradas";
 
 }
 
@@ -3288,19 +3115,19 @@ cantidad === 1
 // ============================================================
 
 function obtenerSocio(
-id
+    id
 ) {
 
-return socios.find(
-function (socio) {
+    return socios.find(
+        function (socio) {
 
-return Number(
-socio.id
-) ===
-Number(id);
+            return Number(
+                socio.id
+            ) ===
+            Number(id);
 
-}
-);
+        }
+    );
 
 }
 
@@ -3310,19 +3137,19 @@ Number(id);
 // ============================================================
 
 function obtenerPeriodo(
-id
+    id
 ) {
 
-return periodos.find(
-function (periodo) {
+    return periodos.find(
+        function (periodo) {
 
-return Number(
-periodo.id
-) ===
-Number(id);
+            return Number(
+                periodo.id
+            ) ===
+            Number(id);
 
-}
-);
+        }
+    );
 
 }
 
@@ -3332,32 +3159,32 @@ Number(id);
 // ============================================================
 
 function construirNombreCompleto(
-socio
+    socio
 ) {
 
-return [
+    return [
 
-socio.nombres,
+        socio.nombres,
 
-socio.apellido_paterno,
+        socio.apellido_paterno,
 
-socio.apellido_materno
+        socio.apellido_materno
 
-]
-.filter(
-function (parte) {
+    ]
+        .filter(
+            function (parte) {
 
-return (
-parte &&
-String(
-parte
-).trim() !==
-""
-);
+                return (
+                    parte &&
+                    String(
+                        parte
+                    ).trim() !==
+                    ""
+                );
 
-}
-)
-.join(" ");
+            }
+        )
+        .join(" ");
 
 }
 
@@ -3368,18 +3195,18 @@ parte
 
 function cerrarModalPago() {
 
-const modal =
-document.getElementById(
-"modalPago"
-);
+    const modal =
+        document.getElementById(
+            "modalPago"
+        );
 
 
-if (modal) {
+    if (modal) {
 
-modal.style.display =
-"none";
+        modal.style.display =
+            "none";
 
-}
+    }
 
 }
 
@@ -3390,18 +3217,18 @@ modal.style.display =
 
 function cerrarModalHistorial() {
 
-const modal =
-document.getElementById(
-"modalHistorial"
-);
+    const modal =
+        document.getElementById(
+            "modalHistorial"
+        );
 
 
-if (modal) {
+    if (modal) {
 
-modal.style.display =
-"none";
+        modal.style.display =
+            "none";
 
-}
+    }
 
 }
 
@@ -3412,39 +3239,39 @@ modal.style.display =
 
 function obtenerFechaActual() {
 
-const fecha =
-new Date();
+    const fecha =
+        new Date();
 
 
-const anio =
-fecha.getFullYear();
+    const anio =
+        fecha.getFullYear();
 
 
-const mes =
-String(
-fecha.getMonth() + 1
-).padStart(
-2,
-"0"
-);
+    const mes =
+        String(
+            fecha.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
 
 
-const dia =
-String(
-fecha.getDate()
-).padStart(
-2,
-"0"
-);
+    const dia =
+        String(
+            fecha.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
 
 
-return (
-anio +
-"-" +
-mes +
-"-" +
-dia
-);
+    return (
+        anio +
+        "-" +
+        mes +
+        "-" +
+        dia
+    );
 
 }
 
@@ -3454,24 +3281,24 @@ dia
 // ============================================================
 
 function formatearMoneda(
-valor
+    valor
 ) {
 
-return Number(
-valor || 0
-).toLocaleString(
-"es-CL",
-{
-style:
-"currency",
+    return Number(
+        valor || 0
+    ).toLocaleString(
+        "es-CL",
+        {
+            style:
+                "currency",
 
-currency:
-"CLP",
+            currency:
+                "CLP",
 
-maximumFractionDigits:
-0
-}
-);
+            maximumFractionDigits:
+                0
+        }
+    );
 
 }
 
@@ -3481,36 +3308,36 @@ maximumFractionDigits:
 // ============================================================
 
 function formatearFecha(
-fecha
+    fecha
 ) {
 
-if (!fecha) {
-return "—";
-}
+    if (!fecha) {
+        return "—";
+    }
 
 
-const partes =
-String(
-fecha
-).split("-");
+    const partes =
+        String(
+            fecha
+        ).split("-");
 
 
-if (
-partes.length !== 3
-) {
+    if (
+        partes.length !== 3
+    ) {
 
-return fecha;
+        return fecha;
 
-}
+    }
 
 
-return (
-partes[2] +
-"-" +
-partes[1] +
-"-" +
-partes[0]
-);
+    return (
+        partes[2] +
+        "-" +
+        partes[1] +
+        "-" +
+        partes[0]
+    );
 
 }
 
@@ -3520,22 +3347,22 @@ partes[0]
 // ============================================================
 
 function traducirMedioPago(
-medio
+    medio
 ) {
 
-switch (medio) {
+    switch (medio) {
 
-case "efectivo":
-return "Efectivo";
+        case "efectivo":
+            return "Efectivo";
 
-case "transferencia":
-return "Transferencia";
+        case "transferencia":
+            return "Transferencia";
 
-default:
-return medio ||
-"—";
+        default:
+            return medio ||
+                "—";
 
-}
+    }
 
 }
 
@@ -3545,28 +3372,28 @@ return medio ||
 // ============================================================
 
 function traducirEstado(
-estado
+    estado
 ) {
 
-switch (estado) {
+    switch (estado) {
 
-case "pendiente":
-return "Pendiente";
+        case "pendiente":
+            return "Pendiente";
 
-case "parcial":
-return "Parcial";
+        case "parcial":
+            return "Parcial";
 
-case "pagada":
-return "Pagada";
+        case "pagada":
+            return "Pagada";
 
-case "anulada":
-return "Anulada";
+        case "anulada":
+            return "Anulada";
 
-default:
-return estado ||
-"—";
+        default:
+            return estado ||
+                "—";
 
-}
+    }
 
 }
 
@@ -3576,15 +3403,15 @@ return estado ||
 // ============================================================
 
 function traducirEstadoPago(
-estado
+    estado
 ) {
 
-return estado ===
-"activo"
+    return estado ===
+        "activo"
 
-? "Activo"
+        ? "Activo"
 
-: "Anulado";
+        : "Anulado";
 
 }
 
@@ -3594,24 +3421,24 @@ return estado ===
 // ============================================================
 
 function obtenerClaseEstado(
-estado
+    estado
 ) {
 
-switch (estado) {
+    switch (estado) {
 
-case "pagada":
-return "estado-activo";
+        case "pagada":
+            return "estado-activo";
 
-case "parcial":
-return "estado-parcial";
+        case "parcial":
+            return "estado-parcial";
 
-case "pendiente":
-return "estado-inactivo";
+        case "pendiente":
+            return "estado-inactivo";
 
-default:
-return "estado-inactivo";
+        default:
+            return "estado-inactivo";
 
-}
+    }
 
 }
 
@@ -3621,32 +3448,32 @@ return "estado-inactivo";
 // ============================================================
 
 function escaparHTML(
-texto
+    texto
 ) {
 
-return String(
-texto
-)
-.replace(
-/&/g,
-"&amp;"
-)
-.replace(
-/</g,
-"&lt;"
-)
-.replace(
-/>/g,
-"&gt;"
-)
-.replace(
-/"/g,
-"&quot;"
-)
-.replace(
-/'/g,
-"&#039;"
-);
+    return String(
+        texto
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
 }
 
@@ -3656,64 +3483,64 @@ texto
 // ============================================================
 
 function obtenerMensajeError(
-error
+    error
 ) {
 
-if (!error) {
+    if (!error) {
 
-return (
-"Ocurrió un error desconocido."
-);
+        return (
+            "Ocurrió un error desconocido."
+        );
 
-}
-
-
-console.error(
-"Detalle del error:",
-error
-);
+    }
 
 
-if (
-error.code ===
-"23503"
-) {
-
-return (
-"No fue posible guardar el pago porque la cuota o la cuenta seleccionada no existe."
-);
-
-}
+    console.error(
+        "Detalle del error:",
+        error
+    );
 
 
-if (
-error.code ===
-"42501"
-) {
+    if (
+        error.code ===
+        "23503"
+    ) {
 
-return (
-"No tiene permisos para realizar esta operación."
-);
+        return (
+            "No fue posible guardar el pago porque la cuota o la cuenta seleccionada no existe."
+        );
 
-}
-
-
-if (
-error.code ===
-"23514"
-) {
-
-return (
-"Los datos ingresados no cumplen las reglas establecidas para los pagos."
-);
-
-}
+    }
 
 
-return (
-error.message ||
-"No fue posible completar la operación."
-);
+    if (
+        error.code ===
+        "42501"
+    ) {
+
+        return (
+            "No tiene permisos para realizar esta operación."
+        );
+
+    }
+
+
+    if (
+        error.code ===
+        "23514"
+    ) {
+
+        return (
+            "Los datos ingresados no cumplen las reglas establecidas para los pagos."
+        );
+
+    }
+
+
+    return (
+        error.message ||
+        "No fue posible completar la operación."
+    );
 
 }
 
@@ -3723,18 +3550,18 @@ error.message ||
 // ============================================================
 
 function capitalizar(
-texto
+    texto
 ) {
 
-if (!texto) {
-return "";
-}
+    if (!texto) {
+        return "";
+    }
 
 
-return (
-texto.charAt(0).toUpperCase() +
-texto.slice(1)
-);
+    return (
+        texto.charAt(0).toUpperCase() +
+        texto.slice(1)
+    );
 
 }
 
@@ -3745,39 +3572,39 @@ texto.slice(1)
 
 async function cerrarSesion() {
 
-const confirmar =
-confirm(
-"¿Está seguro de que desea cerrar la sesión?"
-);
+    const confirmar =
+        confirm(
+            "¿Está seguro de que desea cerrar la sesión?"
+        );
 
 
-if (!confirmar) {
-return;
-}
+    if (!confirmar) {
+        return;
+    }
 
 
-const resultado =
-await supabaseClient
-.auth
-.signOut();
+    const resultado =
+        await supabaseClient
+            .auth
+            .signOut();
 
 
-if (resultado.error) {
+    if (resultado.error) {
 
-console.error(
-"Error al cerrar sesión:",
-resultado.error
-);
+        console.error(
+            "Error al cerrar sesión:",
+            resultado.error
+        );
 
-alert(
-"No fue posible cerrar la sesión."
-);
+        alert(
+            "No fue posible cerrar la sesión."
+        );
 
-return;
-}
+        return;
+    }
 
 
-window.location.href =
-"login.html";
+    window.location.href =
+        "login.html";
 
 }
