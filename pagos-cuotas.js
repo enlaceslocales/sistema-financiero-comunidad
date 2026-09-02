@@ -762,7 +762,6 @@ async function cargarTotalesPagos() {
             .select(
                 "id, cuota_id, monto, estado"
             )
-            .eq("estado", "activo")
             .in(
                 "cuota_id",
                 ids
@@ -1441,134 +1440,233 @@ function abrirModalPago(
 // GUARDAR PAGO
 // ============================================================
 
-async function guardarPago(event) {
-    if (event) {
-        event.preventDefault();
-    }
+async function guardarPago(
+    event
+) {
+
+    event.preventDefault();
+
 
     const cuotaId =
         Number(
-            document.getElementById("pagoCuotaId")?.value || 0
+            document.getElementById(
+                "pagoCuotaId"
+            ).value
         );
+
 
     const monto =
         Number(
-            document.getElementById("pagoMonto")?.value || 0
+            document.getElementById(
+                "pagoMonto"
+            ).value
         );
 
-    const medioPago =
-        document.getElementById("medioPago")?.value || "";
 
     const cuentaId =
         Number(
-            document.getElementById("cuentaPago")?.value || 0
+            document.getElementById(
+                "cuentaPago"
+            ).value
         );
 
+
+    const medioPago =
+        document.getElementById(
+            "medioPago"
+        ).value;
+
+
     const fechaPago =
-        document.getElementById("fechaPago")?.value || "";
+        document.getElementById(
+            "fechaPago"
+        ).value;
+
 
     const comprobante =
-        document.getElementById("numeroComprobante")?.value.trim() || "";
+        document.getElementById(
+            "numeroComprobante"
+        ).value.trim();
+
 
     const bancoOrigen =
-        document.getElementById("bancoOrigen")?.value.trim() || "";
+        document.getElementById(
+            "bancoOrigen"
+        ).value.trim();
+
 
     const observacion =
-        document.getElementById("observacionPago")?.value.trim() || "";
+        document.getElementById(
+            "observacionPago"
+        ).value.trim();
+
 
     if (!cuotaId) {
-        alert("No se ha seleccionado una cuota.");
+
+        alert(
+            "No se ha seleccionado una cuota."
+        );
+
         return;
     }
 
-    if (!monto || monto <= 0) {
-        alert("Debe ingresar un monto válido.");
+
+    if (
+        !monto ||
+        monto <= 0
+    ) {
+
+        alert(
+            "Debe ingresar un monto válido."
+        );
+
         return;
     }
+
 
     const cuota =
-        cuotas.find(function (elemento) {
-            return Number(elemento.id) === cuotaId;
-        });
+        cuotas.find(
+            function (elemento) {
+
+                return Number(
+                    elemento.id
+                ) === cuotaId;
+
+            }
+        );
+
 
     if (!cuota) {
-        alert("No fue posible encontrar la cuota.");
+
+        alert(
+            "No fue posible encontrar la cuota."
+        );
+
         return;
     }
+
 
     const saldo =
         Math.max(
-            Number(cuota.monto || 0) -
-            Number(cuota.total_pagado || 0),
+            Number(
+                cuota.monto ||
+                0
+            ) -
+            Number(
+                cuota.total_pagado ||
+                0
+            ),
             0
         );
 
-    if (monto > saldo) {
+
+    if (
+        monto > saldo
+    ) {
+
         alert(
             "El monto ingresado supera el saldo pendiente de la cuota.\n\n" +
             "Saldo pendiente: " +
-            formatearMoneda(saldo)
+            formatearMoneda(
+                saldo
+            )
         );
+
         return;
     }
+
 
     if (!medioPago) {
-        alert("Debe seleccionar el medio de pago.");
+
+        alert(
+            "Debe seleccionar el medio de pago."
+        );
+
         return;
     }
+
 
     if (!cuentaId) {
-        alert("Debe seleccionar la cuenta de destino.");
+
+        alert(
+            "Debe seleccionar la cuenta de destino."
+        );
+
         return;
     }
+
 
     if (!fechaPago) {
-        alert("Debe indicar la fecha del pago.");
+
+        alert(
+            "Debe indicar la fecha del pago."
+        );
+
         return;
     }
 
-    if (!usuarioActual || !usuarioActual.id) {
-        alert("No se pudo identificar al usuario autenticado.");
-        return;
-    }
 
     const boton =
-        document.getElementById("guardarPago");
+        document.getElementById(
+            "guardarPago"
+        );
+
 
     if (boton) {
-        boton.disabled = true;
-        boton.textContent = "Registrando...";
+
+        boton.disabled =
+            true;
+
+        boton.textContent =
+            "Registrando...";
+
     }
 
-    let pagoRegistradoId = null;
 
     try {
-        // ========================================================
-        // 1. REGISTRAR EL PAGO
-        // ========================================================
 
         const resultado =
             await supabaseClient
                 .from("pagos_cuotas")
-                .insert({
-                    cuota_id: cuotaId,
-                    cuenta_id: cuentaId,
-                    monto: monto,
-                    medio_pago: medioPago,
-                    fecha_pago: fechaPago,
-                    numero_comprobante:
-                        comprobante || null,
-                    banco_origen:
-                        bancoOrigen || null,
-                    observacion:
-                        observacion || null,
-                    created_by:
-                        usuarioActual.id
-                })
+                .insert(
+                    {
+                        cuota_id:
+                            cuotaId,
+
+                        cuenta_id:
+                            cuentaId,
+
+                        monto:
+                            monto,
+
+                        medio_pago:
+                            medioPago,
+
+                        fecha_pago:
+                            fechaPago,
+
+                        numero_comprobante:
+                            comprobante ||
+                            null,
+
+                        banco_origen:
+                            bancoOrigen ||
+                            null,
+
+                        observacion:
+                            observacion ||
+                            null,
+
+                        created_by:
+                            usuarioActual.id
+                    }
+                
                 .select("id")
-                .single();
+                .single());
+
 
         if (resultado.error) {
+
             console.error(
                 "Error al registrar pago:",
                 resultado.error
@@ -1583,226 +1681,90 @@ async function guardarPago(event) {
             return;
         }
 
-        pagoRegistradoId =
-            resultado.data &&
-            resultado.data.id
-                ? Number(resultado.data.id)
+
+        
+        const pagoRegistradoId =
+            resultado.data && resultado.data.id
+                ? resultado.data.id
                 : null;
 
-        if (!pagoRegistradoId) {
-            console.error(
-                "El pago fue insertado, pero Supabase no devolvió su ID:",
-                resultado.data
-            );
+        if (pagoRegistradoId) {
+            const emision =
+                await supabaseClient.rpc(
+                    "emitir_comprobante_cuota",
+                    {
+                        p_pago_id: pagoRegistradoId
+                    }
+                );
 
-            alert(
-                "El pago fue registrado, pero no fue posible obtener su identificador.\n\n" +
-                "Revise el historial antes de volver a registrarlo para evitar duplicaciones."
-            );
+            if (emision.error) {
+                console.error(
+                    "Pago registrado, pero no fue posible emitir el comprobante:",
+                    emision.error
+                );
 
-            return;
-        }
+                alert(
+                    "El pago fue registrado correctamente, pero no fue posible emitir el comprobante automáticamente. Podrá emitirlo desde el historial."
+                );
 
-        console.log(
-            "Pago registrado correctamente. ID:",
-            pagoRegistradoId
-        );
+                cerrarModalPago();
+                await cargarCuotas();
+                return;
+            }
 
-        // ========================================================
-        // 2. EMITIR COMPROBANTE
-        // ========================================================
-
-        if (boton) {
-            boton.textContent = "Generando comprobante...";
-        }
-
-        const resultadoComprobante =
-            await supabaseClient.rpc(
-                "emitir_comprobante_cuota",
-                {
-                    p_pago_id:
-                        pagoRegistradoId
-                }
-            );
-
-        if (resultadoComprobante.error) {
-            console.error(
-                "Pago registrado, pero falló la emisión del comprobante:",
-                resultadoComprobante.error
-            );
-
-            alert(
-                "El pago fue registrado correctamente.\n\n" +
-                "Sin embargo, no fue posible emitir el comprobante automáticamente.\n\n" +
-                "El pago NO se ha perdido ni eliminado. Puede emitir el comprobante posteriormente desde el historial de pagos."
-            );
+            const comprobante =
+                Array.isArray(emision.data)
+                    ? emision.data[0]
+                    : emision.data;
 
             cerrarModalPago();
+            await cargarCuotas();
 
-            try {
-                await cargarCuotas();
-            } catch (errorActualizacion) {
-                console.error(
-                    "El pago quedó registrado, pero no fue posible actualizar la pantalla:",
-                    errorActualizacion
-                );
-            }
-
-            return;
-        }
-
-        // ========================================================
-        // 3. OBTENER ID DEL COMPROBANTE
-        // ========================================================
-
-        let comprobanteRegistrado =
-            resultadoComprobante.data;
-
-        // La función normalmente devuelve el registro o su ID.
-        // Se contemplan ambas formas para hacer el frontend más robusto.
-        let comprobanteId = null;
-
-        if (
-            comprobanteRegistrado &&
-            typeof comprobanteRegistrado === "object"
-        ) {
-            if (Array.isArray(comprobanteRegistrado)) {
-                comprobanteRegistrado =
-                    comprobanteRegistrado[0] || null;
-            }
-
-            if (comprobanteRegistrado) {
-                comprobanteId =
-                    comprobanteRegistrado.id ||
-                    comprobanteRegistrado.comprobante_id ||
-                    null;
-            }
-        } else if (
-            comprobanteRegistrado !== null &&
-            comprobanteRegistrado !== undefined
-        ) {
-            comprobanteId =
-                comprobanteRegistrado;
-        }
-
-        // Si la RPC devuelve solo el ID, lo normalizamos.
-        if (comprobanteId !== null) {
-            comprobanteId =
-                Number(comprobanteId);
-        }
-
-        // Si no vino un ID desde la RPC, lo buscamos por pago_id.
-        if (!comprobanteId) {
-            const consultaComprobante =
-                await supabaseClient
-                    .from("comprobantes_cuota")
-                    .select("id, numero")
-                    .eq(
-                        "pago_id",
-                        pagoRegistradoId
-                    )
-                    .maybeSingle();
-
-            if (consultaComprobante.error) {
-                console.error(
-                    "No fue posible localizar el comprobante emitido:",
-                    consultaComprobante.error
-                );
-            } else if (
-                consultaComprobante.data &&
-                consultaComprobante.data.id
-            ) {
-                comprobanteId =
-                    Number(
-                        consultaComprobante.data.id
-                    );
+            if (comprobante && comprobante.id) {
+                window.location.href =
+                    "comprobante.html?id=" +
+                    encodeURIComponent(comprobante.id);
+                return;
             }
         }
 
-        if (!comprobanteId) {
-            console.error(
-                "La emisión del comprobante terminó correctamente, pero no fue posible obtener su ID.",
-                resultadoComprobante
-            );
-
-            alert(
-                "El pago fue registrado correctamente y el comprobante fue emitido, pero no fue posible abrirlo automáticamente.\n\n" +
-                "Puede encontrarlo posteriormente en el historial de pagos."
-            );
-
-            cerrarModalPago();
-
-            try {
-                await cargarCuotas();
-            } catch (errorActualizacion) {
-                console.error(
-                    "No fue posible actualizar la pantalla:",
-                    errorActualizacion
-                );
-            }
-
-            return;
-        }
-
-        console.log(
-            "Comprobante emitido correctamente. ID:",
-            comprobanteId
+        alert(
+            "Pago registrado correctamente."
         );
 
-        // ========================================================
-        // 4. ACTUALIZAR PANTALLA SIN CONFUNDIR UN ERROR DE CARGA
-        //    CON UN ERROR DE REGISTRO
-        // ========================================================
 
         cerrarModalPago();
 
-        try {
-            await cargarCuotas();
-        } catch (errorActualizacion) {
-            console.error(
-                "Pago y comprobante registrados, pero falló la actualización de la pantalla:",
-                errorActualizacion
-            );
-        }
 
-        // ========================================================
-        // 5. ABRIR COMPROBANTE
-        // ========================================================
+        await cargarCuotas();
 
-        window.location.href =
-            "comprobante.html?id=" +
-            encodeURIComponent(
-                String(comprobanteId)
-            );
+    }
+    catch (error) {
 
-    } catch (error) {
         console.error(
-            "Error inesperado al registrar el pago:",
+            "Error inesperado:",
             error
         );
 
-        // Si ya obtuvimos un ID, el INSERT sí ocurrió.
-        // No debemos decir que el pago falló ni pedir que se repita.
-        if (pagoRegistradoId) {
-            alert(
-                "El pago fue registrado correctamente (ID " +
-                pagoRegistradoId +
-                "), pero ocurrió un problema al completar el proceso del comprobante.\n\n" +
-                "No vuelva a registrar el mismo pago para evitar duplicarlo."
-            );
-        } else {
-            alert(
-                "No fue posible completar el registro del pago.\n\n" +
-                "Revise la consola del navegador para conocer el error exacto."
-            );
+        alert(
+            "Ocurrió un error inesperado al registrar el pago."
+        );
+
+    }
+    finally {
+
+        if (boton) {
+
+            boton.disabled =
+                false;
+
+            boton.textContent =
+                "Registrar pago";
+
         }
 
-    } finally {
-        if (boton) {
-            boton.disabled = false;
-            boton.textContent = "Registrar pago";
-        }
     }
+
 }
 
 
@@ -1974,43 +1936,6 @@ async function abrirHistorial(
         resultado.data || [];
 
 
-    // ------------------------------------------------------------
-    // COMPROBANTES ASOCIADOS A LOS PAGOS
-    // ------------------------------------------------------------
-    let comprobantesPorPago = {};
-
-    if (pagos.length > 0) {
-
-        const idsPagos = pagos.map(function (pago) {
-            return Number(pago.id);
-        });
-
-        const resultadoComprobantes =
-            await supabaseClient
-                .from("comprobantes_cuota")
-                .select("id, pago_id, numero, estado, fecha_emision")
-                .in("pago_id", idsPagos);
-
-        if (resultadoComprobantes.error) {
-
-            console.warn(
-                "No fue posible cargar los comprobantes asociados al historial:",
-                resultadoComprobantes.error
-            );
-
-        } else {
-
-            (resultadoComprobantes.data || []).forEach(function (comprobante) {
-
-                comprobantesPorPago[Number(comprobante.pago_id)] = comprobante;
-
-            });
-
-        }
-
-    }
-
-
     let html =
 
         "<div class='historial-resumen'>" +
@@ -2088,8 +2013,6 @@ async function abrirHistorial(
 
         "<th>Banco</th>" +
 
-        "<th>Comprobante cuota</th>" +
-
         "<th>Estado</th>" +
 
         "<th>Acción</th>" +
@@ -2141,47 +2064,12 @@ async function abrirHistorial(
                 "</td>" +
 
                 "<td>" +
-                (
-                    comprobantesPorPago[Number(pago.id)]
-                        ? "<button type='button' " +
-                          "class='boton-tabla boton-comprobante-pago' " +
-                          "data-comprobante-id='" +
-                          comprobantesPorPago[Number(pago.id)].id +
-                          "'>" +
-                          "🧾 " +
-                          escaparHTML(comprobantesPorPago[Number(pago.id)].numero) +
-                          "</button>"
-                        : "<span class='estado-comprobante-pendiente'>Pendiente de emisión</span>"
-                ) +
-                "</td>" +
-
-                "<td>" +
                 traducirEstadoPago(
                     pago.estado
                 ) +
                 "</td>" +
 
                 "<td>" +
-
-                (
-                    comprobantesPorPago[Number(pago.id)]
-                        ? "<button type='button' " +
-                          "class='boton-tabla boton-comprobante-pago' " +
-                          "data-comprobante-id='" +
-                          comprobantesPorPago[Number(pago.id)].id +
-                          "'>" +
-                          "🧾 Ver comprobante" +
-                          "</button> "
-                        : pago.estado === "activo"
-                            ? "<button type='button' " +
-                              "class='boton-tabla boton-emitir-comprobante-pago' " +
-                              "data-pago-id='" +
-                              pago.id +
-                              "'>" +
-                              "🧾 Emitir comprobante" +
-                              "</button> "
-                            : ""
-                ) +
 
                 (
                     pago.estado ===
@@ -2195,7 +2083,7 @@ async function abrirHistorial(
                           "Anular" +
                           "</button>"
 
-                        : ""
+                        : "—"
                 ) +
 
                 "</td>" +
@@ -2238,59 +2126,6 @@ async function abrirHistorial(
                                 boton.dataset.id
                             ),
                             cuotaId
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-    contenido
-        .querySelectorAll(
-            ".boton-comprobante-pago"
-        )
-        .forEach(
-            function (boton) {
-
-                boton.addEventListener(
-                    "click",
-                    function () {
-
-                        const comprobanteId =
-                            boton.dataset.comprobanteId;
-
-                        if (!comprobanteId) {
-                            return;
-                        }
-
-                        window.location.href =
-                            "comprobante.html?id=" +
-                            encodeURIComponent(comprobanteId);
-
-                    }
-                );
-
-            }
-        );
-
-
-    contenido
-        .querySelectorAll(
-            ".boton-emitir-comprobante-pago"
-        )
-        .forEach(
-            function (boton) {
-
-                boton.addEventListener(
-                    "click",
-                    async function () {
-
-                        await emitirComprobantePago(
-                            Number(
-                                boton.dataset.pagoId
-                            )
                         );
 
                     }
@@ -2750,7 +2585,7 @@ function imprimirHistorial() {
 
         "<div class='informacion-emision'>" +
 
-        "<p><strong>Documento emitido por:</strong> Tesorería</p>" +
+        "<p><strong>Documento emitido por:</strong> Tesorero</p>" +
 
         "<p><strong>Socio:</strong> " +
         escaparHTML(
