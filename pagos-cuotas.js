@@ -10,6 +10,8 @@ let cuotas = [];
 let socios = [];
 let periodos = [];
 let cuentas = [];
+let comprobantesPorPago = {};
+let cuotaHistorialActual = null;
 
 
 // ============================================================
@@ -124,6 +126,15 @@ async function verificarSesion() {
         perfil;
 
 
+    if (perfilUsuario.rol === "consulta") {
+
+        window.location.href =
+            "reportes.html";
+
+        return;
+    }
+
+
     mostrarUsuario();
 
     configurarEventos();
@@ -205,17 +216,6 @@ function traducirRol(rol) {
 // ============================================================
 
 function configurarEventos() {
-
-    const botonComprobantes =
-        document.getElementById("irComprobantesButton");
-
-    if (botonComprobantes) {
-        botonComprobantes.addEventListener("click", function () {
-            window.location.href = "comprobantes.html";
-        });
-    }
-
-
 
     const buscar =
         document.getElementById(
@@ -347,6 +347,46 @@ function configurarEventos() {
         imprimir.addEventListener(
             "click",
             imprimirHistorial
+        );
+
+    }
+
+
+    const verComprobantes =
+        document.getElementById(
+            "verComprobantes"
+        );
+
+    if (verComprobantes) {
+
+        verComprobantes.addEventListener(
+            "click",
+            function () {
+
+                window.location.href =
+                    "comprobantes.html";
+
+            }
+        );
+
+    }
+
+
+    const irComprobantes =
+        document.getElementById(
+            "irComprobantesButton"
+        );
+
+    if (irComprobantes) {
+
+        irComprobantes.addEventListener(
+            "click",
+            function () {
+
+                window.location.href =
+                    "comprobantes.html";
+
+            }
         );
 
     }
@@ -792,6 +832,60 @@ async function cargarTotalesPagos() {
         resultado.data || [];
 
 
+    comprobantesPorPago = {};
+
+    const pagosIds =
+        pagos.map(
+            function (pago) {
+                return pago.id;
+            }
+        );
+
+    if (pagosIds.length > 0) {
+
+        const resultadoComprobantes =
+            await supabaseClient
+                .from("comprobantes_cuota")
+                .select(
+                    "id, pago_id, numero, estado, fecha_emision"
+                )
+                .in(
+                    "pago_id",
+                    pagosIds
+                )
+                .order(
+                    "fecha_emision",
+                    {
+                        ascending: false
+                    }
+                );
+
+        if (!resultadoComprobantes.error) {
+
+            (resultadoComprobantes.data || [])
+                .forEach(
+                    function (comprobante) {
+
+                        if (
+                            !comprobantesPorPago[
+                                comprobante.pago_id
+                            ]
+                        ) {
+
+                            comprobantesPorPago[
+                                comprobante.pago_id
+                            ] = comprobante;
+
+                        }
+
+                    }
+                );
+
+        }
+
+    }
+
+
     cuotas.forEach(
         function (cuota) {
 
@@ -1189,6 +1283,10 @@ function renderizarCuotas(
                 'Ver pagos' +
                 '</button>' +
 
+                '</td>' +
+
+                '<td>' +
+                '<span class="texto-secundario">Ver pagos</span>' +
                 '</td>';
 
 
@@ -1236,6 +1334,29 @@ function renderizarCuotas(
                     function () {
 
                         abrirHistorial(
+                            Number(
+                                boton.dataset.id
+                            )
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+    tabla
+        .querySelectorAll(
+            '[data-accion="comprobante"]'
+        )
+        .forEach(
+            function (boton) {
+
+                boton.addEventListener(
+                    "click",
+                    function () {
+
+                        abrirComprobante(
                             Number(
                                 boton.dataset.id
                             )
@@ -1660,9 +1781,7 @@ async function guardarPago(
                         created_by:
                             usuarioActual.id
                     }
-                
-                .select("id")
-                .single());
+                );
 
 
         if (resultado.error) {
@@ -1682,51 +1801,80 @@ async function guardarPago(
         }
 
 
-        
-        const pagoRegistradoId =
-            resultado.data && resultado.data.id
-                ? resultado.data.id
+        const pagoRegistrado =
+            resultado.data &&
+            resultado.data[0]
+                ? resultado.data[0]
                 : null;
 
-        if (pagoRegistradoId) {
-            const emision =
+
+        if (pagoRegistrado) {
+
+            const resultadoComprobante =
                 await supabaseClient.rpc(
                     "emitir_comprobante_cuota",
                     {
-                        p_pago_id: pagoRegistradoId
+                        p_pago_id:
+                            pagoRegistrado.id
                     }
                 );
 
-            if (emision.error) {
+            if (resultadoComprobante.error) {
+
                 console.error(
                     "Pago registrado, pero no fue posible emitir el comprobante:",
-                    emision.error
+                    resultadoComprobante.error
                 );
 
                 alert(
-                    "El pago fue registrado correctamente, pero no fue posible emitir el comprobante automáticamente. Podrá emitirlo desde el historial."
+                    "El pago fue registrado correctamente, pero no fue posible emitir el comprobante en este momento.\n\n" +
+                    "Puede emitirlo posteriormente desde el historial de pagos."
                 );
 
                 cerrarModalPago();
+
                 await cargarCuotas();
+
                 return;
+
             }
+
 
             const comprobante =
-                Array.isArray(emision.data)
-                    ? emision.data[0]
-                    : emision.data;
+                obtenerResultadoComprobante(
+                    resultadoComprobante.data
+                );
+
 
             cerrarModalPago();
+
             await cargarCuotas();
 
-            if (comprobante && comprobante.id) {
+
+            if (
+                comprobante &&
+                comprobante.id
+            ) {
+
                 window.location.href =
                     "comprobante.html?id=" +
-                    encodeURIComponent(comprobante.id);
+                    encodeURIComponent(
+                        comprobante.id
+                    );
+
                 return;
+
             }
+
+
+            alert(
+                "Pago y comprobante registrados correctamente."
+            );
+
+            return;
+
         }
+
 
         alert(
             "Pago registrado correctamente."
@@ -1792,6 +1940,10 @@ async function abrirHistorial(
     if (!cuota) {
         return;
     }
+
+
+    cuotaHistorialActual =
+        cuotaId;
 
 
     const contenido =
@@ -1936,6 +2088,64 @@ async function abrirHistorial(
         resultado.data || [];
 
 
+    // ========================================================
+    // CARGAR COMPROBANTES DEL HISTORIAL DIRECTAMENTE
+    // ========================================================
+    // Se consulta nuevamente por los IDs de pago que pertenecen
+    // a esta cuota. Esto evita depender de un mapa cargado
+    // anteriormente y garantiza que los comprobantes ya emitidos
+    // aparezcan inmediatamente en este historial.
+    if (pagos.length > 0) {
+
+        const idsPagosHistorial =
+            pagos.map(
+                function (pago) {
+                    return pago.id;
+                }
+            );
+
+        const resultadoComprobantesHistorial =
+            await supabaseClient
+                .from("comprobantes_cuota")
+                .select(
+                    "id, pago_id, numero, estado, fecha_emision"
+                )
+                .in(
+                    "pago_id",
+                    idsPagosHistorial
+                )
+                .order(
+                    "fecha_emision",
+                    {
+                        ascending: false
+                    }
+                );
+
+        if (resultadoComprobantesHistorial.error) {
+
+            console.error(
+                "Error al cargar comprobantes del historial:",
+                resultadoComprobantesHistorial.error
+            );
+
+        } else {
+
+            (resultadoComprobantesHistorial.data || [])
+                .forEach(
+                    function (comprobante) {
+
+                        comprobantesPorPago[
+                            comprobante.pago_id
+                        ] = comprobante;
+
+                    }
+                );
+
+        }
+
+    }
+
+
     let html =
 
         "<div class='historial-resumen'>" +
@@ -2009,7 +2219,7 @@ async function abrirHistorial(
 
         "<th>Medio</th>" +
 
-        "<th>Comprobante</th>" +
+        "<th>N.º transferencia</th>\n\n                <th>Comprobante</th>" +
 
         "<th>Banco</th>" +
 
@@ -2053,6 +2263,12 @@ async function abrirHistorial(
                 escaparHTML(
                     pago.numero_comprobante ||
                     "—"
+                ) +
+                "</td>" +
+
+                "<td>" +
+                construirCeldaComprobante(
+                    pago
                 ) +
                 "</td>" +
 
@@ -2134,9 +2350,231 @@ async function abrirHistorial(
             }
         );
 
+
+    contenido
+        .querySelectorAll(
+            ".boton-comprobante-pago"
+        )
+        .forEach(
+            function (boton) {
+
+                boton.addEventListener(
+                    "click",
+                    function () {
+
+                        abrirComprobante(
+                            Number(
+                                boton.dataset.id
+                            )
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    contenido
+        .querySelectorAll(
+            ".boton-emitir-comprobante"
+        )
+        .forEach(
+            function (boton) {
+
+                boton.addEventListener(
+                    "click",
+                    async function () {
+
+                        await emitirComprobante(
+                            Number(
+                                boton.dataset.id
+                            ),
+                            cuotaId
+                        );
+
+                    }
+                );
+
+            }
+        );
+
 }
 
 // ============================================================
+
+// ============================================================
+// COMPROBANTES DE CUOTA
+// ============================================================
+
+function obtenerResultadoComprobante(data) {
+
+    if (!data) {
+        return null;
+    }
+
+    if (Array.isArray(data)) {
+        return data[0] || null;
+    }
+
+    if (data.id) {
+        return data;
+    }
+
+    if (data.comprobante) {
+
+        return Array.isArray(data.comprobante)
+            ? data.comprobante[0] || null
+            : data.comprobante;
+
+    }
+
+    return null;
+
+}
+
+
+function construirCeldaComprobante(pago) {
+
+    const comprobante =
+        comprobantesPorPago[pago.id];
+
+    if (comprobante) {
+
+        return (
+            "<button type='button' " +
+            "class='boton-tabla boton-comprobante-pago' " +
+            "data-id='" +
+            pago.id +
+            "'>" +
+            escaparHTML(
+                comprobante.numero ||
+                "Ver comprobante"
+            ) +
+            "</button>"
+        );
+
+    }
+
+    if (pago.estado === "activo") {
+
+        return (
+            "<button type='button' " +
+            "class='boton-tabla boton-emitir-comprobante' " +
+            "data-id='" +
+            pago.id +
+            "'>" +
+            "Emitir" +
+            "</button>"
+        );
+
+    }
+
+    return "—";
+
+}
+
+
+async function emitirComprobante(
+    pagoId,
+    cuotaId
+) {
+
+    const confirmar =
+        confirm(
+            "¿Desea emitir el comprobante interno para este pago?"
+        );
+
+    if (!confirmar) {
+        return;
+    }
+
+
+    const resultado =
+        await supabaseClient.rpc(
+            "emitir_comprobante_cuota",
+            {
+                p_pago_id:
+                    pagoId
+            }
+        );
+
+
+    if (resultado.error) {
+
+        console.error(
+            "Error al emitir comprobante:",
+            resultado.error
+        );
+
+        alert(
+            obtenerMensajeError(
+                resultado.error
+            )
+        );
+
+        return;
+
+    }
+
+
+    const comprobante =
+        obtenerResultadoComprobante(
+            resultado.data
+        );
+
+
+    if (
+        !comprobante ||
+        !comprobante.id
+    ) {
+
+        alert(
+            "El comprobante fue procesado, pero no fue posible obtener su identificador."
+        );
+
+        return;
+
+    }
+
+
+    await cargarCuotas();
+
+    abrirComprobante(
+        pagoId
+    );
+
+}
+
+
+function abrirComprobante(pagoId) {
+
+    const comprobante =
+        comprobantesPorPago[pagoId];
+
+    if (
+        comprobante &&
+        comprobante.id
+    ) {
+
+        window.location.href =
+            "comprobante.html?id=" +
+            encodeURIComponent(
+                comprobante.id
+            );
+
+        return;
+
+    }
+
+
+    alert(
+        "Este pago todavía no tiene un comprobante emitido."
+    );
+
+}
+
+
 // IMPRIMIR HISTORIAL
 // ============================================================
 
@@ -2449,54 +2887,23 @@ function imprimirHistorial() {
         ".timbre {" +
         "width: 125px;" +
         "height: 125px;" +
-        "border: 3px solid #333;" +
-        "border-radius: 50%;" +
-        "display: flex;" +
-        "align-items: center;" +
-        "justify-content: center;" +
-        "position: relative;" +
-        "text-align: center;" +
-        "font-weight: bold;" +
-        "font-size: 10px;" +
-        "letter-spacing: 0.5px;" +
-        "transform: rotate(-8deg);" +
+        "object-fit: contain;" +
         "}" +
 
 
-        ".timbre::before {" +
-        "content: '';" +
-        "position: absolute;" +
-        "width: 104px;" +
-        "height: 104px;" +
-        "border: 1px solid #333;" +
-        "border-radius: 50%;" +
-        "}" +
 
 
-        ".timbre-contenido {" +
-        "position: relative;" +
-        "z-index: 2;" +
-        "width: 90px;" +
-        "line-height: 1.25;" +
-        "}" +
 
 
-        ".timbre-titulo {" +
-        "font-size: 10px;" +
-        "}" +
 
 
-        ".timbre-centro {" +
-        "font-size: 14px;" +
-        "margin: 5px 0;" +
-        "letter-spacing: 1px;" +
-        "}" +
 
 
-        ".timbre-fecha {" +
-        "font-size: 8px;" +
-        "font-weight: normal;" +
-        "}" +
+
+
+
+
+
 
 
         ".pie {" +
@@ -2549,9 +2956,9 @@ function imprimirHistorial() {
 
         "<div class='encabezado'>" +
 
-        "<h1>Sistema Financiero</h1>" +
+        "<h1>COMUNIDAD INDÍGENA JUAN CHEUQUELÉN</h1>" +
 
-        "<p>Comunidad Indígena Juan Cheuquelen</p>" +
+        "<p>RUT: 65.169.427-2 &nbsp;|&nbsp; Personería Jurídica N.º 2314 &nbsp;|&nbsp; Fundada 27 de julio de 2017</p>" +
 
         "</div>" +
 
@@ -2585,7 +2992,7 @@ function imprimirHistorial() {
 
         "<div class='informacion-emision'>" +
 
-        "<p><strong>Documento emitido por:</strong> Tesorero</p>" +
+        "<p><strong>Documento emitido por:</strong> Tesorería</p>" +
 
         "<p><strong>Socio:</strong> " +
         escaparHTML(
@@ -2620,29 +3027,7 @@ function imprimirHistorial() {
         // TIMBRE
         // ====================================================
 
-        "<div class='timbre'>" +
-
-        "<div class='timbre-contenido'>" +
-
-        "<div class='timbre-titulo'>" +
-        "EMITIDO POR" +
-        "</div>" +
-
-        "<div class='timbre-centro'>" +
-        "TESORERÍA" +
-        "</div>" +
-
-        "<div class='timbre-titulo'>" +
-        "COMUNIDAD INDÍGENA" +
-        "</div>" +
-
-        "<div class='timbre-fecha'>" +
-        fechaEmision +
-        "</div>" +
-
-        "</div>" +
-
-        "</div>" +
+        "<img class='timbre' src='assets/timbre-comunidad.jpeg' alt='Timbre oficial de la Comunidad Indígena Juan Cheuquelén'>" +
 
 
         "</div>" +
