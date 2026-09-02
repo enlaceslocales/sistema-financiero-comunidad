@@ -2526,7 +2526,7 @@ function imprimirHistorial() {
 
         "<div class='informacion-emision'>" +
 
-        "<p><strong>Documento emitido por:</strong> Tesorería</p>" +
+        "<p><strong>Documento emitido por:</strong> Tesorero</p>" +
 
         "<p><strong>Socio:</strong> " +
         escaparHTML(
