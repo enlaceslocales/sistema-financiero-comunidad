@@ -2151,7 +2151,7 @@ async function abrirHistorial(
                           "🧾 " +
                           escaparHTML(comprobantesPorPago[Number(pago.id)].numero) +
                           "</button>"
-                        : "<span class='estado-comprobante-pendiente'>Sin emitir</span>"
+                        : "<span class='estado-comprobante-pendiente'>Pendiente de emisión</span>"
                 ) +
                 "</td>" +
 
@@ -2162,6 +2162,26 @@ async function abrirHistorial(
                 "</td>" +
 
                 "<td>" +
+
+                (
+                    comprobantesPorPago[Number(pago.id)]
+                        ? "<button type='button' " +
+                          "class='boton-tabla boton-comprobante-pago' " +
+                          "data-comprobante-id='" +
+                          comprobantesPorPago[Number(pago.id)].id +
+                          "'>" +
+                          "🧾 Ver comprobante" +
+                          "</button> "
+                        : pago.estado === "activo"
+                            ? "<button type='button' " +
+                              "class='boton-tabla boton-emitir-comprobante-pago' " +
+                              "data-pago-id='" +
+                              pago.id +
+                              "'>" +
+                              "🧾 Emitir comprobante" +
+                              "</button> "
+                            : ""
+                ) +
 
                 (
                     pago.estado ===
@@ -2175,7 +2195,7 @@ async function abrirHistorial(
                           "Anular" +
                           "</button>"
 
-                        : "—"
+                        : ""
                 ) +
 
                 "</td>" +
@@ -2248,6 +2268,30 @@ async function abrirHistorial(
                         window.location.href =
                             "comprobante.html?id=" +
                             encodeURIComponent(comprobanteId);
+
+                    }
+                );
+
+            }
+        );
+
+
+    contenido
+        .querySelectorAll(
+            ".boton-emitir-comprobante-pago"
+        )
+        .forEach(
+            function (boton) {
+
+                boton.addEventListener(
+                    "click",
+                    async function () {
+
+                        await emitirComprobantePago(
+                            Number(
+                                boton.dataset.pagoId
+                            )
+                        );
 
                     }
                 );
