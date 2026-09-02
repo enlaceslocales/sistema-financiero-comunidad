@@ -2751,7 +2751,7 @@ function imprimirHistorial() {
 
     const timbreUrl =
         new URL(
-            "timbre-comunidad.jpeg",
+            "timbre-comunidad.png",
             window.location.href
         ).href;
 
