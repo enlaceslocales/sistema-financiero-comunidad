@@ -352,17 +352,73 @@
             </div>
 
 
-            <!-- NUEVO SOCIO -->
+            <!-- =================================================
+                 ACCIONES DE SOCIOS
+                 ================================================= -->
 
-            <button
-                type="button"
-                id="nuevoSocioButton"
-                class="boton"
+            <div
+                style="
+                    display: flex;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                    justify-content: flex-end;
+                "
             >
 
-                + Nuevo socio
 
-            </button>
+                <!-- EXCEL -->
+
+                <button
+                    type="button"
+                    id="exportarExcelButton"
+                    class="boton-secundario"
+                >
+
+                    📊 Excel
+
+                </button>
+
+
+                <!-- PDF -->
+
+                <button
+                    type="button"
+                    id="exportarPdfButton"
+                    class="boton-secundario"
+                >
+
+                    📄 PDF
+
+                </button>
+
+
+                <!-- IMPRIMIR -->
+
+                <button
+                    type="button"
+                    id="imprimirNominaButton"
+                    class="boton-secundario"
+                >
+
+                    🖨️ Imprimir
+
+                </button>
+
+
+                <!-- NUEVO SOCIO -->
+
+                <button
+                    type="button"
+                    id="nuevoSocioButton"
+                    class="boton"
+                >
+
+                    + Nuevo socio
+
+                </button>
+
+
+            </div>
 
 
         </section>
@@ -888,13 +944,41 @@
      SCRIPTS
      ===================================================== -->
 
+
+<!-- SUPABASE -->
+
 <script
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
 ></script>
 
 
+<!-- CONFIGURACIÓN DEL PROYECTO -->
+
 <script src="config.js"></script>
 
+
+<!-- EXCEL -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
+></script>
+
+
+<!-- PDF -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"
+></script>
+
+
+<!-- TABLAS PDF -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"
+></script>
+
+
+<!-- LÓGICA DEL MÓDULO -->
 
 <script src="socios.js"></script>
 
