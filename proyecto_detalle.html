@@ -525,6 +525,143 @@
         }
 
 
+
+
+        /* =====================================================
+           DOCUMENTACIÓN DEL PROYECTO
+           ===================================================== */
+
+        .documentos-panel {
+            margin-bottom: 20px;
+        }
+
+        .documentos-categorias {
+            display: grid;
+            gap: 18px;
+        }
+
+        .documentos-categoria {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .documentos-categoria-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .documentos-categoria-header strong {
+            color: #111827;
+        }
+
+        .documentos-categoria-header span {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .documento-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 14px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .documento-item:last-child {
+            border-bottom: none;
+        }
+
+        .documento-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .documento-nombre {
+            display: block;
+            font-weight: 600;
+            color: #111827;
+            overflow-wrap: anywhere;
+        }
+
+        .documento-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 14px;
+            margin-top: 5px;
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .documento-acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: flex-end;
+        }
+
+        .documento-vacio {
+            padding: 24px;
+            text-align: center;
+            color: #6b7280;
+        }
+
+        .documento-error {
+            padding: 16px;
+            color: #991b1b;
+            background: #fef2f2;
+            border-radius: 8px;
+        }
+
+        .boton-documento-danger {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: 600;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .boton-documento-danger:hover {
+            background: #fecaca;
+        }
+
+        .ayuda-documento {
+            margin-top: 5px;
+            color: #6b7280;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .archivo-seleccionado {
+            margin-top: 8px;
+            padding: 9px 10px;
+            border-radius: 7px;
+            background: #f3f4f6;
+            color: #374151;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 700px) {
+            .documento-item {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .documento-acciones {
+                justify-content: flex-start;
+            }
+        }
+
+
         /* =====================================================
            RESPONSIVE
            ===================================================== */
@@ -987,6 +1124,49 @@
                     </tbody>
 
                 </table>
+
+            </div>
+
+        </section>
+
+
+
+
+        <!-- =================================================
+             DOCUMENTACIÓN DEL PROYECTO
+             ================================================= -->
+
+        <section class="panel documentos-panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h3>
+                        Documentación del proyecto
+                    </h3>
+
+                    <p>
+                        Documentos de postulación, adjudicación, ejecución y rendición.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="nuevoDocumentoButton"
+                    class="boton boton-azul"
+                >
+                    + Subir documento
+                </button>
+
+            </div>
+
+            <div id="documentosProyecto" class="documentos-categorias">
+
+                <div class="documento-vacio">
+                    Cargando documentación...
+                </div>
 
             </div>
 
@@ -1561,6 +1741,164 @@
 <!-- =========================================================
      SUPABASE
      ========================================================= -->
+
+
+
+<!-- =========================================================
+     MODAL DOCUMENTO
+     ========================================================= -->
+
+<div
+    id="modalDocumento"
+    class="modal"
+    style="display: none;"
+>
+
+    <div class="modal-contenido">
+
+        <div class="modal-header">
+
+            <h3 id="tituloModalDocumento">
+                Subir documento
+            </h3>
+
+            <button
+                type="button"
+                id="cerrarModalDocumento"
+                class="modal-cerrar"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <form id="formDocumento">
+
+            <div class="modal-body">
+
+                <div class="form-grid">
+
+                    <div class="form-grupo">
+                        <label for="documentoCategoria">
+                            Categoría *
+                        </label>
+                        <select id="documentoCategoria" required>
+                            <option value="">Seleccione una categoría</option>
+                            <option value="postulacion">Postulación</option>
+                            <option value="adjudicacion">Adjudicación</option>
+                            <option value="ejecucion">Ejecución</option>
+                            <option value="rendicion">Rendición</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="documentoTipo">
+                            Tipo de documento *
+                        </label>
+                        <select id="documentoTipo" required>
+                            <option value="">Seleccione un tipo</option>
+                            <option value="Formulario de postulación">Formulario de postulación</option>
+                            <option value="Proyecto presentado">Proyecto presentado</option>
+                            <option value="Bases o convocatoria">Bases o convocatoria</option>
+                            <option value="Convenio">Convenio</option>
+                            <option value="Resolución de adjudicación">Resolución de adjudicación</option>
+                            <option value="Certificado">Certificado</option>
+                            <option value="Factura">Factura</option>
+                            <option value="Boleta">Boleta</option>
+                            <option value="Cotización">Cotización</option>
+                            <option value="Fotografía">Fotografía</option>
+                            <option value="Informe de rendición">Informe de rendición</option>
+                            <option value="Rendición">Rendición</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="documentoNumero">
+                            Número de documento
+                        </label>
+                        <input
+                            type="text"
+                            id="documentoNumero"
+                            maxlength="100"
+                            placeholder="Ej.: Factura N.º 1234"
+                        >
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="documentoFecha">
+                            Fecha del documento
+                        </label>
+                        <input
+                            type="date"
+                            id="documentoFecha"
+                        >
+                    </div>
+
+                    <div class="form-grupo form-grupo-completo">
+                        <label for="documentoArchivo">
+                            Archivo *
+                        </label>
+                        <input
+                            type="file"
+                            id="documentoArchivo"
+                            required
+                            accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                        >
+                        <div class="ayuda-documento">
+                            Máximo 50 MB. Se permiten PDF, imágenes, Word, Excel, PowerPoint y TXT.
+                        </div>
+                        <div
+                            id="archivoDocumentoSeleccionado"
+                            class="archivo-seleccionado"
+                            style="display:none;"
+                        ></div>
+                    </div>
+
+                    <div class="form-grupo form-grupo-completo">
+                        <label for="documentoObservaciones">
+                            Descripción / observaciones
+                        </label>
+                        <textarea
+                            id="documentoObservaciones"
+                            rows="3"
+                            maxlength="1000"
+                            placeholder="Indique brevemente qué respalda este documento..."
+                        ></textarea>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    id="cancelarDocumento"
+                    class="boton boton-secundario"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="submit"
+                    id="guardarDocumentoButton"
+                    class="boton boton-azul"
+                >
+                    Subir documento
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 

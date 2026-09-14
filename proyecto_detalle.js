@@ -15,6 +15,7 @@ let categorias = [];
 
 let ingresos = [];
 let gastos = [];
+let documentos = [];
 
 let proyectoId = null;
 
@@ -422,6 +423,89 @@ function configurarEventos() {
 
     }
 
+
+
+
+    /* ========================================================
+       DOCUMENTACIÓN
+       ======================================================== */
+
+    const nuevoDocumento =
+        document.getElementById(
+            "nuevoDocumentoButton"
+        );
+
+    if (nuevoDocumento) {
+        nuevoDocumento.addEventListener(
+            "click",
+            abrirNuevoDocumento
+        );
+    }
+
+    const formularioDocumento =
+        document.getElementById(
+            "formDocumento"
+        );
+
+    if (formularioDocumento) {
+        formularioDocumento.addEventListener(
+            "submit",
+            guardarDocumento
+        );
+    }
+
+    const cerrarDocumento =
+        document.getElementById(
+            "cerrarModalDocumento"
+        );
+
+    if (cerrarDocumento) {
+        cerrarDocumento.addEventListener(
+            "click",
+            cerrarModalDocumento
+        );
+    }
+
+    const cancelarDocumento =
+        document.getElementById(
+            "cancelarDocumento"
+        );
+
+    if (cancelarDocumento) {
+        cancelarDocumento.addEventListener(
+            "click",
+            cerrarModalDocumento
+        );
+    }
+
+    const modalDocumento =
+        document.getElementById(
+            "modalDocumento"
+        );
+
+    if (modalDocumento) {
+        modalDocumento.addEventListener(
+            "click",
+            function (event) {
+                if (event.target === modalDocumento) {
+                    cerrarModalDocumento();
+                }
+            }
+        );
+    }
+
+    const archivoDocumento =
+        document.getElementById(
+            "documentoArchivo"
+        );
+
+    if (archivoDocumento) {
+        archivoDocumento.addEventListener(
+            "change",
+            actualizarArchivoSeleccionado
+        );
+    }
+
 }
 
 
@@ -723,6 +807,7 @@ async function cargarProyecto() {
     await cargarIngresos();
 
     await cargarGastos();
+    await cargarDocumentos();
 
 
     ocultarCargando();
@@ -1627,7 +1712,12 @@ async function guardarIngreso(event) {
     try {
 
         let resultado;
+        let ingresoGuardado;
 
+
+        /* ====================================================
+           EDITAR INGRESO
+           ==================================================== */
 
         if (id) {
 
@@ -1644,11 +1734,50 @@ async function guardarIngreso(event) {
                     .eq(
                         "proyecto_id",
                         proyectoId
+                    );
+
+
+            if (resultado.error) {
+
+                throw resultado.error;
+
+            }
+
+
+            const consultaActualizado =
+                await supabaseClient
+                    .from("proyectos_ingresos")
+                    .select(
+                        "id, proyecto_id, movimiento_id, cuenta_id, fecha_ingreso, monto, numero_comprobante, descripcion, observacion, created_at"
                     )
-                    .select()
-                    .single();
+                    .eq(
+                        "id",
+                        Number(id)
+                    )
+                    .eq(
+                        "proyecto_id",
+                        proyectoId
+                    )
+                    .maybeSingle();
+
+
+            if (consultaActualizado.error) {
+
+                throw consultaActualizado.error;
+
+            }
+
+
+            ingresoGuardado =
+                consultaActualizado.data;
 
         }
+
+
+        /* ====================================================
+           CREAR INGRESO
+           ==================================================== */
+
         else {
 
             datos.created_by =
@@ -1660,27 +1789,91 @@ async function guardarIngreso(event) {
                     .from("proyectos_ingresos")
                     .insert(
                         datos
+                    );
+
+
+            if (resultado.error) {
+
+                throw resultado.error;
+
+            }
+
+
+            /*
+             * No usamos .select().single() directamente después del
+             * INSERT. El trigger de Supabase genera el movimiento y
+             * actualiza movimiento_id; luego consultamos el registro
+             * ya persistido para comprobar el resultado final.
+             */
+
+            const consultaNuevo =
+                await supabaseClient
+                    .from("proyectos_ingresos")
+                    .select(
+                        "id, proyecto_id, movimiento_id, cuenta_id, fecha_ingreso, monto, numero_comprobante, descripcion, observacion, created_at"
                     )
-                    .select()
-                    .single();
+                    .eq(
+                        "proyecto_id",
+                        proyectoId
+                    )
+                    .eq(
+                        "cuenta_id",
+                        cuentaId
+                    )
+                    .eq(
+                        "fecha_ingreso",
+                        fecha
+                    )
+                    .eq(
+                        "monto",
+                        monto
+                    )
+                    .order(
+                        "id",
+                        {
+                            ascending: false
+                        }
+                    )
+                    .limit(1)
+                    .maybeSingle();
+
+
+            if (consultaNuevo.error) {
+
+                throw consultaNuevo.error;
+
+            }
+
+
+            ingresoGuardado =
+                consultaNuevo.data;
 
         }
 
 
-        if (resultado.error) {
+        if (!ingresoGuardado) {
 
-            console.error(
-                "Error al guardar ingreso:",
-                resultado.error
+            throw new Error(
+                "El ingreso fue enviado, pero no fue posible verificar el registro guardado."
             );
 
+        }
 
-            alert(
-                "No fue posible guardar el ingreso.\n\n" +
-                resultado.error.message
+
+        console.log(
+            "Ingreso guardado correctamente:",
+            ingresoGuardado
+        );
+
+
+        if (
+            !ingresoGuardado.movimiento_id
+        ) {
+
+            console.warn(
+                "El ingreso fue guardado, pero aún no tiene movimiento_id:",
+                ingresoGuardado
             );
-
-            return;
 
         }
 
@@ -1703,13 +1896,19 @@ async function guardarIngreso(event) {
     catch (error) {
 
         console.error(
-            "Error inesperado al guardar ingreso:",
+            "Error al guardar ingreso:",
             error
         );
 
 
         alert(
-            "Ocurrió un error inesperado al guardar el ingreso."
+            "No fue posible guardar el ingreso.\n\n" +
+            (
+                error &&
+                error.message
+                    ? error.message
+                    : String(error)
+            )
         );
 
     }
@@ -1730,7 +1929,6 @@ async function guardarIngreso(event) {
     }
 
 }
-
 
 /* ============================================================
    ELIMINAR INGRESO
@@ -2295,7 +2493,7 @@ function abrirNuevoGasto() {
 
 
     establecerValor(
-        "gastoDocumento",
+        "gastoNumeroDocumento",
         ""
     );
 
@@ -2419,7 +2617,7 @@ function abrirEditarGasto(id) {
 
 
     establecerValor(
-        "gastoDocumento",
+        "gastoNumeroDocumento",
         gasto.numero_documento
     );
 
@@ -2529,7 +2727,7 @@ async function guardarGasto(event) {
 
     const numeroDocumento =
         document.getElementById(
-            "gastoDocumento"
+            "gastoNumeroDocumento"
         ).value.trim();
 
 
@@ -2707,10 +2905,11 @@ async function guardarGasto(event) {
     try {
 
         let resultado;
+        let gastoGuardado;
 
 
         /* ====================================================
-           EDITAR
+           EDITAR GASTO
            ==================================================== */
 
         if (id) {
@@ -2728,15 +2927,48 @@ async function guardarGasto(event) {
                     .eq(
                         "proyecto_id",
                         proyectoId
+                    );
+
+
+            if (resultado.error) {
+
+                throw resultado.error;
+
+            }
+
+
+            const consultaActualizado =
+                await supabaseClient
+                    .from("proyectos_gastos")
+                    .select(
+                        "id, proyecto_id, movimiento_id, cuenta_id, categoria_id, fecha_gasto, monto, medio_pago, proveedor, rut_proveedor, numero_documento, descripcion, observacion, estado_rendicion, created_at"
                     )
-                    .select()
-                    .single();
+                    .eq(
+                        "id",
+                        Number(id)
+                    )
+                    .eq(
+                        "proyecto_id",
+                        proyectoId
+                    )
+                    .maybeSingle();
+
+
+            if (consultaActualizado.error) {
+
+                throw consultaActualizado.error;
+
+            }
+
+
+            gastoGuardado =
+                consultaActualizado.data;
 
         }
 
 
         /* ====================================================
-           CREAR
+           CREAR GASTO
            ==================================================== */
 
         else {
@@ -2750,27 +2982,91 @@ async function guardarGasto(event) {
                     .from("proyectos_gastos")
                     .insert(
                         datos
+                    );
+
+
+            if (resultado.error) {
+
+                throw resultado.error;
+
+            }
+
+
+            /*
+             * No usamos .select().single() directamente después del
+             * INSERT. El trigger de Supabase genera el movimiento y
+             * actualiza movimiento_id; luego consultamos el registro
+             * ya persistido para comprobar el resultado final.
+             */
+
+            const consultaNuevo =
+                await supabaseClient
+                    .from("proyectos_gastos")
+                    .select(
+                        "id, proyecto_id, movimiento_id, cuenta_id, categoria_id, fecha_gasto, monto, medio_pago, proveedor, rut_proveedor, numero_documento, descripcion, observacion, estado_rendicion, created_at"
                     )
-                    .select()
-                    .single();
+                    .eq(
+                        "proyecto_id",
+                        proyectoId
+                    )
+                    .eq(
+                        "cuenta_id",
+                        cuentaId
+                    )
+                    .eq(
+                        "fecha_gasto",
+                        fecha
+                    )
+                    .eq(
+                        "monto",
+                        monto
+                    )
+                    .order(
+                        "id",
+                        {
+                            ascending: false
+                        }
+                    )
+                    .limit(1)
+                    .maybeSingle();
+
+
+            if (consultaNuevo.error) {
+
+                throw consultaNuevo.error;
+
+            }
+
+
+            gastoGuardado =
+                consultaNuevo.data;
 
         }
 
 
-        if (resultado.error) {
+        if (!gastoGuardado) {
 
-            console.error(
-                "Error al guardar gasto:",
-                resultado.error
+            throw new Error(
+                "El gasto fue enviado, pero no fue posible verificar el registro guardado."
             );
 
+        }
 
-            alert(
-                "No fue posible guardar el gasto.\n\n" +
-                resultado.error.message
+
+        console.log(
+            "Gasto guardado correctamente:",
+            gastoGuardado
+        );
+
+
+        if (
+            !gastoGuardado.movimiento_id
+        ) {
+
+            console.warn(
+                "El gasto fue guardado, pero aún no tiene movimiento_id:",
+                gastoGuardado
             );
-
-            return;
 
         }
 
@@ -2793,13 +3089,19 @@ async function guardarGasto(event) {
     catch (error) {
 
         console.error(
-            "Error inesperado al guardar gasto:",
+            "Error al guardar gasto:",
             error
         );
 
 
         alert(
-            "Ocurrió un error inesperado al guardar el gasto."
+            "No fue posible guardar el gasto.\n\n" +
+            (
+                error &&
+                error.message
+                    ? error.message
+                    : String(error)
+            )
         );
 
     }
@@ -2820,7 +3122,6 @@ async function guardarGasto(event) {
     }
 
 }
-
 
 /* ============================================================
    ELIMINAR GASTO
@@ -3072,6 +3373,429 @@ async function eliminarGasto(id) {
 
 
 /* ============================================================
+   DOCUMENTACIÓN DEL PROYECTO
+   ============================================================ */
+
+const CATEGORIAS_DOCUMENTOS = [
+    { valor: "postulacion", nombre: "Postulación" },
+    { valor: "adjudicacion", nombre: "Adjudicación" },
+    { valor: "ejecucion", nombre: "Ejecución" },
+    { valor: "rendicion", nombre: "Rendición" },
+    { valor: "otros", nombre: "Otros" }
+];
+
+const TIPOS_MIME_DOCUMENTOS = [
+    "application/pdf",
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "text/plain"
+];
+
+const MAX_TAMANO_DOCUMENTO = 50 * 1024 * 1024;
+
+async function cargarDocumentos() {
+    const contenedor = document.getElementById("documentosProyecto");
+    if (!contenedor) return;
+
+    contenedor.innerHTML = '<div class="documento-vacio">Cargando documentación...</div>';
+
+    const resultado = await supabaseClient
+        .from("proyectos_documentos")
+        .select("id, proyecto_id, gasto_id, rendicion_id, categoria, tipo_documento, nombre_archivo, ruta_archivo, numero_documento, fecha_documento, observaciones, mime_type, tamano_bytes, created_at, created_by")
+        .eq("proyecto_id", proyectoId)
+        .order("created_at", { ascending: false });
+
+    if (resultado.error) {
+        console.error("Error al cargar documentación:", resultado.error);
+        contenedor.innerHTML = '<div class="documento-error">No fue posible cargar la documentación del proyecto.</div>';
+        return;
+    }
+
+    documentos = resultado.data || [];
+    renderizarDocumentos();
+}
+
+function renderizarDocumentos() {
+    const contenedor = document.getElementById("documentosProyecto");
+    if (!contenedor) return;
+
+    contenedor.innerHTML = "";
+
+    if (documentos.length === 0) {
+        contenedor.innerHTML = '<div class="documento-vacio">No hay documentos asociados a este proyecto.</div>';
+        return;
+    }
+
+    CATEGORIAS_DOCUMENTOS.forEach(function (categoria) {
+        const lista = documentos.filter(function (documento) {
+            return documento.categoria === categoria.valor;
+        });
+
+        if (lista.length === 0) return;
+
+        const bloque = document.createElement("div");
+        bloque.className = "documentos-categoria";
+        bloque.innerHTML =
+            '<div class="documentos-categoria-header">' +
+            '<strong>' + escaparHTML(categoria.nombre) + '</strong>' +
+            '<span>' + lista.length + (lista.length === 1 ? " documento" : " documentos") + '</span>' +
+            '</div>';
+
+        lista.forEach(function (documento) {
+            const item = document.createElement("div");
+            item.className = "documento-item";
+
+            const fecha = documento.fecha_documento
+                ? formatearFecha(documento.fecha_documento)
+                : "Fecha no indicada";
+            const tamano = formatearTamanoArchivo(documento.tamano_bytes);
+            const numero = documento.numero_documento
+                ? "N.º " + documento.numero_documento
+                : "";
+            const descripcion = documento.observaciones || "";
+            const puedeEliminar = perfilUsuario && perfilUsuario.rol === "administrador";
+
+            item.innerHTML =
+                '<div class="documento-info">' +
+                '<span class="documento-nombre">📄 ' + escaparHTML(documento.nombre_archivo) + '</span>' +
+                '<div class="documento-meta">' +
+                '<span>' + escaparHTML(documento.tipo_documento || "Documento") + '</span>' +
+                '<span>' + escaparHTML(fecha) + '</span>' +
+                (tamano ? '<span>' + escaparHTML(tamano) + '</span>' : '') +
+                (numero ? '<span>' + escaparHTML(numero) + '</span>' : '') +
+                '</div>' +
+                (descripcion ? '<div class="documento-meta"><span>' + escaparHTML(descripcion) + '</span></div>' : '') +
+                '</div>' +
+                '<div class="documento-acciones">' +
+                '<button type="button" class="boton boton-secundario boton-documento" data-documento-accion="ver" data-id="' + documento.id + '">Ver</button>' +
+                '<button type="button" class="boton boton-secundario boton-documento" data-documento-accion="descargar" data-id="' + documento.id + '">Descargar</button>' +
+                (puedeEliminar ? '<button type="button" class="boton boton-documento-danger" data-documento-accion="eliminar" data-id="' + documento.id + '">Eliminar</button>' : '') +
+                '</div>';
+
+            bloque.appendChild(item);
+        });
+
+        contenedor.appendChild(bloque);
+    });
+
+    configurarBotonesDocumentos();
+}
+
+function configurarBotonesDocumentos() {
+    const botones = document.querySelectorAll("[data-documento-accion]");
+    botones.forEach(function (boton) {
+        boton.addEventListener("click", async function () {
+            const accion = boton.dataset.documentoAccion;
+            const id = Number(boton.dataset.id);
+            if (accion === "ver") await abrirDocumento(id);
+            if (accion === "descargar") await descargarDocumento(id);
+            if (accion === "eliminar") await eliminarDocumento(id);
+        });
+    });
+}
+
+function obtenerDocumento(id) {
+    return documentos.find(function (documento) {
+        return Number(documento.id) === Number(id);
+    });
+}
+
+async function obtenerURLDocumento(documento, descargar) {
+    if (!documento || !documento.ruta_archivo) {
+        throw new Error("El documento no tiene una ruta de almacenamiento válida.");
+    }
+
+    const opciones = descargar
+        ? { download: documento.nombre_archivo }
+        : undefined;
+
+    const resultado = await supabaseClient
+        .storage
+        .from("proyectos-documentos")
+        .createSignedUrl(documento.ruta_archivo, 600, opciones);
+
+    if (resultado.error) throw resultado.error;
+    return resultado.data.signedUrl;
+}
+
+async function abrirDocumento(id) {
+    const documento = obtenerDocumento(id);
+    if (!documento) {
+        alert("No fue posible encontrar el documento.");
+        return;
+    }
+
+    try {
+        const url = await obtenerURLDocumento(documento, false);
+        window.open(url, "_blank", "noopener,noreferrer");
+    } catch (error) {
+        console.error("Error al abrir documento:", error);
+        alert("No fue posible abrir el documento.");
+    }
+}
+
+async function descargarDocumento(id) {
+    const documento = obtenerDocumento(id);
+    if (!documento) {
+        alert("No fue posible encontrar el documento.");
+        return;
+    }
+
+    try {
+        const url = await obtenerURLDocumento(documento, true);
+        const enlace = document.createElement("a");
+        enlace.href = url;
+        enlace.target = "_blank";
+        enlace.rel = "noopener noreferrer";
+        document.body.appendChild(enlace);
+        enlace.click();
+        enlace.remove();
+    } catch (error) {
+        console.error("Error al descargar documento:", error);
+        alert("No fue posible descargar el documento.");
+    }
+}
+
+function abrirNuevoDocumento() {
+    if (!tienePermisoFinanciero()) {
+        alert("No tiene permisos para cargar documentos.");
+        return;
+    }
+
+    const formulario = document.getElementById("formDocumento");
+    if (formulario) formulario.reset();
+
+    establecerValor("documentoFecha", obtenerFechaActual());
+
+    const archivo = document.getElementById("archivoDocumentoSeleccionado");
+    if (archivo) {
+        archivo.textContent = "";
+        archivo.style.display = "none";
+    }
+
+    const boton = document.getElementById("guardarDocumentoButton");
+    if (boton) {
+        boton.disabled = false;
+        boton.textContent = "Subir documento";
+    }
+
+    abrirModalDocumento();
+}
+
+function actualizarArchivoSeleccionado() {
+    const input = document.getElementById("documentoArchivo");
+    const contenedor = document.getElementById("archivoDocumentoSeleccionado");
+    if (!input || !contenedor) return;
+
+    const archivo = input.files && input.files[0] ? input.files[0] : null;
+    if (!archivo) {
+        contenedor.textContent = "";
+        contenedor.style.display = "none";
+        return;
+    }
+
+    contenedor.textContent =
+        "Archivo seleccionado: " + archivo.name + " (" + formatearTamanoArchivo(archivo.size) + ")";
+    contenedor.style.display = "block";
+}
+
+async function guardarDocumento(event) {
+    event.preventDefault();
+
+    if (!tienePermisoFinanciero()) {
+        alert("No tiene permisos para cargar documentos.");
+        return;
+    }
+
+    const categoria = document.getElementById("documentoCategoria").value;
+    const tipoDocumento = document.getElementById("documentoTipo").value;
+    const numeroDocumento = document.getElementById("documentoNumero").value.trim();
+    const fechaDocumento = document.getElementById("documentoFecha").value;
+    const observaciones = document.getElementById("documentoObservaciones").value.trim();
+    const inputArchivo = document.getElementById("documentoArchivo");
+    const archivo = inputArchivo.files && inputArchivo.files[0] ? inputArchivo.files[0] : null;
+
+    if (!categoria) {
+        alert("Debe seleccionar una categoría.");
+        return;
+    }
+    if (!tipoDocumento) {
+        alert("Debe seleccionar el tipo de documento.");
+        return;
+    }
+    if (!archivo) {
+        alert("Debe seleccionar un archivo.");
+        return;
+    }
+    if (archivo.size > MAX_TAMANO_DOCUMENTO) {
+        alert("El archivo supera el tamaño máximo permitido de 50 MB.");
+        return;
+    }
+    if (archivo.type && !TIPOS_MIME_DOCUMENTOS.includes(archivo.type)) {
+        alert("El tipo de archivo seleccionado no está permitido.");
+        return;
+    }
+
+    const boton = document.getElementById("guardarDocumentoButton");
+    if (boton) {
+        boton.disabled = true;
+        boton.textContent = "Subiendo...";
+    }
+
+    const ruta =
+        "proyectos/" +
+        proyectoId +
+        "/" +
+        generarIdentificadorArchivo() +
+        "_" +
+        sanitizarNombreArchivo(archivo.name);
+
+    try {
+        const subida = await supabaseClient
+            .storage
+            .from("proyectos-documentos")
+            .upload(ruta, archivo, {
+                cacheControl: "3600",
+                upsert: false,
+                contentType: archivo.type || undefined
+            });
+
+        if (subida.error) throw subida.error;
+
+        const registro = {
+            proyecto_id: proyectoId,
+            categoria: categoria,
+            tipo_documento: tipoDocumento,
+            nombre_archivo: archivo.name,
+            ruta_archivo: ruta,
+            numero_documento: numeroDocumento || null,
+            fecha_documento: fechaDocumento || null,
+            observaciones: observaciones || null,
+            mime_type: archivo.type || null,
+            tamano_bytes: archivo.size,
+            created_by: usuarioActual ? usuarioActual.id : null
+        };
+
+        const insercion = await supabaseClient
+            .from("proyectos_documentos")
+            .insert(registro)
+            .select("id, proyecto_id, gasto_id, rendicion_id, categoria, tipo_documento, nombre_archivo, ruta_archivo, numero_documento, fecha_documento, observaciones, mime_type, tamano_bytes, created_at, created_by")
+            .single();
+
+        if (insercion.error) {
+            await supabaseClient.storage
+                .from("proyectos-documentos")
+                .remove([ruta]);
+            throw insercion.error;
+        }
+
+        alert("Documento cargado correctamente.");
+        cerrarModalDocumento();
+        await cargarDocumentos();
+
+    } catch (error) {
+        console.error("Error al guardar documento:", error);
+        alert(
+            "No fue posible cargar el documento.\n\n" +
+            (error.message || "Error desconocido.")
+        );
+    } finally {
+        if (boton) {
+            boton.disabled = false;
+            boton.textContent = "Subir documento";
+        }
+    }
+}
+
+async function eliminarDocumento(id) {
+    if (!perfilUsuario || perfilUsuario.rol !== "administrador") {
+        alert("Solo el administrador puede eliminar documentos.");
+        return;
+    }
+
+    const documento = obtenerDocumento(id);
+    if (!documento) {
+        alert("No fue posible encontrar el documento.");
+        return;
+    }
+
+    const confirmar = window.confirm(
+        "¿Está seguro de eliminar el documento " +
+        documento.nombre_archivo +
+        "?\n\nEl archivo será eliminado del almacenamiento del proyecto."
+    );
+
+    if (!confirmar) return;
+
+    try {
+        const eliminacionArchivo = await supabaseClient
+            .storage
+            .from("proyectos-documentos")
+            .remove([documento.ruta_archivo]);
+
+        if (eliminacionArchivo.error) throw eliminacionArchivo.error;
+
+        const eliminacionRegistro = await supabaseClient
+            .from("proyectos_documentos")
+            .delete()
+            .eq("id", Number(id))
+            .eq("proyecto_id", proyectoId);
+
+        if (eliminacionRegistro.error) throw eliminacionRegistro.error;
+
+        alert("Documento eliminado correctamente.");
+        await cargarDocumentos();
+
+    } catch (error) {
+        console.error("Error al eliminar documento:", error);
+        alert(
+            "No fue posible eliminar el documento.\n\n" +
+            (error.message || "Error desconocido.")
+        );
+    }
+}
+
+function formatearTamanoArchivo(bytes) {
+    const numero = Number(bytes);
+    if (!numero || numero <= 0) return "";
+    if (numero < 1024) return numero + " B";
+    if (numero < 1024 * 1024) return (numero / 1024).toFixed(1) + " KB";
+    return (numero / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function sanitizarNombreArchivo(nombre) {
+    return String(nombre || "archivo")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9._-]+/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_+|_+$/g, "") || "archivo";
+}
+
+function generarIdentificadorArchivo() {
+    if (
+        window.crypto &&
+        typeof window.crypto.randomUUID === "function"
+    ) {
+        return window.crypto.randomUUID();
+    }
+
+    return (
+        Date.now().toString(36) +
+        "_" +
+        Math.random().toString(36).slice(2)
+    );
+}
+
+
+/* ============================================================
    MODAL INGRESO
    ============================================================ */
 
@@ -3148,6 +3872,21 @@ function cerrarModalGasto() {
 
     }
 
+}
+
+
+/* ============================================================
+   MODAL DOCUMENTO
+   ============================================================ */
+
+function abrirModalDocumento() {
+    const modal = document.getElementById("modalDocumento");
+    if (modal) modal.style.display = "flex";
+}
+
+function cerrarModalDocumento() {
+    const modal = document.getElementById("modalDocumento");
+    if (modal) modal.style.display = "none";
 }
 
 
