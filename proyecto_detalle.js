@@ -3571,6 +3571,7 @@ function renderizarDocumentos() {
                 ? "N.º " + documento.numero_documento
                 : "";
             const descripcion = documento.observaciones || "";
+            const gastoAsociado = obtenerGastoAsociadoDocumento(documento.gasto_id);
             const puedeEliminar = perfilUsuario && perfilUsuario.rol === "administrador";
 
             item.innerHTML =
@@ -3582,6 +3583,7 @@ function renderizarDocumentos() {
                 (tamano ? '<span>' + escaparHTML(tamano) + '</span>' : '') +
                 (numero ? '<span>' + escaparHTML(numero) + '</span>' : '') +
                 '</div>' +
+                (gastoAsociado ? '<div class="documento-meta"><span>💰 Gasto asociado: ' + escaparHTML(gastoAsociado) + '</span></div>' : '') +
                 (descripcion ? '<div class="documento-meta"><span>' + escaparHTML(descripcion) + '</span></div>' : '') +
                 '</div>' +
                 '<div class="documento-acciones">' +
@@ -3597,6 +3599,83 @@ function renderizarDocumentos() {
     });
 
     configurarBotonesDocumentos();
+}
+
+function obtenerGastoAsociadoDocumento(gastoId) {
+    if (!gastoId) return "";
+
+    const gasto = gastos.find(function (elemento) {
+        return Number(elemento.id) === Number(gastoId);
+    });
+
+    if (!gasto) return "";
+
+    const partes = [];
+
+    if (gasto.fecha_gasto) {
+        partes.push(formatearFecha(gasto.fecha_gasto));
+    }
+
+    partes.push(formatearMoneda(gasto.monto));
+
+    if (gasto.proveedor) {
+        partes.push(gasto.proveedor);
+    }
+
+    if (gasto.numero_documento) {
+        partes.push("Doc. " + gasto.numero_documento);
+    }
+
+    return partes.join(" · ");
+}
+
+function cargarOpcionesGastosDocumento(gastoIdSeleccionado) {
+    const select = document.getElementById("documentoGasto");
+    if (!select) return;
+
+    const valorActual = gastoIdSeleccionado
+        ? String(gastoIdSeleccionado)
+        : select.value;
+
+    select.innerHTML =
+        '<option value="">Sin asociar a un gasto específico</option>';
+
+    if (gastos.length === 0) {
+        select.disabled = true;
+        return;
+    }
+
+    select.disabled = false;
+
+    gastos.forEach(function (gasto) {
+        const option = document.createElement("option");
+        option.value = gasto.id;
+
+        const detalle = [];
+
+        if (gasto.fecha_gasto) {
+            detalle.push(formatearFecha(gasto.fecha_gasto));
+        }
+
+        detalle.push(formatearMoneda(gasto.monto));
+
+        if (gasto.proveedor) {
+            detalle.push(gasto.proveedor);
+        }
+
+        if (gasto.numero_documento) {
+            detalle.push("Doc. " + gasto.numero_documento);
+        }
+
+        option.textContent = detalle.join(" · ");
+        select.appendChild(option);
+    });
+
+    if (valorActual && gastos.some(function (gasto) {
+        return String(gasto.id) === String(valorActual);
+    })) {
+        select.value = valorActual;
+    }
 }
 
 function configurarBotonesDocumentos() {
@@ -3684,6 +3763,7 @@ function abrirNuevoDocumento() {
     if (formulario) formulario.reset();
 
     establecerValor("documentoFecha", obtenerFechaActual());
+    cargarOpcionesGastosDocumento("");
 
     const archivo = document.getElementById("archivoDocumentoSeleccionado");
     if (archivo) {
@@ -3729,6 +3809,7 @@ async function guardarDocumento(event) {
     const tipoDocumento = document.getElementById("documentoTipo").value;
     const numeroDocumento = document.getElementById("documentoNumero").value.trim();
     const fechaDocumento = document.getElementById("documentoFecha").value;
+    const gastoId = document.getElementById("documentoGasto").value;
     const observaciones = document.getElementById("documentoObservaciones").value.trim();
     const inputArchivo = document.getElementById("documentoArchivo");
     const archivo = inputArchivo.files && inputArchivo.files[0] ? inputArchivo.files[0] : null;
@@ -3741,6 +3822,14 @@ async function guardarDocumento(event) {
         alert("Debe seleccionar el tipo de documento.");
         return;
     }
+
+    if (gastoId && !gastos.some(function (gasto) {
+        return Number(gasto.id) === Number(gastoId);
+    })) {
+        alert("El gasto seleccionado no corresponde a este proyecto.");
+        return;
+    }
+
     if (!archivo) {
         alert("Debe seleccionar un archivo.");
         return;
@@ -3781,7 +3870,8 @@ async function guardarDocumento(event) {
         if (subida.error) throw subida.error;
 
         const registro = {
-            proyecto_id: proyectoId,
+                proyecto_id: proyectoId,
+            gasto_id: gastoId ? Number(gastoId) : null,
             categoria: categoria,
             tipo_documento: tipoDocumento,
             nombre_archivo: archivo.name,
