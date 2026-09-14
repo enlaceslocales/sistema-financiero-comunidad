@@ -12,6 +12,113 @@ let periodos = [];
 let proyectoEditando = null;
 
 
+
+
+/* ============================================================
+   NAVEGACIÓN LATERAL DEL MÓDULO
+   ============================================================ */
+
+function configurarMenuLateral() {
+
+    const ids = [
+        "menuSocios",
+        "menuCuotas",
+        "menuFinanzas",
+        "menuProyectos",
+        "menuReportes",
+        "menuUsuarios"
+    ];
+
+    ids.forEach(function (id) {
+        const elemento = document.getElementById(id);
+
+        if (elemento) {
+            elemento.style.display = "none";
+        }
+    });
+
+    if (!perfilUsuario) {
+        return;
+    }
+
+    if (perfilUsuario.rol === "administrador") {
+        ids.forEach(function (id) {
+            const elemento = document.getElementById(id);
+
+            if (elemento) {
+                elemento.style.display = "flex";
+            }
+        });
+    }
+    else if (perfilUsuario.rol === "tesorero") {
+        [
+            "menuSocios",
+            "menuCuotas",
+            "menuFinanzas",
+            "menuProyectos",
+            "menuReportes"
+        ].forEach(function (id) {
+            const elemento = document.getElementById(id);
+
+            if (elemento) {
+                elemento.style.display = "flex";
+            }
+        });
+    }
+    else if (perfilUsuario.rol === "consulta") {
+        const elemento = document.getElementById("menuReportes");
+
+        if (elemento) {
+            elemento.style.display = "flex";
+        }
+    }
+}
+
+
+/* ============================================================
+   CERRAR SESIÓN DESDE LA BARRA LATERAL
+   ============================================================ */
+
+function configurarCerrarSesionLateral() {
+
+    const boton = document.getElementById("logoutButton");
+
+    if (!boton || boton.dataset.listenerConfigurado === "true") {
+        return;
+    }
+
+    boton.addEventListener("click", async function () {
+
+        const confirmar = confirm(
+            "¿Está seguro de que desea cerrar sesión?"
+        );
+
+        if (!confirmar) {
+            return;
+        }
+
+        boton.disabled = true;
+
+        const resultado = await supabaseClient.auth.signOut();
+
+        if (resultado.error) {
+            console.error(
+                "Error al cerrar sesión:",
+                resultado.error
+            );
+
+            alert("No fue posible cerrar la sesión.");
+            boton.disabled = false;
+            return;
+        }
+
+        window.location.replace("login.html");
+    });
+
+    boton.dataset.listenerConfigurado = "true";
+}
+
+
 /* ============================================================
    INICIAR MODULO
    ============================================================ */
@@ -99,6 +206,10 @@ async function verificarSesion() {
 
     perfilUsuario =
         resultadoPerfil.data;
+
+
+    configurarMenuLateral();
+    configurarCerrarSesionLateral();
 
 
     if (

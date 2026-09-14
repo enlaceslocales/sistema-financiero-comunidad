@@ -345,6 +345,240 @@
 
 <body>
 
+<div class="app">
+
+    <aside class="sidebar">
+
+
+        <!-- LOGO -->
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                SF
+            </div>
+
+            <div class="logo-text">
+
+                <strong>
+                    Sistema Financiero
+                </strong>
+
+                <span>
+                    Comunidad Juan Cheuquelen
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             MENÚ PRINCIPAL
+             ================================================= -->
+
+        <nav
+            class="menu"
+            aria-label="Menú principal"
+        >
+
+
+            <!-- INICIO -->
+
+            <a
+                href="dashboard.html"
+                class="menu-item"
+                id="menuInicio"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ⌂
+                </span>
+
+                <span>
+                    Inicio
+                </span>
+
+            </a>
+
+
+            <!-- SOCIOS -->
+
+            <a
+                href="socios.html"
+                class="menu-item"
+                id="menuSocios"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ♙
+                </span>
+
+                <span>
+                    Socios
+                </span>
+
+            </a>
+
+
+            <!-- CUOTAS -->
+
+            <a
+                href="cuotas.html"
+                class="menu-item"
+                id="menuCuotas"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ▣
+                </span>
+
+                <span>
+                    Cuotas
+                </span>
+
+            </a>
+
+
+            <!-- FINANZAS -->
+
+            <a
+                href="finanzas.html"
+                class="menu-item"
+                id="menuFinanzas"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ◈
+                </span>
+
+                <span>
+                    Finanzas
+                </span>
+
+            </a>
+
+
+            <!-- PROYECTOS -->
+
+            <a
+                href="proyectos.html"
+                class="menu-item activo"
+                id="menuProyectos"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ◫
+                </span>
+
+                <span>
+                    Proyectos
+                </span>
+
+            </a>
+
+
+            <!-- REPORTES -->
+
+            <a
+                href="reportes.html"
+                class="menu-item"
+                id="menuReportes"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ▥
+                </span>
+
+                <span>
+                    Reportes
+                </span>
+
+            </a>
+
+
+            <!-- =================================================
+                 USUARIOS
+
+                 SOLO ADMINISTRADOR
+
+                 Se mantiene oculto inicialmente.
+                 ================================================= -->
+
+            <a
+                href="usuarios.html"
+                class="menu-item"
+                id="menuUsuarios"
+                style="display: none;"
+            >
+
+                <span
+                    class="menu-icon"
+                    aria-hidden="true"
+                >
+                    ♙
+                </span>
+
+                <span>
+                    Usuarios
+                </span>
+
+            </a>
+
+
+        </nav>
+
+
+        <!-- =================================================
+             PARTE INFERIOR
+             ================================================= -->
+
+        <div class="sidebar-bottom">
+
+
+            <button
+                type="button"
+                id="logoutButton"
+                class="cerrar-sesion"
+            >
+
+                <span aria-hidden="true">
+                    ↪
+                </span>
+
+                Cerrar sesión
+
+            </button>
+
+
+        </div>
+
+
+    </aside>
+
+    <main class="contenido">
+
     <div class="proyectos-contenedor">
 
         <div class="proyectos-header">
@@ -890,6 +1124,12 @@
         </div>
 
     </div>
+
+    </main>
+
+</div>
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
