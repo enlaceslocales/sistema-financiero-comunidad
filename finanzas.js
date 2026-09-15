@@ -4596,3 +4596,584 @@ async function cerrarSesion() {
         "login.html";
 
 }
+
+/* ============================================================
+   COMPROBANTES DE RESPALDO - MÓDULO DE FINANZAS
+   Se carga DESPUÉS de finanzas.js.
+   Permite adjuntar documentos a ingresos y egresos normales.
+   Los traspasos no utilizan comprobantes.
+   ============================================================ */
+
+(function () {
+    "use strict";
+
+    const BUCKET = "movimientos-documentos";
+    const MAX_FILE_SIZE = 50 * 1024 * 1024;
+    const TIPOS_PERMITIDOS = [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "text/plain"
+    ];
+
+    let documentosMovimiento = [];
+    let archivoComprobanteSeleccionado = null;
+
+    function tienePermisoEdicion() {
+        try {
+            return typeof perfilUsuario !== "undefined" && perfilUsuario &&
+                (perfilUsuario.rol === "administrador" || perfilUsuario.rol === "tesorero");
+        } catch (error) {
+            return false;
+        }
+    }
+
+    function escapar(texto) {
+        if (typeof window.escaparHTML === "function") {
+            return window.escaparHTML(texto == null ? "" : String(texto));
+        }
+        return String(texto == null ? "" : texto)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function formatearTamano(bytes) {
+        const n = Number(bytes) || 0;
+        if (n < 1024) return n + " B";
+        if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " KB";
+        return (n / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    function nombreSeguro(nombre) {
+        return String(nombre || "documento")
+            .replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ._-]/g, "_")
+            .replace(/_+/g, "_")
+            .slice(0, 160);
+    }
+
+    function crearIdArchivo() {
+        if (window.crypto && typeof crypto.randomUUID === "function") {
+            return crypto.randomUUID();
+        }
+        return Date.now() + "-" + Math.random().toString(36).slice(2);
+    }
+
+    function obtenerMovimiento(id) {
+        try {
+            if (typeof movimientos === "undefined" || !Array.isArray(movimientos)) return null;
+            return movimientos.find(m => Number(m.id) === Number(id)) || null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    async function cargarDocumentosMovimiento(id) {
+        const resultado = await supabaseClient
+            .from("movimientos_documentos")
+            .select("id, movimiento_id, nombre_archivo, ruta_archivo, mime_type, tamano_bytes, numero_documento, fecha_documento, observaciones, created_at, created_by")
+            .eq("movimiento_id", Number(id))
+            .order("created_at", { ascending: false });
+
+        if (resultado.error) {
+            console.error("Error al cargar documentos del movimiento:", resultado.error);
+            documentosMovimiento = [];
+            return [];
+        }
+
+        documentosMovimiento = resultado.data || [];
+        return documentosMovimiento;
+    }
+
+    async function obtenerUrl(documento, descargar) {
+        const opciones = descargar
+            ? { download: documento.nombre_archivo }
+            : { download: false };
+
+        const resultado = await supabaseClient.storage
+            .from(BUCKET)
+            .createSignedUrl(documento.ruta_archivo, 600, opciones);
+
+        if (resultado.error) {
+            console.error("Error al generar URL del documento:", resultado.error);
+            throw resultado.error;
+        }
+
+        return resultado.data.signedUrl;
+    }
+
+    function crearSeccionDocumentos(contenedor, movimientoId) {
+        const existente = contenedor.querySelector("#documentosMovimientoSeccion");
+        if (existente) existente.remove();
+
+        const seccion = document.createElement("div");
+        seccion.id = "documentosMovimientoSeccion";
+        seccion.className = "documentos-movimiento-seccion";
+
+        seccion.innerHTML = `
+            <div class="documentos-movimiento-header">
+                <div>
+                    <strong>📎 Documentos de respaldo</strong>
+                    <div class="documentos-movimiento-ayuda">
+                        Boletas, facturas, pasajes, comprobantes y otros respaldos del movimiento.
+                    </div>
+                </div>
+                ${tienePermisoEdicion() ? `
+                    <button type="button" class="boton-tabla" id="agregarComprobanteMovimiento">
+                        + Agregar documento
+                    </button>` : ""}
+            </div>
+            <div id="listaDocumentosMovimiento" class="lista-documentos-movimiento">
+                <div class="documento-cargando">Cargando documentos...</div>
+            </div>
+        `;
+
+        contenedor.appendChild(seccion);
+
+        const boton = seccion.querySelector("#agregarComprobanteMovimiento");
+        if (boton) boton.addEventListener("click", () => abrirModalComprobante(movimientoId));
+    }
+
+    function renderizarDocumentosMovimiento() {
+        const lista = document.getElementById("listaDocumentosMovimiento");
+        if (!lista) return;
+
+        if (!documentosMovimiento.length) {
+            lista.innerHTML = '<div class="documento-vacio">No hay documentos de respaldo asociados.</div>';
+            return;
+        }
+
+        lista.innerHTML = documentosMovimiento.map(doc => `
+            <div class="documento-movimiento-item">
+                <div class="documento-movimiento-info">
+                    <strong>📄 ${escapar(doc.nombre_archivo)}</strong>
+                    <span>${escapar(doc.mime_type || "Documento")} · ${formatearTamano(doc.tamano_bytes)}</span>
+                    ${doc.numero_documento ? `<span><strong>N.º documento:</strong> ${escapar(doc.numero_documento)}</span>` : ""}
+                    ${doc.fecha_documento ? `<span><strong>Fecha:</strong> ${escapar(formatearFechaDocumento(doc.fecha_documento))}</span>` : ""}
+                    ${doc.observaciones ? `<span><strong>Observación:</strong> ${escapar(doc.observaciones)}</span>` : ""}
+                </div>
+                <div class="documento-movimiento-acciones">
+                    <button type="button" class="boton-tabla" data-doc-ver="${doc.id}">Ver</button>
+                    <button type="button" class="boton-tabla" data-doc-descargar="${doc.id}">Descargar</button>
+                    ${perfilUsuario && perfilUsuario.rol === "administrador" ? `<button type="button" class="boton-tabla boton-documento-eliminar" data-doc-eliminar="${doc.id}">Eliminar</button>` : ""}
+                </div>
+            </div>
+        `).join("");
+
+        lista.querySelectorAll("[data-doc-ver]").forEach(btn => {
+            btn.addEventListener("click", () => abrirDocumentoMovimiento(btn.dataset.docVer, false));
+        });
+        lista.querySelectorAll("[data-doc-descargar]").forEach(btn => {
+            btn.addEventListener("click", () => abrirDocumentoMovimiento(btn.dataset.docDescargar, true));
+        });
+        lista.querySelectorAll("[data-doc-eliminar]").forEach(btn => {
+            btn.addEventListener("click", () => eliminarDocumentoMovimiento(btn.dataset.docEliminar));
+        });
+    }
+
+    function formatearFechaDocumento(fecha) {
+        if (!fecha) return "—";
+        const partes = String(fecha).split("-");
+        return partes.length === 3 ? `${partes[2]}-${partes[1]}-${partes[0]}` : String(fecha);
+    }
+
+    async function abrirDocumentoMovimiento(id, descargar) {
+        const documento = documentosMovimiento.find(d => Number(d.id) === Number(id));
+        if (!documento) return;
+        try {
+            const url = await obtenerUrl(documento, descargar);
+            window.open(url, "_blank", "noopener,noreferrer");
+        } catch (error) {
+            alert("No fue posible abrir el documento.\n\n" + (error.message || "Error inesperado."));
+        }
+    }
+
+    async function eliminarDocumentoMovimiento(id) {
+        if (!perfilUsuario || perfilUsuario.rol !== "administrador") {
+            alert("Solo el administrador puede eliminar documentos.");
+            return;
+        }
+
+        const documento = documentosMovimiento.find(d => Number(d.id) === Number(id));
+        if (!documento) return;
+
+        if (!confirm("¿Está seguro de eliminar este documento?\n\n" + documento.nombre_archivo + "\n\nEsta acción no se puede deshacer.")) return;
+
+        try {
+            const eliminadoStorage = await supabaseClient.storage
+                .from(BUCKET)
+                .remove([documento.ruta_archivo]);
+
+            if (eliminadoStorage.error) throw eliminadoStorage.error;
+
+            const eliminadoBD = await supabaseClient
+                .from("movimientos_documentos")
+                .delete()
+                .eq("id", Number(id));
+
+            if (eliminadoBD.error) throw eliminadoBD.error;
+
+            const movimientoId = documento.movimiento_id;
+            await cargarDocumentosMovimiento(movimientoId);
+            renderizarDocumentosMovimiento();
+        } catch (error) {
+            console.error("Error al eliminar documento:", error);
+            alert("No fue posible eliminar el documento.\n\n" + (error.message || "Error inesperado."));
+        }
+    }
+
+    function abrirModalComprobante(movimientoId) {
+        const anterior = document.getElementById("modalComprobanteMovimiento");
+        if (anterior) anterior.remove();
+
+        archivoComprobanteSeleccionado = null;
+
+        const modal = document.createElement("div");
+        modal.id = "modalComprobanteMovimiento";
+        modal.className = "modal";
+        modal.style.display = "flex";
+
+        modal.innerHTML = `
+            <div class="modal-contenido comprobante-movimiento-modal">
+                <div class="modal-header">
+                    <div>
+                        <span class="etiqueta">DOCUMENTO DE RESPALDO</span>
+                        <h2>Agregar comprobante</h2>
+                    </div>
+                    <button type="button" class="modal-cerrar" id="cerrarComprobanteMovimiento">×</button>
+                </div>
+                <form id="formComprobanteMovimiento">
+                    <div class="form-grid">
+                        <div class="form-grupo form-grupo-completo">
+                            <label for="comprobanteArchivoMovimiento">Archivo *</label>
+                            <input id="comprobanteArchivoMovimiento" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" required>
+                            <small id="nombreComprobanteMovimiento">Ningún archivo seleccionado.</small>
+                            <div class="ayuda-documento">PDF, imágenes, Word, Excel, PowerPoint o TXT. Máximo 50 MB.</div>
+                        </div>
+                        <div class="form-grupo">
+                            <label for="comprobanteNumeroMovimiento">Número de documento</label>
+                            <input id="comprobanteNumeroMovimiento" type="text" maxlength="100" placeholder="Ej.: 12345">
+                        </div>
+                        <div class="form-grupo">
+                            <label for="comprobanteFechaMovimiento">Fecha del documento</label>
+                            <input id="comprobanteFechaMovimiento" type="date">
+                        </div>
+                        <div class="form-grupo form-grupo-completo">
+                            <label for="comprobanteObservacionMovimiento">Descripción / observaciones</label>
+                            <textarea id="comprobanteObservacionMovimiento" rows="3" maxlength="1000" placeholder="Ej.: Boleta de pasaje correspondiente a viaje de la directiva."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-acciones">
+                        <button type="button" class="boton boton-secundario" id="cancelarComprobanteMovimiento">Cancelar</button>
+                        <button type="submit" class="boton boton-azul" id="guardarComprobanteMovimiento">Guardar documento</button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const cerrar = () => modal.remove();
+        modal.querySelector("#cerrarComprobanteMovimiento").addEventListener("click", cerrar);
+        modal.querySelector("#cancelarComprobanteMovimiento").addEventListener("click", cerrar);
+        modal.addEventListener("click", e => { if (e.target === modal) cerrar(); });
+
+        const input = modal.querySelector("#comprobanteArchivoMovimiento");
+        input.addEventListener("change", () => {
+            archivoComprobanteSeleccionado = input.files && input.files[0] ? input.files[0] : null;
+            modal.querySelector("#nombreComprobanteMovimiento").textContent = archivoComprobanteSeleccionado
+                ? `${archivoComprobanteSeleccionado.name} · ${formatearTamano(archivoComprobanteSeleccionado.size)}`
+                : "Ningún archivo seleccionado.";
+        });
+
+        modal.querySelector("#formComprobanteMovimiento").addEventListener("submit", async e => {
+            e.preventDefault();
+            await guardarComprobanteMovimiento(movimientoId, modal);
+        });
+    }
+
+    async function guardarComprobanteMovimiento(movimientoId, modal) {
+        if (!tienePermisoEdicion()) {
+            alert("No tiene permisos para adjuntar documentos.");
+            return;
+        }
+
+        const archivo = archivoComprobanteSeleccionado;
+        if (!archivo) {
+            alert("Debe seleccionar un archivo.");
+            return;
+        }
+        if (archivo.size > MAX_FILE_SIZE) {
+            alert("El archivo supera el límite de 50 MB.");
+            return;
+        }
+        if (archivo.type && !TIPOS_PERMITIDOS.includes(archivo.type)) {
+            alert("El tipo de archivo no está permitido.");
+            return;
+        }
+
+        const movimiento = obtenerMovimiento(movimientoId);
+        if (!movimiento || !["ingreso", "egreso"].includes(movimiento.tipo)) {
+            alert("El comprobante solo puede asociarse a ingresos o egresos normales.");
+            return;
+        }
+
+        const boton = modal.querySelector("#guardarComprobanteMovimiento");
+        boton.disabled = true;
+        boton.textContent = "Guardando...";
+
+        const numeroDocumento = modal.querySelector("#comprobanteNumeroMovimiento").value.trim();
+        const fechaDocumento = modal.querySelector("#comprobanteFechaMovimiento").value || null;
+        const observaciones = modal.querySelector("#comprobanteObservacionMovimiento").value.trim();
+        const ruta = `movimientos/${movimientoId}/${crearIdArchivo()}_${nombreSeguro(archivo.name)}`;
+
+        try {
+            const subida = await supabaseClient.storage
+                .from(BUCKET)
+                .upload(ruta, archivo, {
+                    cacheControl: "3600",
+                    upsert: false,
+                    contentType: archivo.type || "application/octet-stream"
+                });
+
+            if (subida.error) throw subida.error;
+
+            const insercion = await supabaseClient
+                .from("movimientos_documentos")
+                .insert({
+                    movimiento_id: Number(movimientoId),
+                    nombre_archivo: archivo.name,
+                    ruta_archivo: ruta,
+                    mime_type: archivo.type || null,
+                    tamano_bytes: archivo.size,
+                    numero_documento: numeroDocumento || null,
+                    fecha_documento: fechaDocumento,
+                    observaciones: observaciones || null,
+                    created_by: perfilUsuario ? perfilUsuario.id || usuarioActual.id : usuarioActual.id
+                });
+
+            if (insercion.error) {
+                await supabaseClient.storage.from(BUCKET).remove([ruta]);
+                throw insercion.error;
+            }
+
+            modal.remove();
+            await cargarDocumentosMovimiento(movimientoId);
+            renderizarDocumentosMovimiento();
+        } catch (error) {
+            console.error("Error al guardar comprobante:", error);
+            alert("No fue posible guardar el documento.\n\n" + (error.message || "Error inesperado."));
+        } finally {
+            if (boton) {
+                boton.disabled = false;
+                boton.textContent = "Guardar documento";
+            }
+        }
+    }
+
+    async function prepararDetalleMovimiento() {
+        const modal = document.getElementById("modalMovimiento");
+        if (!modal) return;
+
+        const detalle = modal.querySelector(".modal-contenido") || modal.firstElementChild;
+        if (!detalle) return;
+
+        let movimientoId = null;
+        const botonDetalle = document.querySelector("[data-accion='detalle'][data-id]");
+        // El ID se obtiene del contenido actual del detalle cuando la función original
+        // ya abrió el modal. Se usa el valor de detalleId si existe; si no, se busca por
+        // los datos visibles del modal.
+        if (window.movimientoDetalleActualId) movimientoId = window.movimientoDetalleActualId;
+        if (!movimientoId) return;
+
+        crearSeccionDocumentos(detalle, movimientoId);
+        await cargarDocumentosMovimiento(movimientoId);
+        renderizarDocumentosMovimiento();
+    }
+
+    function instalarIntegracion() {
+        // Agrega el campo al formulario sin modificar finanzas.html.
+        const formulario = document.getElementById("formNuevoMovimiento");
+        if (formulario && !document.getElementById("bloqueComprobanteMovimiento")) {
+            const bloque = document.createElement("div");
+            bloque.id = "bloqueComprobanteMovimiento";
+            bloque.className = "form-grupo form-grupo-completo";
+            bloque.innerHTML = `
+                <label for="archivoComprobanteMovimiento">📎 Comprobante / documento de respaldo</label>
+                <input id="archivoComprobanteMovimiento" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
+                <small id="nombreArchivoComprobanteMovimiento">Ningún archivo seleccionado.</small>
+                <div class="ayuda-documento">Opcional. Puedes adjuntar la boleta, factura, pasaje, recibo u otro respaldo del ingreso o egreso.</div>
+            `;
+            formulario.insertBefore(bloque, formulario.querySelector(".modal-acciones") || formulario.lastElementChild);
+            const input = bloque.querySelector("#archivoComprobanteMovimiento");
+            input.addEventListener("change", () => {
+                archivoComprobanteSeleccionado = input.files && input.files[0] ? input.files[0] : null;
+                bloque.querySelector("#nombreArchivoComprobanteMovimiento").textContent = archivoComprobanteSeleccionado
+                    ? `${archivoComprobanteSeleccionado.name} · ${formatearTamano(archivoComprobanteSeleccionado.size)}`
+                    : "Ningún archivo seleccionado.";
+            });
+        }
+    }
+
+    function capturarComprobanteAntesDeGuardar() {
+        const formulario = document.getElementById("formNuevoMovimiento");
+        if (!formulario || formulario.dataset.comprobantesListener === "1") return;
+
+        formulario.dataset.comprobantesListener = "1";
+
+        // Captura el archivo en fase de captura, antes de que finanzas.js procese
+        // el formulario y cierre el modal. El movimiento se busca después de guardarse.
+        formulario.addEventListener("submit", function () {
+            const input = document.getElementById("archivoComprobanteMovimiento");
+            const archivo = input && input.files && input.files[0] ? input.files[0] : null;
+            if (!archivo) return;
+
+            if (archivo.size > MAX_FILE_SIZE) {
+                alert("El archivo supera el límite de 50 MB.");
+                return;
+            }
+            if (archivo.type && !TIPOS_PERMITIDOS.includes(archivo.type)) {
+                alert("El tipo de archivo no está permitido.");
+                return;
+            }
+
+            const idsAntes = (() => {
+                try {
+                    return typeof movimientos !== "undefined" && Array.isArray(movimientos)
+                        ? movimientos.map(m => Number(m.id))
+                        : [];
+                } catch (error) {
+                    return [];
+                }
+            })();
+
+            // Esperamos a que el listener original termine de insertar y recargar.
+            setTimeout(async function () {
+                try {
+                    if (typeof movimientos === "undefined" || !Array.isArray(movimientos)) return;
+                    const nuevo = movimientos.find(m =>
+                        !idsAntes.includes(Number(m.id)) &&
+                        ["ingreso", "egreso"].includes(m.tipo)
+                    );
+                    if (nuevo) {
+                        await subirArchivoRapido(nuevo.id, archivo);
+                    }
+                } catch (error) {
+                    console.error("Error al asociar comprobante:", error);
+                }
+            }, 1200);
+        }, true);
+    }
+
+    async function subirArchivoRapido(movimientoId, archivo) {
+        const ruta = `movimientos/${movimientoId}/${crearIdArchivo()}_${nombreSeguro(archivo.name)}`;
+        try {
+            const subida = await supabaseClient.storage.from(BUCKET).upload(ruta, archivo, {
+                cacheControl: "3600",
+                upsert: false,
+                contentType: archivo.type || "application/octet-stream"
+            });
+            if (subida.error) throw subida.error;
+
+            const insercion = await supabaseClient.from("movimientos_documentos").insert({
+                movimiento_id: Number(movimientoId),
+                nombre_archivo: archivo.name,
+                ruta_archivo: ruta,
+                mime_type: archivo.type || null,
+                tamano_bytes: archivo.size,
+                created_by: usuarioActual.id
+            });
+            if (insercion.error) {
+                await supabaseClient.storage.from(BUCKET).remove([ruta]);
+                throw insercion.error;
+            }
+        } catch (error) {
+            console.error("Movimiento guardado, pero no fue posible adjuntar el documento:", error);
+            alert("El movimiento fue guardado correctamente, pero el comprobante no pudo adjuntarse. Puedes agregarlo posteriormente desde el detalle del movimiento.");
+        }
+    }
+
+    function interceptarDetalle() {
+        if (document.body.dataset.comprobantesDetalleListener === "1") return;
+        document.body.dataset.comprobantesDetalleListener = "1";
+
+        // Captura el clic antes del listener de finanzas.js. Dejamos que el detalle
+        // original se abra y luego agregamos la sección de documentos.
+        document.addEventListener("click", function (event) {
+            const objetivo = event.target && event.target.closest
+                ? event.target.closest("[data-accion='detalle'][data-id]")
+                : null;
+            if (!objetivo) return;
+
+            const id = Number(objetivo.dataset.id);
+            if (!id) return;
+
+            setTimeout(async function () {
+                try {
+                    const movimiento = obtenerMovimiento(id);
+                    if (!movimiento || !["ingreso", "egreso"].includes(movimiento.tipo)) return;
+
+                    const modal = document.getElementById("modalMovimiento");
+                    const detalle = modal && (modal.querySelector(".modal-contenido") || modal.firstElementChild);
+                    if (!detalle) return;
+
+                    crearSeccionDocumentos(detalle, id);
+                    await cargarDocumentosMovimiento(id);
+                    renderizarDocumentosMovimiento();
+                } catch (error) {
+                    console.error("Error al mostrar documentos del movimiento:", error);
+                }
+            }, 50);
+        }, true);
+    }
+
+    function agregarEstilos() {
+        if (document.getElementById("estilosComprobantesMovimientos")) return;
+        const style = document.createElement("style");
+        style.id = "estilosComprobantesMovimientos";
+        style.textContent = `
+            .documentos-movimiento-seccion{margin-top:24px;padding-top:18px;border-top:1px solid #e5e7eb}
+            .documentos-movimiento-header{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:14px}
+            .documentos-movimiento-ayuda,.ayuda-documento{font-size:.85rem;color:#6b7280;margin-top:4px;line-height:1.4}
+            .lista-documentos-movimiento{display:flex;flex-direction:column;gap:10px}
+            .documento-movimiento-item{display:flex;justify-content:space-between;gap:14px;align-items:center;border:1px solid #e5e7eb;border-radius:10px;padding:12px;background:#fafafa}
+            .documento-movimiento-info{display:flex;flex-direction:column;gap:3px;min-width:0}
+            .documento-movimiento-info strong{overflow-wrap:anywhere}
+            .documento-movimiento-info span{font-size:.84rem;color:#6b7280}
+            .documento-movimiento-acciones{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+            .documento-vacio,.documento-cargando{padding:12px;color:#6b7280;font-size:.9rem}
+            .comprobante-movimiento-modal{max-width:760px}
+            .boton-documento-eliminar{color:#9b1c1c}
+            @media(max-width:700px){.documentos-movimiento-header,.documento-movimiento-item{flex-direction:column;align-items:stretch}.documento-movimiento-acciones{justify-content:stretch}.documento-movimiento-acciones .boton-tabla{flex:1}}
+        `;
+        document.head.appendChild(style);
+    }
+
+    function iniciar() {
+        agregarEstilos();
+        instalarIntegracion();
+        capturarComprobanteAntesDeGuardar();
+        interceptarDetalle();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // finanzas.js registra sus eventos durante DOMContentLoaded; esperamos al siguiente turno.
+        setTimeout(iniciar, 0);
+    });
+
+    // Exportar para depuración controlada.
+    window.movimientosDocumentos = {
+        cargar: cargarDocumentosMovimiento,
+        renderizar: renderizarDocumentosMovimiento
+    };
+})();
+
