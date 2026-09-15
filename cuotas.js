@@ -2660,19 +2660,22 @@ async function generarReporteCuotasPDF() {
                             item.rut ||
                             "—",
 
-                            item.periodo_anio ||
-                            item.anio ||
+                            item.periodo_anio ??
+                            item.anio ??
                             "—",
 
-                            item.categoria_nombre ||
-                            item.categoria ||
+                            item.categoria_nombre ??
+                            item.categoria ??
                             "—",
 
                             formatearMoneda(
-                                item.monto
+                                item.monto_cuota ??
+                                item.monto ??
+                                0
                             ),
 
                             traducirEstadoReporte(
+                                item.estado_cuota ??
                                 item.estado
                             ),
 
