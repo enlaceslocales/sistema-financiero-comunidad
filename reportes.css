@@ -1081,3 +1081,82 @@
     }
 
 }
+/* =========================================================
+   REPORTE DE PROYECTOS
+   ========================================================= */
+
+.reporte-proyectos {
+    overflow: hidden;
+}
+
+.proyectos-resumen-grid {
+    padding: 22px;
+    margin-bottom: 0;
+}
+
+.tabla-proyectos-reporte {
+    border-top: 1px solid var(--borde);
+}
+
+.tabla-proyectos-reporte .tabla-reporte th,
+.tabla-proyectos-reporte .tabla-reporte td {
+    white-space: nowrap;
+}
+
+.tabla-proyectos-reporte .tabla-reporte td:first-child {
+    white-space: normal;
+    min-width: 210px;
+}
+
+.tabla-proyectos-reporte small {
+    color: var(--texto-secundario);
+    font-size: 11px;
+}
+
+.estado-proyecto-reporte {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    background: #eef2f7;
+    color: var(--texto-secundario);
+}
+
+.estado-proyecto-reporte.estado-en_ejecucion {
+    background: #e8f7ef;
+    color: #217a4d;
+}
+
+.estado-proyecto-reporte.estado-finalizado {
+    background: #e9f1fb;
+    color: #28639b;
+}
+
+.estado-proyecto-reporte.estado-adjudicado {
+    background: #edf7f3;
+    color: #27745a;
+}
+
+.estado-proyecto-reporte.estado-postulado {
+    background: #fff5df;
+    color: #9a6a16;
+}
+
+.estado-proyecto-reporte.estado-rechazado,
+.estado-proyecto-reporte.estado-desistido {
+    background: #fdecef;
+    color: #a83d52;
+}
+
+@media (max-width: 750px) {
+
+    .proyectos-resumen-grid {
+        padding: 18px;
+    }
+
+}

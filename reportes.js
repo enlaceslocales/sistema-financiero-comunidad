@@ -26,6 +26,8 @@ let perfilUsuario = null;
 let movimientos = [];
 let periodos = [];
 let cuentas = [];
+let proyectosReporte = [];
+let periodosReporte = [];
 
 let reporteActual = [];
 
@@ -252,6 +254,8 @@ async function verificarSesion() {
     await cargarCuentas();
 
     await cargarMovimientos();
+
+    await cargarReporteProyectos();
 
 }
 
@@ -741,6 +745,439 @@ async function cargarMovimientos() {
         false
     );
 
+}
+
+
+/* ============================================================
+   CARGAR REPORTE DE PROYECTOS
+   ============================================================ */
+
+async function cargarReporteProyectos() {
+
+    const tabla =
+        document.getElementById(
+            "tablaReporteProyectos"
+        );
+
+    if (tabla) {
+        tabla.innerHTML =
+            '<tr>' +
+            '<td colspan="7" class="tabla-vacia">' +
+            'Cargando proyectos...' +
+            '</td>' +
+            '</tr>';
+    }
+
+    const resultados =
+        await Promise.all([
+            supabaseClient
+                .from("proyectos")
+                .select(
+                    "id, periodo_id, nombre, codigo, organismo_financiador, monto_adjudicado, estado"
+                )
+                .order(
+                    "created_at",
+                    { ascending: false }
+                ),
+
+            supabaseClient
+                .from("proyectos_ingresos")
+                .select(
+                    "id, proyecto_id, monto"
+                ),
+
+            supabaseClient
+                .from("proyectos_gastos")
+                .select(
+                    "id, proyecto_id, monto"
+                ),
+
+            supabaseClient
+                .from("proyectos_documentos")
+                .select(
+                    "id, proyecto_id"
+                )
+        ]);
+
+    const resultadoProyectos =
+        resultados[0];
+
+    const resultadoIngresos =
+        resultados[1];
+
+    const resultadoGastos =
+        resultados[2];
+
+    const resultadoDocumentos =
+        resultados[3];
+
+    const errores = resultados.filter(
+        function (resultado) {
+            return !!resultado.error;
+        }
+    );
+
+    if (errores.length > 0) {
+
+        console.error(
+            "Error al cargar reporte de proyectos:",
+            errores
+        );
+
+        proyectosReporte = [];
+
+        if (tabla) {
+            tabla.innerHTML =
+                '<tr>' +
+                '<td colspan="7" class="tabla-vacia">' +
+                'No fue posible cargar el reporte de proyectos.' +
+                '</td>' +
+                '</tr>';
+        }
+
+        return;
+    }
+
+    const proyectos =
+        resultadoProyectos.data || [];
+
+    const ingresos =
+        resultadoIngresos.data || [];
+
+    const gastos =
+        resultadoGastos.data || [];
+
+    const documentos =
+        resultadoDocumentos.data || [];
+
+    proyectosReporte =
+        proyectos.map(
+            function (proyecto) {
+
+                const ingresosProyecto =
+                    ingresos
+                        .filter(
+                            function (ingreso) {
+                                return Number(
+                                    ingreso.proyecto_id
+                                ) === Number(
+                                    proyecto.id
+                                );
+                            }
+                        )
+                        .reduce(
+                            function (total, ingreso) {
+                                return total +
+                                    (Number(ingreso.monto) || 0);
+                            },
+                            0
+                        );
+
+                const gastosProyecto =
+                    gastos
+                        .filter(
+                            function (gasto) {
+                                return Number(
+                                    gasto.proyecto_id
+                                ) === Number(
+                                    proyecto.id
+                                );
+                            }
+                        )
+                        .reduce(
+                            function (total, gasto) {
+                                return total +
+                                    (Number(gasto.monto) || 0);
+                            },
+                            0
+                        );
+
+                const documentosProyecto =
+                    documentos.filter(
+                        function (documento) {
+                            return Number(
+                                documento.proyecto_id
+                            ) === Number(
+                                proyecto.id
+                            );
+                        }
+                    ).length;
+
+                return {
+                    ...proyecto,
+                    montoAdjudicado:
+                        Number(
+                            proyecto.monto_adjudicado
+                        ) || 0,
+                    ingresos:
+                        ingresosProyecto,
+                    gastos:
+                        gastosProyecto,
+                    saldo:
+                        ingresosProyecto -
+                        gastosProyecto,
+                    documentos:
+                        documentosProyecto
+                };
+
+            }
+        );
+
+    renderizarReporteProyectos();
+
+}
+
+
+/* ============================================================
+   RENDERIZAR REPORTE DE PROYECTOS
+   ============================================================ */
+
+function renderizarReporteProyectos() {
+
+    const tabla =
+        document.getElementById(
+            "tablaReporteProyectos"
+        );
+
+    if (!tabla) {
+        return;
+    }
+
+    let totalAdjudicado = 0;
+    let totalIngresos = 0;
+    let totalGastos = 0;
+    let totalDocumentos = 0;
+
+    let ejecucion = 0;
+    let finalizados = 0;
+    let pendientes = 0;
+
+    proyectosReporte.forEach(
+        function (proyecto) {
+
+            totalAdjudicado +=
+                proyecto.montoAdjudicado;
+
+            totalIngresos +=
+                proyecto.ingresos;
+
+            totalGastos +=
+                proyecto.gastos;
+
+            totalDocumentos +=
+                proyecto.documentos;
+
+            switch (
+                String(
+                    proyecto.estado || ""
+                ).toLowerCase()
+            ) {
+
+                case "en_ejecucion":
+                    ejecucion++;
+                    break;
+
+                case "finalizado":
+                case "finalizada":
+                    finalizados++;
+                    break;
+
+                case "postulado":
+                case "adjudicado":
+                    pendientes++;
+                    break;
+            }
+
+        }
+    );
+
+    const saldoTotal =
+        totalIngresos -
+        totalGastos;
+
+    establecerTextoReporteProyecto(
+        "proyectosTotal",
+        proyectosReporte.length
+    );
+
+    establecerTextoReporteProyecto(
+        "proyectosEjecucion",
+        ejecucion
+    );
+
+    establecerTextoReporteProyecto(
+        "proyectosFinalizados",
+        finalizados
+    );
+
+    establecerTextoReporteProyecto(
+        "proyectosPendientes",
+        pendientes
+    );
+
+    establecerTextoReporteProyecto(
+        "proyectosMontoAdjudicado",
+        formatearMoneda(totalAdjudicado)
+    );
+
+    establecerTextoReporteProyecto(
+        "proyectosIngresos",
+        formatearMoneda(totalIngresos)
+    );
+
+    establecerTextoReporteProyecto(
+        "proyectosGastos",
+        formatearMoneda(totalGastos)
+    );
+
+    establecerTextoReporteProyecto(
+        "proyectosSaldo",
+        formatearMoneda(saldoTotal)
+    );
+
+    tabla.innerHTML = "";
+
+    if (proyectosReporte.length === 0) {
+
+        tabla.innerHTML =
+            '<tr>' +
+            '<td colspan="7" class="tabla-vacia">' +
+            'No hay proyectos registrados.' +
+            '</td>' +
+            '</tr>';
+
+        return;
+    }
+
+    proyectosReporte.forEach(
+        function (proyecto) {
+
+            const fila =
+                document.createElement(
+                    "tr"
+                );
+
+            fila.innerHTML =
+                '<td>' +
+                '<strong>' +
+                escaparHTML(
+                    proyecto.nombre ||
+                    "—"
+                ) +
+                '</strong>' +
+                (
+                    proyecto.codigo
+                        ? '<br><small>' +
+                          escaparHTML(
+                              proyecto.codigo
+                          ) +
+                          '</small>'
+                        : ''
+                ) +
+                '</td>' +
+
+                '<td>' +
+                crearEtiquetaEstadoProyecto(
+                    proyecto.estado
+                ) +
+                '</td>' +
+
+                '<td>' +
+                formatearMoneda(
+                    proyecto.montoAdjudicado
+                ) +
+                '</td>' +
+
+                '<td>' +
+                formatearMoneda(
+                    proyecto.ingresos
+                ) +
+                '</td>' +
+
+                '<td>' +
+                formatearMoneda(
+                    proyecto.gastos
+                ) +
+                '</td>' +
+
+                '<td>' +
+                formatearMoneda(
+                    proyecto.saldo
+                ) +
+                '</td>' +
+
+                '<td>' +
+                String(
+                    proyecto.documentos
+                ) +
+                '</td>';
+
+            tabla.appendChild(
+                fila
+            );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   ESTABLECER TEXTO DE REPORTE DE PROYECTO
+   ============================================================ */
+
+function establecerTextoReporteProyecto(
+    id,
+    texto
+) {
+
+    const elemento =
+        document.getElementById(
+            id
+        );
+
+    if (!elemento) {
+        return;
+    }
+
+    elemento.textContent =
+        texto;
+
+}
+
+
+/* ============================================================
+   ETIQUETA DE ESTADO DE PROYECTO
+   ============================================================ */
+
+function crearEtiquetaEstadoProyecto(
+    estado
+) {
+
+    const mapa = {
+        postulado: "Postulado",
+        adjudicado: "Adjudicado",
+        en_ejecucion: "En ejecución",
+        finalizado: "Finalizado",
+        rechazado: "Rechazado",
+        desistido: "Desistido"
+    };
+
+    const texto =
+        mapa[estado] ||
+        estado ||
+        "Sin estado";
+
+    return (
+        '<span class="estado-proyecto-reporte estado-' +
+        escaparHTML(
+            estado ||
+            "sin-estado"
+        ) +
+        '">' +
+        escaparHTML(texto) +
+        '</span>'
+    );
 }
 
 
