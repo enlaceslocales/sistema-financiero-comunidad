@@ -13,6 +13,10 @@ let cuentas = [];
 let comprobantesPorPago = {};
 let cuotaHistorialActual = null;
 
+// Lista actualmente visible según los filtros aplicados.
+// Se utiliza exclusivamente para generar el PDF del listado.
+let cuotasFiltradasActuales = [];
+
 
 // ============================================================
 // INICIAR MÓDULO
@@ -257,6 +261,21 @@ function configurarEventos() {
         periodo.addEventListener(
             "change",
             aplicarFiltros
+        );
+
+    }
+
+
+    const generarPdf =
+        document.getElementById(
+            "generarPdfCuotas"
+        );
+
+    if (generarPdf) {
+
+        generarPdf.addEventListener(
+            "click",
+            generarPDFCuotas
         );
 
     }
@@ -1060,6 +1079,12 @@ function aplicarFiltros() {
 
             }
         );
+
+
+    // Guardar exactamente la lista que está visible en pantalla.
+    // Esto permite que el PDF respete búsqueda, período y estado.
+    cuotasFiltradasActuales =
+        lista.slice();
 
 
     renderizarCuotas(
@@ -3141,6 +3166,582 @@ escaparHTML(
         );
 
     }
+
+}
+
+
+
+// ============================================================
+// GENERAR PDF DEL LISTADO DE CUOTAS
+// ============================================================
+
+function generarPDFCuotas() {
+
+    if (
+        typeof window.jspdf === "undefined" ||
+        typeof window.jspdf.jsPDF === "undefined"
+    ) {
+
+        alert(
+            "No fue posible cargar el generador de PDF. " +
+            "Verifique su conexión a Internet y vuelva a intentarlo."
+        );
+
+        return;
+    }
+
+
+    const lista =
+        cuotasFiltradasActuales || [];
+
+
+    if (lista.length === 0) {
+
+        alert(
+            "No hay cuotas para generar el PDF con los filtros actuales."
+        );
+
+        return;
+    }
+
+
+    const JsPDF =
+        window.jspdf.jsPDF;
+
+
+    const documento =
+        new JsPDF(
+            {
+                orientation: "landscape",
+                unit: "mm",
+                format: "a4"
+            }
+        );
+
+
+    const anchoPagina =
+        documento.internal.pageSize.getWidth();
+
+
+    const altoPagina =
+        documento.internal.pageSize.getHeight();
+
+
+    // ========================================================
+    // ENCABEZADO
+    // ========================================================
+
+    documento.setFont(
+        "helvetica",
+        "bold"
+    );
+
+    documento.setFontSize(
+        16
+    );
+
+    documento.text(
+        "COMUNIDAD INDÍGENA JUAN CHEUQUELÉN",
+        14,
+        15
+    );
+
+
+    documento.setFont(
+        "helvetica",
+        "normal"
+    );
+
+    documento.setFontSize(
+        9
+    );
+
+    documento.text(
+        "RUT: 65.169.427-2  |  PJ N.º 2314  |  Fundada 27 de julio de 2017",
+        14,
+        21
+    );
+
+
+    documento.setFont(
+        "helvetica",
+        "bold"
+    );
+
+    documento.setFontSize(
+        13
+    );
+
+    documento.text(
+        "CUOTAS POR COBRAR",
+        14,
+        31
+    );
+
+
+    // ========================================================
+    // FILTROS ACTUALES
+    // ========================================================
+
+    const periodoSelect =
+        document.getElementById(
+            "periodoSelect"
+        );
+
+
+    const estadoSelect =
+        document.getElementById(
+            "filtroEstado"
+        );
+
+
+    const buscarInput =
+        document.getElementById(
+            "buscarSocio"
+        );
+
+
+    const periodoTexto =
+        periodoSelect &&
+        periodoSelect.selectedIndex >= 0
+            ? periodoSelect.options[
+                periodoSelect.selectedIndex
+            ].textContent
+            : "Todos los períodos";
+
+
+    const estadoTexto =
+        estadoSelect &&
+        estadoSelect.selectedIndex >= 0
+            ? estadoSelect.options[
+                estadoSelect.selectedIndex
+            ].textContent
+            : "Todos";
+
+
+    const busquedaTexto =
+        buscarInput
+            ? buscarInput.value.trim()
+            : "";
+
+
+    documento.setFont(
+        "helvetica",
+        "normal"
+    );
+
+    documento.setFontSize(
+        9
+    );
+
+
+    documento.text(
+        "Período: " +
+        (periodoTexto || "Todos los períodos"),
+        14,
+        38
+    );
+
+
+    documento.text(
+        "Estado: " +
+        (estadoTexto || "Todos"),
+        14,
+        43
+    );
+
+
+    documento.text(
+        "Búsqueda: " +
+        (busquedaTexto || "Sin filtro"),
+        100,
+        38
+    );
+
+
+    documento.text(
+        "Cuotas mostradas: " +
+        lista.length,
+        100,
+        43
+    );
+
+
+    // ========================================================
+    // DATOS DE LA TABLA
+    // ========================================================
+
+    const filas =
+        lista.map(
+            function (cuota) {
+
+                const socio =
+                    obtenerSocio(
+                        cuota.socio_id
+                    );
+
+
+                const periodo =
+                    obtenerPeriodo(
+                        cuota.periodo_id
+                    );
+
+
+                const monto =
+                    Number(
+                        cuota.monto || 0
+                    );
+
+
+                const pagado =
+                    Number(
+                        cuota.total_pagado || 0
+                    );
+
+
+                const saldo =
+                    Math.max(
+                        monto - pagado,
+                        0
+                    );
+
+
+                const estado =
+                    determinarEstado(
+                        monto,
+                        pagado,
+                        cuota.estado
+                    );
+
+
+                return [
+                    socio
+                        ? construirNombreCompleto(
+                            socio
+                        )
+                        : "Socio no encontrado",
+
+                    periodo
+                        ? String(
+                            periodo.anio
+                        )
+                        : "—",
+
+                    formatearMoneda(
+                        monto
+                    ),
+
+                    formatearMoneda(
+                        pagado
+                    ),
+
+                    formatearMoneda(
+                        saldo
+                    ),
+
+                    traducirEstado(
+                        estado
+                    )
+                ];
+
+            }
+        );
+
+
+    // ========================================================
+    // TABLA PDF
+    // ========================================================
+
+    if (
+        typeof documento.autoTable !==
+        "function"
+    ) {
+
+        alert(
+            "No fue posible cargar el componente de tablas para el PDF. " +
+            "Recargue la página y vuelva a intentarlo."
+        );
+
+        return;
+    }
+
+
+    documento.autoTable(
+        {
+            startY: 50,
+
+            head: [
+                [
+                    "Socio",
+                    "Período",
+                    "Cuota",
+                    "Pagado",
+                    "Saldo",
+                    "Estado"
+                ]
+            ],
+
+            body: filas,
+
+            theme: "grid",
+
+            styles: {
+                font: "helvetica",
+                fontSize: 8,
+                cellPadding: 3,
+                valign: "middle"
+            },
+
+            headStyles: {
+                fontStyle: "bold",
+                halign: "center"
+            },
+
+            columnStyles: {
+                0: {
+                    cellWidth: 78
+                },
+
+                1: {
+                    cellWidth: 25,
+                    halign: "center"
+                },
+
+                2: {
+                    cellWidth: 35,
+                    halign: "right"
+                },
+
+                3: {
+                    cellWidth: 35,
+                    halign: "right"
+                },
+
+                4: {
+                    cellWidth: 35,
+                    halign: "right"
+                },
+
+                5: {
+                    cellWidth: 30,
+                    halign: "center"
+                }
+            },
+
+            margin: {
+                left: 14,
+                right: 14
+            },
+
+            didDrawPage:
+                function (data) {
+
+                    const pagina =
+                        documento.internal.getNumberOfPages();
+
+
+                    documento.setFont(
+                        "helvetica",
+                        "normal"
+                    );
+
+                    documento.setFontSize(
+                        8
+                    );
+
+
+                    documento.text(
+                        "Sistema Financiero — Comunidad Indígena Juan Cheuquelén",
+                        14,
+                        altoPagina - 10
+                    );
+
+
+                    documento.text(
+                        "Página " +
+                        pagina,
+                        anchoPagina - 28,
+                        altoPagina - 10
+                    );
+
+                }
+        }
+    );
+
+
+    // ========================================================
+    // RESUMEN FINAL
+    // ========================================================
+
+    const ultimoY =
+        documento.lastAutoTable &&
+        documento.lastAutoTable.finalY
+            ? documento.lastAutoTable.finalY
+            : 50;
+
+
+    let resumenY =
+        ultimoY + 10;
+
+
+    if (
+        resumenY >
+        altoPagina - 35
+    ) {
+
+        documento.addPage();
+
+        resumenY = 20;
+
+    }
+
+
+    let totalCuotas =
+        0;
+
+    let totalPagado =
+        0;
+
+    let totalSaldo =
+        0;
+
+
+    lista.forEach(
+        function (cuota) {
+
+            const monto =
+                Number(
+                    cuota.monto || 0
+                );
+
+
+            const pagado =
+                Number(
+                    cuota.total_pagado || 0
+                );
+
+
+            const saldo =
+                Math.max(
+                    monto - pagado,
+                    0
+                );
+
+
+            totalCuotas +=
+                monto;
+
+            totalPagado +=
+                pagado;
+
+            totalSaldo +=
+                saldo;
+
+        }
+    );
+
+
+    documento.setFont(
+        "helvetica",
+        "bold"
+    );
+
+    documento.setFontSize(
+        9
+    );
+
+
+    documento.text(
+        "Resumen del listado:",
+        14,
+        resumenY
+    );
+
+
+    documento.setFont(
+        "helvetica",
+        "normal"
+    );
+
+
+    documento.text(
+        "Total cuotas: " +
+        formatearMoneda(
+            totalCuotas
+        ),
+        14,
+        resumenY + 6
+    );
+
+
+    documento.text(
+        "Total pagado: " +
+        formatearMoneda(
+            totalPagado
+        ),
+        80,
+        resumenY + 6
+    );
+
+
+    documento.text(
+        "Saldo pendiente: " +
+        formatearMoneda(
+            totalSaldo
+        ),
+        150,
+        resumenY + 6
+    );
+
+
+    // ========================================================
+    // FECHA DE EMISIÓN Y DESCARGA
+    // ========================================================
+
+    documento.setFontSize(
+        8
+    );
+
+
+    documento.text(
+        "Documento generado el " +
+        formatearFecha(
+            obtenerFechaActual()
+        ),
+        14,
+        altoPagina - 16
+    );
+
+
+    const periodoNombre =
+        periodoSelect &&
+        periodoSelect.value
+            ? (
+                obtenerPeriodo(
+                    Number(
+                        periodoSelect.value
+                    )
+                ) || {}
+            ).anio
+            : "todos";
+
+
+    const nombreArchivo =
+        "cuotas-por-cobrar-" +
+        String(
+            periodoNombre
+        ).replace(
+            /[^a-zA-Z0-9_-]/g,
+            ""
+        ) +
+        "-" +
+        obtenerFechaActual() +
+        ".pdf";
+
+
+    documento.save(
+        nombreArchivo
+    );
 
 }
 
