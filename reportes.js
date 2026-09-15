@@ -17,6 +17,34 @@
 
 
 /* ============================================================
+   REGLA CONTABLE DEL REPORTE GENERAL
+   ============================================================ */
+
+/*
+ * El reporte general excluye los movimientos cuyo origen corresponde
+ * a proyectos. El reporte de proyectos se presenta por separado.
+ *
+ * El "Resultado de operaciones generales" es solo una diferencia
+ * analítica entre ingresos generales + cuotas y egresos generales.
+ *
+ * El "Saldo disponible" NO es esa diferencia.
+ * El saldo disponible corresponde al dinero físicamente disponible:
+ *
+ *      Caja + Cuenta Bancaria
+ *
+ * Actualmente, para 2026:
+ *
+ *      Caja:              $196.730
+ *      Cuenta bancaria:    $27.082
+ *      Total disponible: $223.812
+ *
+ * Los $212.403 pendientes del proyecto son un monto que deberá
+ * reintegrarse al organismo financiador cuando corresponda.
+ * No se descuenta del saldo disponible hasta que el reintegro sea
+ * efectivamente registrado como un egreso.
+ */
+
+/* ============================================================
    VARIABLES DEL MÓDULO
    ============================================================ */
 
@@ -245,6 +273,9 @@ async function verificarSesion() {
         perfil;
 
 
+    ocultarCategoriaProyectos();
+
+
     mostrarUsuario();
 
     configurarEventos();
@@ -410,6 +441,40 @@ function traducirRol(rol) {
 
 
 /* ============================================================
+   OCULTAR CATEGORÍA PROYECTOS DEL REPORTE GENERAL
+   ============================================================ */
+
+function ocultarCategoriaProyectos() {
+
+    const selector =
+        document.getElementById(
+            "filtroCategoria"
+        );
+
+
+    if (!selector) {
+
+        return;
+
+    }
+
+
+    const opcionProyectos =
+        selector.querySelector(
+            'option[value="proyectos"]'
+        );
+
+
+    if (opcionProyectos) {
+
+        opcionProyectos.remove();
+
+    }
+
+}
+
+
+/* ============================================================
    CONFIGURAR EVENTOS
    ============================================================ */
 
@@ -474,38 +539,6 @@ function configurarEventos() {
         exportarPdf.addEventListener(
             "click",
             exportarPdfReporte
-        );
-
-    }
-
-
-    const exportarProyectosExcel =
-        document.getElementById(
-            "exportarProyectosExcelButton"
-        );
-
-
-    if (exportarProyectosExcel) {
-
-        exportarProyectosExcel.addEventListener(
-            "click",
-            exportarProyectosExcelReporte
-        );
-
-    }
-
-
-    const exportarProyectosPdf =
-        document.getElementById(
-            "exportarProyectosPdfButton"
-        );
-
-
-    if (exportarProyectosPdf) {
-
-        exportarProyectosPdf.addEventListener(
-            "click",
-            exportarProyectosPdfReporte
         );
 
     }
@@ -1155,536 +1188,6 @@ function renderizarReporteProyectos() {
 
 
 /* ============================================================
-   EXPORTAR RESUMEN DE PROYECTOS A EXCEL
-   ============================================================ */
-
-function exportarProyectosExcelReporte() {
-
-    if (
-        !proyectosReporte ||
-        proyectosReporte.length === 0
-    ) {
-
-        alert(
-            "No hay proyectos disponibles para exportar."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        typeof XLSX === "undefined"
-    ) {
-
-        alert(
-            "No fue posible cargar la herramienta de exportación Excel."
-        );
-
-        return;
-
-    }
-
-
-    let totalAdjudicado = 0;
-    let totalIngresos = 0;
-    let totalGastos = 0;
-    let totalDocumentos = 0;
-
-
-    proyectosReporte.forEach(
-        function (proyecto) {
-
-            totalAdjudicado +=
-                Number(proyecto.montoAdjudicado) || 0;
-
-            totalIngresos +=
-                Number(proyecto.ingresos) || 0;
-
-            totalGastos +=
-                Number(proyecto.gastos) || 0;
-
-            totalDocumentos +=
-                Number(proyecto.documentos) || 0;
-
-        }
-    );
-
-
-    const filas = [
-
-        [
-            "REPORTE DE PROYECTOS"
-        ],
-
-        [
-            "Fecha de generación",
-            formatearFecha(
-                new Date()
-                    .toISOString()
-                    .substring(0, 10)
-            )
-        ],
-
-        [],
-
-        [
-            "RESUMEN GENERAL"
-        ],
-
-        [
-            "Proyectos totales",
-            proyectosReporte.length
-        ],
-
-        [
-            "Total adjudicado",
-            totalAdjudicado
-        ],
-
-        [
-            "Total ingresos",
-            totalIngresos
-        ],
-
-        [
-            "Total gastos",
-            totalGastos
-        ],
-
-        [
-            "Saldo de proyectos",
-            totalIngresos - totalGastos
-        ],
-
-        [
-            "Total documentos",
-            totalDocumentos
-        ],
-
-        [],
-
-        [
-            "DETALLE DE PROYECTOS"
-        ],
-
-        [
-            "Proyecto",
-            "Código",
-            "Organismo financiador",
-            "Estado",
-            "Monto adjudicado",
-            "Ingresos",
-            "Gastos",
-            "Saldo",
-            "Documentos"
-        ]
-
-    ];
-
-
-    proyectosReporte.forEach(
-        function (proyecto) {
-
-            filas.push([
-
-                proyecto.nombre || "",
-                proyecto.codigo || "",
-                proyecto.organismo_financiador || "",
-                obtenerTextoEstadoProyecto(
-                    proyecto.estado
-                ),
-                Number(proyecto.montoAdjudicado) || 0,
-                Number(proyecto.ingresos) || 0,
-                Number(proyecto.gastos) || 0,
-                Number(proyecto.saldo) || 0,
-                Number(proyecto.documentos) || 0
-
-            ]);
-
-        }
-    );
-
-
-    const hoja =
-        XLSX.utils.aoa_to_sheet(
-            filas
-        );
-
-
-    hoja["!cols"] = [
-        { wch: 34 },
-        { wch: 18 },
-        { wch: 32 },
-        { wch: 18 },
-        { wch: 20 },
-        { wch: 18 },
-        { wch: 18 },
-        { wch: 18 },
-        { wch: 14 }
-    ];
-
-
-    [
-        "B6",
-        "B7",
-        "B8",
-        "B9"
-    ].forEach(
-        function (celda) {
-
-            if (hoja[celda]) {
-                hoja[celda].z = "$ #,##0";
-            }
-
-        }
-    );
-
-
-    const primeraFilaDetalle = 14;
-
-
-    for (
-        let fila = primeraFilaDetalle;
-        fila < primeraFilaDetalle + proyectosReporte.length;
-        fila++
-    ) {
-
-        ["E", "F", "G", "H"].forEach(
-            function (columna) {
-
-                const celda =
-                    hoja[columna + fila];
-
-                if (celda) {
-                    celda.z = "$ #,##0";
-                }
-
-            }
-        );
-
-    }
-
-
-    const libro =
-        XLSX.utils.book_new();
-
-
-    XLSX.utils.book_append_sheet(
-        libro,
-        hoja,
-        "Proyectos"
-    );
-
-
-    const fecha =
-        new Date()
-            .toISOString()
-            .substring(0, 10);
-
-
-    XLSX.writeFile(
-        libro,
-        "reporte-proyectos-" +
-        fecha +
-        ".xlsx"
-    );
-
-}
-
-
-/* ============================================================
-   EXPORTAR RESUMEN DE PROYECTOS A PDF
-   ============================================================ */
-
-function exportarProyectosPdfReporte() {
-
-    if (
-        !proyectosReporte ||
-        proyectosReporte.length === 0
-    ) {
-
-        alert(
-            "No hay proyectos disponibles para exportar."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        typeof window.jspdf === "undefined"
-    ) {
-
-        alert(
-            "No fue posible cargar la herramienta de exportación PDF."
-        );
-
-        return;
-
-    }
-
-
-    const jsPDF =
-        window.jspdf.jsPDF;
-
-
-    const documento =
-        new jsPDF(
-            "landscape",
-            "mm",
-            "a4"
-        );
-
-
-    documento.setFontSize(18);
-
-    documento.text(
-        "Reporte de proyectos",
-        14,
-        15
-    );
-
-
-    documento.setFontSize(9);
-
-    documento.text(
-        "Generado por: " +
-        (perfilUsuario?.nombre || "Usuario"),
-        14,
-        22
-    );
-
-    documento.text(
-        "Fecha de generación: " +
-        formatearFecha(
-            new Date()
-                .toISOString()
-                .substring(0, 10)
-        ),
-        14,
-        27
-    );
-
-
-    let totalAdjudicado = 0;
-    let totalIngresos = 0;
-    let totalGastos = 0;
-    let totalDocumentos = 0;
-
-
-    proyectosReporte.forEach(
-        function (proyecto) {
-
-            totalAdjudicado +=
-                Number(proyecto.montoAdjudicado) || 0;
-
-            totalIngresos +=
-                Number(proyecto.ingresos) || 0;
-
-            totalGastos +=
-                Number(proyecto.gastos) || 0;
-
-            totalDocumentos +=
-                Number(proyecto.documentos) || 0;
-
-        }
-    );
-
-
-    documento.setFontSize(11);
-
-    documento.text(
-        "Resumen general",
-        14,
-        36
-    );
-
-    documento.setFontSize(9);
-
-    documento.text(
-        "Proyectos: " + proyectosReporte.length,
-        14,
-        43
-    );
-
-    documento.text(
-        "Total adjudicado: " + formatearMoneda(totalAdjudicado),
-        70,
-        43
-    );
-
-    documento.text(
-        "Total ingresos: " + formatearMoneda(totalIngresos),
-        145,
-        43
-    );
-
-    documento.text(
-        "Total gastos: " + formatearMoneda(totalGastos),
-        220,
-        43
-    );
-
-    documento.text(
-        "Saldo: " + formatearMoneda(totalIngresos - totalGastos),
-        70,
-        50
-    );
-
-    documento.text(
-        "Documentos: " + totalDocumentos,
-        145,
-        50
-    );
-
-
-    if (
-        typeof documento.autoTable !== "function"
-    ) {
-
-        alert(
-            "No fue posible cargar la herramienta de tablas PDF."
-        );
-
-        return;
-
-    }
-
-
-    const filas =
-        proyectosReporte.map(
-            function (proyecto) {
-
-                return [
-
-                    proyecto.nombre || "—",
-                    proyecto.codigo || "—",
-                    proyecto.organismo_financiador || "—",
-                    obtenerTextoEstadoProyecto(
-                        proyecto.estado
-                    ),
-                    formatearMoneda(
-                        proyecto.montoAdjudicado
-                    ),
-                    formatearMoneda(
-                        proyecto.ingresos
-                    ),
-                    formatearMoneda(
-                        proyecto.gastos
-                    ),
-                    formatearMoneda(
-                        proyecto.saldo
-                    ),
-                    String(
-                        proyecto.documentos
-                    )
-
-                ];
-
-            }
-        );
-
-
-    documento.autoTable({
-
-        startY: 58,
-
-        head: [[
-            "Proyecto",
-            "Código",
-            "Organismo financiador",
-            "Estado",
-            "Adjudicado",
-            "Ingresos",
-            "Gastos",
-            "Saldo",
-            "Docs."
-        ]],
-
-        body: filas,
-
-        styles: {
-            fontSize: 7,
-            cellPadding: 2
-        },
-
-        headStyles: {
-            fontSize: 7,
-            fontStyle: "bold"
-        },
-
-        columnStyles: {
-            0: { cellWidth: 43 },
-            1: { cellWidth: 20 },
-            2: { cellWidth: 38 },
-            3: { cellWidth: 24 },
-            4: { cellWidth: 25 },
-            5: { cellWidth: 25 },
-            6: { cellWidth: 25 },
-            7: { cellWidth: 25 },
-            8: { cellWidth: 12 }
-        },
-
-        margin: {
-            left: 10,
-            right: 10
-        },
-
-        didDrawPage: function () {
-
-            documento.setFontSize(7);
-
-            documento.text(
-                "Comunidad Indígena Juan Cheuquelén — Reporte de proyectos",
-                10,
-                202
-            );
-
-        }
-
-    });
-
-
-    const fecha =
-        new Date()
-            .toISOString()
-            .substring(0, 10);
-
-
-    documento.save(
-        "reporte-proyectos-" +
-        fecha +
-        ".pdf"
-    );
-
-}
-
-
-function obtenerTextoEstadoProyecto(estado) {
-
-    const mapa = {
-        postulado: "Postulado",
-        adjudicado: "Adjudicado",
-        en_ejecucion: "En ejecución",
-        finalizado: "Finalizado",
-        finalizada: "Finalizado",
-        rechazado: "Rechazado",
-        desistido: "Desistido"
-    };
-
-    return (
-        mapa[String(estado || "").toLowerCase()] ||
-        estado ||
-        "Sin estado"
-    );
-
-}
-
-
-/* ============================================================
    ESTABLECER TEXTO DE REPORTE DE PROYECTO
    ============================================================ */
 
@@ -1801,8 +1304,19 @@ async function generarReporte() {
         }
 
 
+        /*
+         * El reporte financiero general NO incluye movimientos
+         * asociados a proyectos. Los proyectos tienen su propio
+         * reporte independiente más arriba en este módulo.
+         */
         let lista =
-            [...movimientos];
+            movimientos.filter(
+                function (movimiento) {
+                    return !esMovimientoProyecto(
+                        movimiento
+                    );
+                }
+            );
 
 
         /* ====================================================
@@ -2142,9 +1656,49 @@ function calcularSaldosDisponibles(
      * calculamos sobre todos los movimientos.
      */
 
+    /*
+     * Cuando se selecciona un año, la disponibilidad se calcula
+     * sobre los movimientos pertenecientes a ese período financiero.
+     * Esto es importante porque un movimiento puede tener una fecha
+     * anterior al año, pero estar correctamente asociado al período
+     * financiero seleccionado (por ejemplo, un ingreso de proyecto).
+     */
+    const periodosDelAnio =
+        anio
+            ? periodos.filter(
+                function (periodo) {
+                    return Number(
+                        periodo.anio
+                    ) === Number(anio);
+                }
+            )
+            : [];
+
+
+    const idsPeriodosDelAnio =
+        periodosDelAnio.map(
+            function (periodo) {
+                return Number(periodo.id);
+            }
+        );
+
+
     const movimientosParaSaldo =
         movimientos.filter(
             function (movimiento) {
+
+                if (
+                    anio &&
+                    idsPeriodosDelAnio.length > 0 &&
+                    !idsPeriodosDelAnio.includes(
+                        Number(movimiento.periodo_id)
+                    )
+                ) {
+
+                    return false;
+
+                }
+
 
                 if (!fechaCorte) {
 
@@ -2296,35 +1850,35 @@ function actualizarSaldosDisponibles(
      *
      * Si posteriormente agregamos las tarjetas:
      *
-     * saldoCajaComunidad
-     * saldoCuentaBancaria
-     * saldoTotalDisponible
-     * anioReportado
+     * disponibilidadCaja
+     * disponibilidadBanco
+     * disponibilidadTotal
+     * disponibilidadAnio
      *
      * se actualizarán automáticamente.
      */
 
     const anioElement =
         document.getElementById(
-            "anioReportado"
+            "disponibilidadAnio"
         );
 
 
     const cajaElement =
         document.getElementById(
-            "saldoCajaComunidad"
+            "disponibilidadCaja"
         );
 
 
     const bancoElement =
         document.getElementById(
-            "saldoCuentaBancaria"
+            "disponibilidadBanco"
         );
 
 
     const totalElement =
         document.getElementById(
-            "saldoTotalDisponible"
+            "disponibilidadTotal"
         );
 
 
@@ -2391,6 +1945,37 @@ function obtenerFechaMovimiento(
     ).substring(
         0,
         10
+    );
+
+}
+
+
+/* ============================================================
+   IDENTIFICAR MOVIMIENTO DE PROYECTO
+   ============================================================ */
+
+function esMovimientoProyecto(
+    movimiento
+) {
+
+    if (!movimiento) {
+
+        return false;
+
+    }
+
+
+    const origen =
+        String(
+            movimiento.origen ||
+            ""
+        ).toLowerCase();
+
+
+    return (
+        origen === "proyecto_ingreso" ||
+        origen === "proyecto_egreso" ||
+        origen === "proyecto"
     );
 
 }
@@ -2480,6 +2065,68 @@ function clasificarMovimiento(
 
 
 /* ============================================================
+   CALCULAR TOTALES DEL REPORTE GENERAL
+   ============================================================ */
+
+function calcularTotalesReporte(
+    lista
+) {
+
+    let ingresos = 0;
+
+    let egresos = 0;
+
+
+    (lista || []).forEach(
+        function (movimiento) {
+
+            const monto =
+                Number(
+                    movimiento.monto
+                ) || 0;
+
+
+            if (
+                movimiento.tipo ===
+                "ingreso"
+            ) {
+
+                ingresos +=
+                    monto;
+
+            }
+
+
+            if (
+                movimiento.tipo ===
+                "egreso"
+            ) {
+
+                egresos +=
+                    monto;
+
+            }
+
+        }
+    );
+
+
+    return {
+
+        ingresos: ingresos,
+
+        egresos: egresos,
+
+        resultado:
+            ingresos -
+            egresos
+
+    };
+
+}
+
+
+/* ============================================================
    ACTUALIZAR RESUMEN GENERAL
    ============================================================ */
 
@@ -2526,7 +2173,31 @@ function actualizarResumen(
     );
 
 
-    const saldo =
+    /*
+     * IMPORTANTE:
+     *
+     * Este indicador NO representa solamente el resultado
+     * de los movimientos incluidos en la consulta.
+     *
+     * El saldo disponible corresponde al dinero que la comunidad
+     * tiene efectivamente disponible en sus cuentas: caja + banco.
+     * Ese cálculo se realiza en calcularSaldosDisponibles() y
+     * considera todos los movimientos, incluidos los de proyectos,
+     * porque el dinero de proyectos forma parte físicamente del saldo
+     * hasta que sea ejecutado o reintegrado.
+     */
+    const saldoDisponible =
+        Number(
+            resumenDisponible.totalDisponible
+        ) || 0;
+
+
+    /*
+     * Resultado matemático de las operaciones generales.
+     * Se conserva para exportaciones y análisis, pero NO se muestra
+     * como saldo disponible, porque podría inducir a error.
+     */
+    const resultadoOperaciones =
         ingresos -
         egresos;
 
@@ -2579,7 +2250,7 @@ function actualizarResumen(
 
         elementoSaldo.textContent =
             formatearMoneda(
-                saldo
+                saldoDisponible
             );
 
 
@@ -2589,7 +2260,7 @@ function actualizarResumen(
         );
 
 
-        if (saldo > 0) {
+        if (saldoDisponible > 0) {
 
             elementoSaldo.classList.add(
                 "resultado-positivo"
@@ -2598,11 +2269,59 @@ function actualizarResumen(
         }
 
 
-        if (saldo < 0) {
+        if (saldoDisponible < 0) {
 
             elementoSaldo.classList.add(
                 "resultado-negativo"
             );
+
+        }
+
+
+        /*
+         * La tarjeta originalmente decía:
+         *
+         *     Saldo
+         *     Ingresos menos egresos
+         *
+         * Esa descripción ya no corresponde a este indicador.
+         * Se cambia dinámicamente para no exigir una modificación
+         * adicional en reportes.html.
+         */
+        const tarjeta =
+            elementoSaldo.closest(
+                ".tarjeta-resumen"
+            );
+
+
+        if (tarjeta) {
+
+            const titulo =
+                tarjeta.querySelector(
+                    "span"
+                );
+
+
+            const descripcion =
+                tarjeta.querySelector(
+                    "small"
+                );
+
+
+            if (titulo) {
+
+                titulo.textContent =
+                    "Saldo disponible";
+
+            }
+
+
+            if (descripcion) {
+
+                descripcion.textContent =
+                    "Caja + cuenta bancaria";
+
+            }
 
         }
 
@@ -3394,6 +3113,27 @@ function exportarExcelReporte() {
         ],
 
         [
+            "Total ingresos generales + cuotas",
+            calcularTotalesReporte(
+                reporteActual
+            ).ingresos
+        ],
+
+        [
+            "Total egresos generales",
+            calcularTotalesReporte(
+                reporteActual
+            ).egresos
+        ],
+
+        [
+            "Resultado de operaciones generales",
+            calcularTotalesReporte(
+                reporteActual
+            ).resultado
+        ],
+
+        [
             "Monto disponible — Caja Comunidad",
             resumenDisponible.cajaComunidad
         ],
@@ -3542,7 +3282,10 @@ function exportarExcelReporte() {
 
         "B5",
         "B6",
-        "B7"
+        "B7",
+        "B8",
+        "B9",
+        "B10"
 
     ];
 
@@ -3572,7 +3315,7 @@ function exportarExcelReporte() {
      */
 
     const primeraFilaMovimientos =
-        12;
+        15;
 
 
     for (
@@ -3800,6 +3543,42 @@ function exportarPdfReporte() {
     );
 
 
+    const totalesReporte =
+        calcularTotalesReporte(
+            reporteActual
+        );
+
+
+    documento.text(
+        "Ingresos generales + cuotas: " +
+        formatearMoneda(
+            totalesReporte.ingresos
+        ),
+        14,
+        57
+    );
+
+
+    documento.text(
+        "Egresos generales: " +
+        formatearMoneda(
+            totalesReporte.egresos
+        ),
+        90,
+        57
+    );
+
+
+    documento.text(
+        "Resultado de operaciones: " +
+        formatearMoneda(
+            totalesReporte.resultado
+        ),
+        180,
+        57
+    );
+
+
     documento.text(
         "Caja Comunidad: " +
         formatearMoneda(
@@ -3915,7 +3694,7 @@ function exportarPdfReporte() {
 
     documento.autoTable({
 
-        startY: 60,
+        startY: 65,
 
         head: [[
 
