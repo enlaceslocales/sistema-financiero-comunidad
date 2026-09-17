@@ -4481,3 +4481,2238 @@ textarea:focus {
 /* =========================================================
    FIN DEL ARCHIVO
    ========================================================= */
+
+
+/* =========================================================
+   IDENTIDAD VISUAL MAPUCHE CONTEMPORÁNEA
+   ---------------------------------------------------------
+   Estos estilos están limitados a .dashboard-page para que
+   no alteren visualmente los demás módulos del sistema.
+   Se mantienen las clases, IDs y comportamiento existentes.
+   ========================================================= */
+
+body.dashboard-page {
+
+    --primario: #1D587A;
+    --primario-hover: #164660;
+    --primario-suave: #E7F0F3;
+
+    --fondo: #F3F1EA;
+    --blanco: #FFFFFF;
+
+    --texto: #193247;
+    --texto-secundario: #667784;
+    --texto-suave: #91A0A9;
+
+    --borde: #DCE3E4;
+
+    --verde: #477B63;
+    --verde-suave: #EAF2ED;
+
+    --rojo: #A85D4A;
+    --rojo-suave: #F7ECE8;
+
+    --amarillo: #B78D3E;
+    --amarillo-suave: #F8F1E2;
+
+    --azul: #397B9E;
+    --azul-suave: #E8F1F5;
+
+    --comunidad-azul: #1D587A;
+    --comunidad-azul-oscuro: #102F49;
+    --comunidad-azul-claro: #E7F0F3;
+    --comunidad-borde: #C6D8DF;
+
+    --radio: 17px;
+
+    --sombra:
+        0 10px 32px rgba(16, 47, 73, 0.08);
+
+    background:
+        radial-gradient(
+            circle at 90% 0%,
+            rgba(183, 141, 62, 0.08),
+            transparent 28%
+        ),
+        var(--fondo);
+}
+
+
+/* =========================================================
+   CONTENEDOR GENERAL
+   ========================================================= */
+
+body.dashboard-page .app {
+
+    background:
+        linear-gradient(
+            180deg,
+            #102F49 0,
+            #102F49 78px,
+            var(--fondo) 78px,
+            var(--fondo) 100%
+        );
+
+}
+
+
+/* =========================================================
+   BARRA LATERAL
+   ========================================================= */
+
+body.dashboard-page .sidebar {
+
+    width: 258px;
+
+    padding: 22px 15px 18px;
+
+    background:
+        radial-gradient(
+            circle at 85% 10%,
+            rgba(255,255,255,0.08),
+            transparent 28%
+        ),
+        linear-gradient(
+            180deg,
+            #102F49 0%,
+            #123A55 55%,
+            #0C2B42 100%
+        );
+
+    border-right: 1px solid rgba(255,255,255,0.07);
+
+    box-shadow: 10px 0 35px rgba(16, 47, 73, 0.08);
+
+    overflow: hidden;
+
+}
+
+
+/* Franja geométrica decorativa */
+
+body.dashboard-page .sidebar::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 24px;
+    right: 24px;
+    bottom: 92px;
+
+    height: 92px;
+
+    opacity: 0.14;
+
+    background:
+        linear-gradient(
+            45deg,
+            transparent 43%,
+            #D5B26A 44%,
+            #D5B26A 48%,
+            transparent 49%,
+            transparent 51%,
+            #D5B26A 52%,
+            #D5B26A 56%,
+            transparent 57%
+        );
+
+    background-size: 34px 34px;
+
+    -webkit-mask-image:
+        linear-gradient(to bottom, transparent, #000);
+
+    mask-image:
+        linear-gradient(to bottom, transparent, #000);
+
+    pointer-events: none;
+
+}
+
+
+/* =========================================================
+   LOGOTIPO
+   ========================================================= */
+
+body.dashboard-page .logo {
+
+    position: relative;
+
+    z-index: 1;
+
+    padding: 5px 8px 30px;
+
+    gap: 13px;
+
+}
+
+
+body.dashboard-page .logo-icon {
+
+    width: 45px;
+    height: 45px;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #D5B26A,
+            #A8783B
+        );
+
+    color: #102F49;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,0.18);
+
+    font-size: 12px;
+
+    letter-spacing: 0.5px;
+
+}
+
+
+body.dashboard-page .logo-text strong {
+
+    color: #FFFFFF;
+
+    font-size: 13px;
+
+    letter-spacing: 0.05px;
+
+}
+
+
+body.dashboard-page .logo-text span {
+
+    color: rgba(255,255,255,0.62);
+
+}
+
+
+/* =========================================================
+   MENÚ
+   ========================================================= */
+
+body.dashboard-page .menu {
+
+    position: relative;
+
+    z-index: 1;
+
+    gap: 7px;
+
+}
+
+
+body.dashboard-page .menu-item {
+
+    color: rgba(255,255,255,0.70);
+
+    border: 1px solid transparent;
+
+    border-radius: 12px;
+
+    padding: 12px 13px;
+
+}
+
+
+body.dashboard-page .menu-item:hover {
+
+    background: rgba(255,255,255,0.08);
+
+    color: #FFFFFF;
+
+    transform: translateX(2px);
+
+}
+
+
+body.dashboard-page .menu-item.activo {
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,0.15),
+            rgba(255,255,255,0.07)
+        );
+
+    border-color: rgba(255,255,255,0.08);
+
+    color: #FFFFFF;
+
+    box-shadow:
+        inset 3px 0 0 #D5B26A;
+
+}
+
+
+body.dashboard-page .menu-icon {
+
+    color: #D5B26A;
+
+}
+
+
+/* =========================================================
+   PARTE INFERIOR SIDEBAR
+   ========================================================= */
+
+body.dashboard-page .sidebar-bottom {
+
+    position: relative;
+
+    z-index: 2;
+
+    border-top-color: rgba(255,255,255,0.10);
+
+}
+
+
+body.dashboard-page .cerrar-sesion {
+
+    color: rgba(255,255,255,0.66);
+
+}
+
+
+body.dashboard-page .cerrar-sesion:hover {
+
+    background: rgba(168,93,74,0.18);
+
+    color: #F1B3A5;
+
+}
+
+
+/* =========================================================
+   CONTENIDO
+   ========================================================= */
+
+body.dashboard-page .contenido {
+
+    width: calc(100% - 258px);
+
+    margin-left: 258px;
+
+    padding: 0 36px 50px;
+
+}
+
+
+/* =========================================================
+   TOPBAR
+   ========================================================= */
+
+body.dashboard-page .topbar {
+
+    min-height: 78px;
+
+    margin: 0 -36px 28px;
+
+    padding: 14px 36px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #102F49 0%,
+            #164660 58%,
+            #1D587A 100%
+        );
+
+    color: #FFFFFF;
+
+    position: relative;
+
+    overflow: hidden;
+
+}
+
+
+/* Geometría textil en la cabecera */
+
+body.dashboard-page .topbar::after {
+
+    content: "";
+
+    position: absolute;
+
+    right: 55px;
+    top: -34px;
+
+    width: 170px;
+    height: 170px;
+
+    border: 2px solid rgba(213,178,106,0.15);
+
+    transform: rotate(45deg);
+
+    box-shadow:
+        0 0 0 14px rgba(213,178,106,0.045),
+        0 0 0 28px rgba(213,178,106,0.025);
+
+    pointer-events: none;
+
+}
+
+
+body.dashboard-page .topbar > * {
+
+    position: relative;
+
+    z-index: 1;
+
+}
+
+
+body.dashboard-page .topbar-titulo {
+
+    min-width: 190px;
+
+}
+
+
+body.dashboard-page .topbar h1 {
+
+    margin-bottom: 4px;
+
+    color: #FFFFFF;
+
+    font-size: 24px;
+
+    letter-spacing: -0.35px;
+
+}
+
+
+body.dashboard-page .topbar p {
+
+    color: rgba(255,255,255,0.65);
+
+}
+
+
+/* =========================================================
+   FECHA ACTUAL
+   ========================================================= */
+
+body.dashboard-page .fecha-actual {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    min-width: 245px;
+
+    padding: 8px 13px;
+
+    border: 1px solid rgba(255,255,255,0.10);
+
+    border-radius: 13px;
+
+    background: rgba(255,255,255,0.07);
+
+    backdrop-filter: blur(8px);
+
+    -webkit-backdrop-filter: blur(8px);
+
+}
+
+
+body.dashboard-page .fecha-actual-icono {
+
+    width: 35px;
+    height: 35px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: rgba(213,178,106,0.17);
+
+    color: #E5C989;
+
+    font-size: 19px;
+
+}
+
+
+body.dashboard-page .fecha-actual-label {
+
+    display: block;
+
+    margin-bottom: 2px;
+
+    color: rgba(255,255,255,0.50);
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.7px;
+
+    text-transform: uppercase;
+
+}
+
+
+body.dashboard-page .fecha-actual strong {
+
+    display: block;
+
+    color: #FFFFFF;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+}
+
+
+/* =========================================================
+   USUARIO
+   ========================================================= */
+
+body.dashboard-page .usuario {
+
+    padding: 7px 10px;
+
+    background: rgba(255,255,255,0.07);
+
+    border: 1px solid rgba(255,255,255,0.10);
+
+    border-radius: 13px;
+
+    backdrop-filter: blur(8px);
+
+    -webkit-backdrop-filter: blur(8px);
+
+}
+
+
+body.dashboard-page .usuario-icono {
+
+    background: rgba(213,178,106,0.17);
+
+    color: #E5C989;
+
+}
+
+
+body.dashboard-page .usuario strong {
+
+    color: #FFFFFF;
+
+}
+
+
+body.dashboard-page .usuario span {
+
+    color: rgba(255,255,255,0.58);
+
+}
+
+
+/* =========================================================
+   ENCABEZADO PRINCIPAL — HERO
+   ========================================================= */
+
+body.dashboard-page .dashboard-header {
+
+    position: relative;
+
+    isolation: isolate;
+
+    min-height: 205px;
+
+    align-items: center;
+
+    margin-bottom: 26px;
+
+    padding: 34px 35px;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(255,255,255,0.10);
+
+    border-radius: 22px;
+
+    background:
+        radial-gradient(
+            circle at 82% 40%,
+            rgba(213,178,106,0.17),
+            transparent 23%
+        ),
+        radial-gradient(
+            circle at 15% 20%,
+            rgba(255,255,255,0.08),
+            transparent 26%
+        ),
+        linear-gradient(
+            120deg,
+            #102F49 0%,
+            #164660 54%,
+            #1D587A 100%
+        );
+
+    box-shadow:
+        0 16px 42px rgba(16,47,73,0.18);
+
+}
+
+
+body.dashboard-page .dashboard-header::before {
+
+    content: "";
+
+    position: absolute;
+
+    z-index: -1;
+
+    right: 56px;
+    top: -82px;
+
+    width: 255px;
+    height: 255px;
+
+    border: 3px solid rgba(213,178,106,0.18);
+
+    transform: rotate(45deg);
+
+    box-shadow:
+        0 0 0 17px rgba(213,178,106,0.055),
+        0 0 0 34px rgba(213,178,106,0.03);
+
+    pointer-events: none;
+
+}
+
+
+body.dashboard-page .dashboard-header::after {
+
+    content: "";
+
+    position: absolute;
+
+    z-index: -1;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 12px;
+
+    background:
+        repeating-linear-gradient(
+            135deg,
+            rgba(213,178,106,0.55) 0 7px,
+            transparent 7px 14px,
+            rgba(255,255,255,0.10) 14px 21px,
+            transparent 21px 28px
+        );
+
+    opacity: 0.55;
+
+}
+
+
+body.dashboard-page .dashboard-header > div:first-child {
+
+    max-width: 700px;
+
+}
+
+
+body.dashboard-page .etiqueta {
+
+    margin-bottom: 10px;
+
+    color: #E5C989;
+
+    font-size: 10px;
+
+    letter-spacing: 1.25px;
+
+}
+
+
+body.dashboard-page .dashboard-header h2 {
+
+    margin-bottom: 9px;
+
+    color: #FFFFFF;
+
+    font-size: clamp(24px, 3vw, 31px);
+
+    line-height: 1.12;
+
+    letter-spacing: -0.7px;
+
+}
+
+
+body.dashboard-page .dashboard-header p {
+
+    max-width: 610px;
+
+    color: rgba(255,255,255,0.72);
+
+    line-height: 1.6;
+
+}
+
+
+/* =========================================================
+   SELECTOR DE PERÍODO
+   ========================================================= */
+
+body.dashboard-page .selector-periodo {
+
+    min-width: 220px;
+
+    padding: 14px;
+
+    border: 1px solid rgba(255,255,255,0.12);
+
+    border-radius: 15px;
+
+    background: rgba(255,255,255,0.08);
+
+    backdrop-filter: blur(9px);
+
+    -webkit-backdrop-filter: blur(9px);
+
+}
+
+
+body.dashboard-page .selector-periodo label {
+
+    margin-bottom: 7px;
+
+    color: rgba(255,255,255,0.62);
+
+}
+
+
+body.dashboard-page .selector-periodo select {
+
+    min-height: 44px;
+
+    border-color: rgba(255,255,255,0.15);
+
+    background: rgba(255,255,255,0.95);
+
+    color: #193247;
+
+}
+
+
+/* =========================================================
+   TARJETAS FINANCIERAS
+   ========================================================= */
+
+body.dashboard-page .tarjetas-financieras {
+
+    gap: 18px;
+
+}
+
+
+body.dashboard-page .tarjeta-financiera {
+
+    position: relative;
+
+    min-height: 150px;
+
+    padding: 22px;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(25,50,71,0.07);
+
+    border-radius: 17px;
+
+    background: #FFFFFF;
+
+    box-shadow: 0 9px 28px rgba(16,47,73,0.07);
+
+    transition:
+        transform 0.22s ease,
+        box-shadow 0.22s ease;
+
+}
+
+
+body.dashboard-page .tarjeta-financiera::after {
+
+    content: "";
+
+    position: absolute;
+
+    right: -26px;
+    bottom: -42px;
+
+    width: 105px;
+    height: 105px;
+
+    border: 1px solid currentColor;
+
+    border-radius: 50%;
+
+    opacity: 0.08;
+
+}
+
+
+body.dashboard-page .tarjeta-financiera:hover {
+
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 15px 35px rgba(16,47,73,0.12);
+
+}
+
+
+body.dashboard-page .tarjeta-financiera-top {
+
+    margin-bottom: 15px;
+
+}
+
+
+body.dashboard-page .tarjeta-icono {
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 12px;
+
+}
+
+
+body.dashboard-page .ingreso-icono {
+
+    background: #EAF2ED;
+
+    color: #477B63;
+
+}
+
+
+body.dashboard-page .egreso-icono {
+
+    background: #F7ECE8;
+
+    color: #A85D4A;
+
+}
+
+
+body.dashboard-page .saldo-icono {
+
+    background: #E7F0F3;
+
+    color: #1D587A;
+
+}
+
+
+body.dashboard-page .ingreso-fondo,
+body.dashboard-page .egreso-fondo,
+body.dashboard-page .saldo-fondo {
+
+    border-top: 3px solid currentColor;
+
+}
+
+
+body.dashboard-page .ingreso-fondo {
+
+    color: #477B63;
+
+}
+
+
+body.dashboard-page .egreso-fondo {
+
+    color: #A85D4A;
+
+}
+
+
+body.dashboard-page .saldo-fondo {
+
+    color: #1D587A;
+
+}
+
+
+body.dashboard-page .ingreso-fondo > strong {
+
+    color: #477B63;
+
+}
+
+
+body.dashboard-page .egreso-fondo > strong {
+
+    color: #A85D4A;
+
+}
+
+
+body.dashboard-page .saldo-fondo > strong {
+
+    color: #1D587A;
+
+}
+
+
+body.dashboard-page .tarjeta-financiera > strong {
+
+    font-size: 27px;
+
+}
+
+
+body.dashboard-page .tarjeta-label {
+
+    color: #667784;
+
+}
+
+
+body.dashboard-page .tarjeta-descripcion {
+
+    color: #87949B;
+
+}
+
+
+/* =========================================================
+   SECCIONES
+   ========================================================= */
+
+body.dashboard-page .seccion-dashboard {
+
+    margin-bottom: 30px;
+
+}
+
+
+body.dashboard-page .titulo-seccion {
+
+    margin-bottom: 14px;
+
+}
+
+
+body.dashboard-page .titulo-seccion h3 {
+
+    color: #193247;
+
+    font-size: 17px;
+
+}
+
+
+body.dashboard-page .titulo-seccion p {
+
+    color: #71818B;
+
+}
+
+
+/* =========================================================
+   TARJETAS DE CUOTAS
+   ========================================================= */
+
+body.dashboard-page .tarjetas-cuotas {
+
+    gap: 16px;
+
+}
+
+
+body.dashboard-page .tarjeta-cuota {
+
+    min-height: 82px;
+
+    padding: 17px 18px;
+
+    border-color: #DCE3E4;
+
+    border-radius: 15px;
+
+    box-shadow: 0 7px 22px rgba(16,47,73,0.055);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+
+}
+
+
+body.dashboard-page .tarjeta-cuota:hover {
+
+    transform: translateY(-2px);
+
+    border-color: #C6D8DF;
+
+    box-shadow: 0 11px 28px rgba(16,47,73,0.09);
+
+}
+
+
+body.dashboard-page .cuota-icono {
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 12px;
+
+}
+
+
+body.dashboard-page .cuota-pagada {
+
+    background: #EAF2ED;
+
+    color: #477B63;
+
+}
+
+
+body.dashboard-page .cuota-pendiente {
+
+    background: #F7ECE8;
+
+    color: #A85D4A;
+
+}
+
+
+body.dashboard-page .cuota-parcial {
+
+    background: #F8F1E2;
+
+    color: #A77D2E;
+
+}
+
+
+/* =========================================================
+   PANEL RESUMEN
+   ========================================================= */
+
+body.dashboard-page .panel-card {
+
+    border-color: #DCE3E4;
+
+    border-radius: 17px;
+
+    box-shadow: 0 9px 28px rgba(16,47,73,0.06);
+
+}
+
+
+body.dashboard-page .panel-card-header {
+
+    padding: 22px 23px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #FFFFFF,
+            #F8F7F2
+        );
+
+    border-bottom-color: #E2E6E4;
+
+}
+
+
+body.dashboard-page .panel-card-header h3 {
+
+    color: #193247;
+
+}
+
+
+body.dashboard-page .panel-card-header p {
+
+    color: #71818B;
+
+}
+
+
+body.dashboard-page .estado-periodo {
+
+    background: #E7F0F3;
+
+    color: #1D587A;
+
+    border: 1px solid #C6D8DF;
+
+}
+
+
+body.dashboard-page .estado-periodo.abierto {
+
+    background: #EAF2ED;
+
+    color: #477B63;
+
+    border-color: #C9DDD1;
+
+}
+
+
+body.dashboard-page .estado-periodo.cerrado {
+
+    background: #F7ECE8;
+
+    color: #A85D4A;
+
+    border-color: #E9CFC7;
+
+}
+
+
+body.dashboard-page .resumen-linea {
+
+    padding: 17px 23px;
+
+    border-bottom-color: #E5E8E7;
+
+}
+
+
+body.dashboard-page .resumen-linea span {
+
+    color: #6D7D86;
+
+}
+
+
+body.dashboard-page .resumen-linea strong {
+
+    color: #193247;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE DEL DASHBOARD REDISEÑADO
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    body.dashboard-page .sidebar {
+
+        width: 230px;
+
+    }
+
+
+    body.dashboard-page .contenido {
+
+        width: calc(100% - 230px);
+
+        margin-left: 230px;
+
+        padding-left: 28px;
+
+        padding-right: 28px;
+
+    }
+
+
+    body.dashboard-page .topbar {
+
+        margin-left: -28px;
+
+        margin-right: -28px;
+
+        padding-left: 28px;
+
+        padding-right: 28px;
+
+    }
+
+
+    body.dashboard-page .fecha-actual {
+
+        min-width: 215px;
+
+    }
+
+}
+
+
+@media (max-width: 850px) {
+
+    body.dashboard-page .topbar {
+
+        flex-wrap: wrap;
+
+        gap: 10px 16px;
+
+        padding-top: 12px;
+
+        padding-bottom: 12px;
+
+    }
+
+
+    body.dashboard-page .topbar-titulo {
+
+        flex: 1 1 200px;
+
+    }
+
+
+    body.dashboard-page .fecha-actual {
+
+        flex: 0 1 auto;
+
+    }
+
+
+    body.dashboard-page .usuario {
+
+        flex: 0 1 auto;
+
+    }
+
+}
+
+
+@media (max-width: 750px) {
+
+    body.dashboard-page .app {
+
+        background: var(--fondo);
+
+    }
+
+
+    body.dashboard-page .sidebar {
+
+        width: 100%;
+
+        background:
+            linear-gradient(
+                135deg,
+                #102F49,
+                #164660
+            );
+
+    }
+
+
+    body.dashboard-page .sidebar::after {
+
+        display: none;
+
+    }
+
+
+    body.dashboard-page .contenido {
+
+        width: 100%;
+
+        margin-left: 0;
+
+        padding: 0 18px 40px;
+
+    }
+
+
+    body.dashboard-page .topbar {
+
+        margin: 0 -18px 22px;
+
+        padding: 14px 18px;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+
+    body.dashboard-page .topbar-titulo {
+
+        width: 100%;
+
+    }
+
+
+    body.dashboard-page .fecha-actual,
+    body.dashboard-page .usuario {
+
+        width: 100%;
+
+    }
+
+
+    body.dashboard-page .dashboard-header {
+
+        min-height: 0;
+
+        padding: 28px 24px;
+
+        align-items: stretch;
+
+    }
+
+
+    body.dashboard-page .dashboard-header::before {
+
+        right: -60px;
+
+    }
+
+
+    body.dashboard-page .selector-periodo {
+
+        width: 100%;
+
+        min-width: 0;
+
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    body.dashboard-page .topbar h1 {
+
+        font-size: 22px;
+
+    }
+
+
+    body.dashboard-page .dashboard-header {
+
+        border-radius: 18px;
+
+        padding: 25px 21px;
+
+    }
+
+
+    body.dashboard-page .dashboard-header h2 {
+
+        font-size: 25px;
+
+    }
+
+
+    body.dashboard-page .tarjeta-financiera {
+
+        min-height: 145px;
+
+    }
+
+}
+
+
+@media (max-width: 400px) {
+
+    body.dashboard-page .contenido {
+
+        padding-left: 12px;
+
+        padding-right: 12px;
+
+    }
+
+
+    body.dashboard-page .topbar {
+
+        margin-left: -12px;
+
+        margin-right: -12px;
+
+        padding-left: 12px;
+
+        padding-right: 12px;
+
+    }
+
+
+    body.dashboard-page .dashboard-header {
+
+        padding: 23px 18px;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   IDENTIDAD VISUAL GLOBAL · COMUNIDAD JUAN CHEUQUELEN
+   ---------------------------------------------------------
+   Capa estética global para todos los módulos del sistema.
+   No modifica IDs, clases funcionales ni lógica JavaScript.
+   ========================================================= */
+
+:root {
+    --primario: #1B5B78;
+    --primario-hover: #14465E;
+    --primario-suave: #E7F1F4;
+
+    --fondo: #F3F0E8;
+    --blanco: #FFFFFF;
+
+    --texto: #26343A;
+    --texto-secundario: #68777B;
+    --texto-suave: #9AA5A6;
+
+    --borde: #D9DDD8;
+
+    --verde: #39785C;
+    --verde-suave: #E8F2EC;
+
+    --rojo: #A9504D;
+    --rojo-suave: #F8EAE8;
+
+    --amarillo: #B58A35;
+    --amarillo-suave: #F8F0DC;
+
+    --azul: #3E7E9B;
+    --azul-suave: #E7F1F4;
+
+    --comunidad-azul: #1B5B78;
+    --comunidad-azul-oscuro: #123D52;
+    --comunidad-azul-claro: #E7F1F4;
+    --comunidad-borde: #BDD0D7;
+
+    --radio: 16px;
+    --sombra: 0 12px 34px rgba(35, 52, 58, 0.09);
+    --sombra-fuerte: 0 20px 55px rgba(35, 52, 58, 0.15);
+    --tierra: #8A6751;
+    --tierra-suave: #F0E8DF;
+    --arena: #E8DFCF;
+}
+
+
+/* =========================================================
+   BASE GLOBAL
+   ========================================================= */
+
+html {
+    background: var(--fondo);
+    scroll-behavior: smooth;
+}
+
+body {
+    background:
+        radial-gradient(circle at 85% 0%, rgba(181, 138, 53, 0.07), transparent 26%),
+        radial-gradient(circle at 0% 100%, rgba(27, 91, 120, 0.055), transparent 30%),
+        var(--fondo);
+    color: var(--texto);
+}
+
+::selection {
+    background: rgba(27, 91, 120, 0.18);
+    color: var(--comunidad-azul-oscuro);
+}
+
+
+/* =========================================================
+   PATRÓN GEOMÉTRICO DECORATIVO
+   Inspiración textil mapuche, usada como recurso gráfico
+   sutil y no como reproducción de un símbolo ceremonial.
+   ========================================================= */
+
+.app {
+    position: relative;
+}
+
+.app::before {
+    content: "";
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: 360px;
+    height: 260px;
+    z-index: -1;
+    opacity: 0.18;
+    pointer-events: none;
+    background:
+        linear-gradient(135deg, transparent 42%, rgba(27, 91, 120, 0.18) 43%, rgba(27, 91, 120, 0.18) 49%, transparent 50%) 0 0 / 36px 36px,
+        linear-gradient(45deg, transparent 42%, rgba(181, 138, 53, 0.18) 43%, rgba(181, 138, 53, 0.18) 49%, transparent 50%) 18px 18px / 36px 36px;
+    mask-image: linear-gradient(to top left, black, transparent 75%);
+}
+
+
+/* =========================================================
+   SIDEBAR GLOBAL
+   ========================================================= */
+
+.sidebar {
+    background:
+        linear-gradient(180deg, #123D52 0%, #164B63 52%, #123D52 100%);
+    border-right: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 8px 0 30px rgba(18, 61, 82, 0.10);
+    overflow: hidden;
+}
+
+.sidebar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, #8A6751, #B58A35, #1B5B78, #B58A35, #8A6751);
+}
+
+.sidebar::after {
+    content: "";
+    position: absolute;
+    right: -42px;
+    bottom: 70px;
+    width: 150px;
+    height: 150px;
+    opacity: 0.10;
+    pointer-events: none;
+    transform: rotate(45deg);
+    border: 1px solid rgba(255,255,255,0.8);
+    box-shadow:
+        0 0 0 18px rgba(255,255,255,0.12),
+        0 0 0 36px rgba(255,255,255,0.08);
+}
+
+.logo {
+    position: relative;
+    padding-top: 12px;
+}
+
+.logo-icon {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(145deg, #B58A35, #8A6751);
+    border: 1px solid rgba(255,255,255,0.22);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.20);
+}
+
+.logo-icon::after {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border: 1px solid rgba(255,255,255,0.35);
+    transform: rotate(45deg);
+}
+
+.logo-text strong,
+.logo-text span {
+    color: #FFFFFF;
+}
+
+.logo-text span {
+    color: rgba(255,255,255,0.68);
+}
+
+.menu-item {
+    color: rgba(255,255,255,0.72);
+    border: 1px solid transparent;
+}
+
+.menu-item:hover {
+    background: rgba(255,255,255,0.10);
+    color: #FFFFFF;
+    transform: translateX(3px);
+    border-color: rgba(255,255,255,0.08);
+}
+
+.menu-item.activo {
+    position: relative;
+    background: rgba(255,255,255,0.13);
+    color: #FFFFFF;
+    border-color: rgba(255,255,255,0.10);
+    box-shadow: inset 3px 0 0 #B58A35;
+}
+
+.menu-item.activo::after {
+    content: "";
+    position: absolute;
+    right: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #D4B45B;
+    box-shadow: 0 0 12px rgba(212,180,91,0.70);
+}
+
+.menu-icon {
+    color: inherit;
+}
+
+.sidebar-bottom {
+    border-top-color: rgba(255,255,255,0.12);
+}
+
+.cerrar-sesion {
+    color: rgba(255,255,255,0.68);
+}
+
+.cerrar-sesion:hover {
+    background: rgba(169,80,77,0.18);
+    color: #FFFFFF;
+}
+
+
+/* =========================================================
+   CONTENIDO Y TOPBAR
+   ========================================================= */
+
+.contenido {
+    background: transparent;
+}
+
+.topbar {
+    position: relative;
+    padding: 14px 18px;
+    border: 1px solid rgba(217,221,216,0.88);
+    border-radius: 18px;
+    background: rgba(255,255,255,0.78);
+    box-shadow: 0 8px 25px rgba(35,52,58,0.055);
+    backdrop-filter: blur(12px);
+}
+
+.topbar::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 18px 0 0 18px;
+    background: linear-gradient(180deg, #B58A35, #1B5B78);
+}
+
+.topbar h1 {
+    color: var(--comunidad-azul-oscuro);
+}
+
+.usuario {
+    background: rgba(255,255,255,0.90);
+    border-color: var(--comunidad-borde);
+    box-shadow: 0 5px 15px rgba(35,52,58,0.05);
+}
+
+.usuario-icono {
+    background: var(--comunidad-azul-claro);
+    color: var(--comunidad-azul);
+}
+
+
+/* =========================================================
+   FECHA ACTUAL DEL DASHBOARD
+   ========================================================= */
+
+.fecha-actual {
+    border-color: var(--comunidad-borde) !important;
+    background: linear-gradient(135deg, rgba(231,241,244,0.95), rgba(255,255,255,0.95)) !important;
+    color: var(--comunidad-azul-oscuro) !important;
+    box-shadow: 0 6px 18px rgba(27,91,120,0.08);
+}
+
+.fecha-actual-icono {
+    background: var(--comunidad-azul) !important;
+    color: #FFFFFF !important;
+}
+
+.fecha-actual-label {
+    color: var(--texto-secundario) !important;
+}
+
+
+/* =========================================================
+   ENCABEZADOS / HERO
+   ========================================================= */
+
+.dashboard-header {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(135deg, rgba(18,61,82,0.98), rgba(27,91,120,0.94)),
+        var(--comunidad-azul-oscuro) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    box-shadow: 0 18px 45px rgba(18,61,82,0.18) !important;
+}
+
+.dashboard-header::after {
+    content: "";
+    position: absolute;
+    right: -40px;
+    top: -55px;
+    width: 210px;
+    height: 210px;
+    opacity: 0.15;
+    transform: rotate(45deg);
+    border: 2px solid #D4B45B;
+    box-shadow:
+        0 0 0 20px rgba(212,180,91,0.16),
+        0 0 0 40px rgba(212,180,91,0.10);
+    pointer-events: none;
+}
+
+.dashboard-header h2,
+.dashboard-header p,
+.dashboard-header .etiqueta {
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-header h2,
+.dashboard-header p {
+    color: #FFFFFF !important;
+}
+
+.dashboard-header .etiqueta {
+    color: #E7D28A !important;
+}
+
+.selector-periodo {
+    position: relative;
+    z-index: 2;
+}
+
+.selector-periodo label {
+    color: rgba(255,255,255,0.78) !important;
+}
+
+.selector-periodo select {
+    background: rgba(255,255,255,0.96) !important;
+    border-color: rgba(255,255,255,0.45) !important;
+}
+
+
+/* =========================================================
+   TARJETAS GENERALES
+   ========================================================= */
+
+.tarjeta,
+.tarjeta-financiera,
+.tarjeta-cuota,
+.panel-card,
+.resumen-cuota,
+.tarjeta-inicio,
+.tarjeta-login {
+    border-color: var(--borde) !important;
+    box-shadow: var(--sombra);
+}
+
+.tarjeta,
+.panel-card,
+.tarjeta-cuota {
+    background: rgba(255,255,255,0.96);
+}
+
+.tarjeta:hover,
+.tarjeta-financiera:hover,
+.tarjeta-cuota:hover,
+.panel-card:hover {
+    border-color: var(--comunidad-borde) !important;
+    box-shadow: 0 16px 36px rgba(35,52,58,0.12);
+}
+
+.tarjeta-financiera {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(145deg, #FFFFFF, #F8F8F4) !important;
+}
+
+.tarjeta-financiera::after {
+    content: "";
+    position: absolute;
+    right: -28px;
+    bottom: -38px;
+    width: 105px;
+    height: 105px;
+    border: 1px solid rgba(27,91,120,0.12);
+    transform: rotate(45deg);
+    pointer-events: none;
+}
+
+.ingreso-fondo {
+    border-top: 3px solid var(--verde) !important;
+}
+
+.egreso-fondo {
+    border-top: 3px solid var(--rojo) !important;
+}
+
+.saldo-fondo {
+    border-top: 3px solid var(--amarillo) !important;
+}
+
+.ingreso-icono {
+    background: var(--verde-suave) !important;
+    color: var(--verde) !important;
+}
+
+.egreso-icono {
+    background: var(--rojo-suave) !important;
+    color: var(--rojo) !important;
+}
+
+.saldo-icono {
+    background: var(--amarillo-suave) !important;
+    color: var(--amarillo) !important;
+}
+
+.tarjeta-financiera > strong {
+    color: var(--comunidad-azul-oscuro) !important;
+}
+
+
+/* =========================================================
+   TÍTULOS DE SECCIÓN
+   ========================================================= */
+
+.titulo-seccion,
+.panel-card-header {
+    position: relative;
+}
+
+.titulo-seccion h3,
+.panel-card-header h3 {
+    color: var(--comunidad-azul-oscuro);
+}
+
+.titulo-seccion h3::before,
+.panel-card-header h3::before {
+    content: "";
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 9px;
+    border: 2px solid var(--amarillo);
+    transform: rotate(45deg);
+    vertical-align: 2px;
+}
+
+.estado-periodo.abierto {
+    background: var(--verde-suave) !important;
+    color: var(--verde) !important;
+    border-color: rgba(57,120,92,0.22) !important;
+}
+
+.estado-periodo.cerrado {
+    background: var(--rojo-suave) !important;
+    color: var(--rojo) !important;
+}
+
+
+/* =========================================================
+   FILTROS Y FORMULARIOS
+   ========================================================= */
+
+.filtros-socios,
+.filtros-cuotas,
+.filtros-pagos,
+.comprobantes-filtros {
+    background: rgba(255,255,255,0.72);
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    box-shadow: 0 7px 22px rgba(35,52,58,0.055);
+}
+
+label,
+.campo-busqueda label,
+.campo-filtro label,
+.campo-formulario label,
+.comprobantes-filtros label {
+    color: var(--texto-secundario);
+}
+
+input,
+select,
+textarea,
+.campo-filtro select,
+.campo-formulario input,
+.campo-formulario select,
+.campo-formulario textarea,
+.filtros-cuotas input,
+.filtros-cuotas select,
+.filtros-pagos input,
+.filtros-pagos select {
+    background: #FCFCF9;
+    border-color: var(--borde);
+    color: var(--texto);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+    border-color: #B9C8C5;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.campo-filtro select:focus,
+.campo-formulario input:focus,
+.campo-formulario select:focus,
+.campo-formulario textarea:focus {
+    border-color: var(--comunidad-azul);
+    box-shadow: 0 0 0 3px rgba(27,91,120,0.11);
+    background: #FFFFFF;
+}
+
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+
+.boton,
+.boton-primario {
+    background: linear-gradient(135deg, #1B5B78, #164B63) !important;
+    box-shadow: 0 7px 17px rgba(27,91,120,0.18);
+}
+
+.boton:hover,
+.boton-primario:hover {
+    background: linear-gradient(135deg, #14465E, #123D52) !important;
+    box-shadow: 0 10px 22px rgba(27,91,120,0.24);
+}
+
+.boton-secundario,
+.boton-accion,
+.boton-reimprimir {
+    background: #FFFFFF;
+    border-color: var(--comunidad-borde);
+    color: var(--comunidad-azul);
+}
+
+.boton-secundario:hover,
+.boton-accion:hover,
+.boton-reimprimir:hover {
+    background: var(--comunidad-azul-claro);
+    border-color: var(--comunidad-azul);
+    color: var(--comunidad-azul-oscuro);
+}
+
+.boton-comprobante {
+    background: var(--comunidad-azul-claro);
+    border-color: var(--comunidad-borde);
+    color: var(--comunidad-azul);
+}
+
+.boton-comprobante:hover {
+    background: var(--comunidad-azul);
+    border-color: var(--comunidad-azul);
+}
+
+
+/* =========================================================
+   TABLAS DE TODOS LOS MÓDULOS
+   ========================================================= */
+
+.tabla-contenedor,
+.tabla-socios,
+.tabla-cuotas,
+.tabla-pagos,
+.tabla-comprobantes,
+.tabla-historial {
+    background: #FFFFFF;
+}
+
+.tabla-contenedor {
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(35,52,58,0.055);
+}
+
+.tabla-socios th,
+.tabla-cuotas th,
+.tabla-pagos th,
+.tabla-comprobantes th,
+.tabla-historial th {
+    background: linear-gradient(135deg, #123D52, #1B5B78) !important;
+    color: #FFFFFF !important;
+    border-bottom-color: rgba(255,255,255,0.14) !important;
+}
+
+.tabla-socios td,
+.tabla-cuotas td,
+.tabla-pagos td,
+.tabla-comprobantes td,
+.tabla-historial td {
+    border-bottom-color: #E3E6E1;
+    color: var(--texto);
+}
+
+.tabla-socios tbody tr:hover,
+.tabla-cuotas tbody tr:hover,
+.tabla-pagos tbody tr:hover,
+.tabla-comprobantes tbody tr:hover,
+.tabla-historial tbody tr:hover {
+    background: #EEF5F5 !important;
+}
+
+.tabla-socios tbody tr:nth-child(even),
+.tabla-cuotas tbody tr:nth-child(even),
+.tabla-pagos tbody tr:nth-child(even),
+.tabla-comprobantes tbody tr:nth-child(even),
+.tabla-historial tbody tr:nth-child(even) {
+    background: #FAFBF8;
+}
+
+.numero-comprobante {
+    background: var(--comunidad-azul-claro);
+    border-color: var(--comunidad-borde);
+    color: var(--comunidad-azul-oscuro);
+}
+
+
+/* =========================================================
+   ESTADOS / BADGES
+   ========================================================= */
+
+.estado-socio.activo,
+.estado-cuota.pagada,
+.estado-pago.activo,
+.estado-pago.pagado,
+.estado-comprobante.emitido {
+    background: var(--verde-suave) !important;
+    color: var(--verde) !important;
+}
+
+.estado-socio.inactivo,
+.estado-cuota.anulada,
+.estado-pago.anulado,
+.comprobante-estado.anulado {
+    background: var(--rojo-suave) !important;
+    color: var(--rojo) !important;
+}
+
+.estado-cuota.pendiente {
+    background: var(--amarillo-suave) !important;
+    color: #8C6A1D !important;
+}
+
+.estado-cuota.parcial {
+    background: var(--comunidad-azul-claro) !important;
+    color: var(--comunidad-azul) !important;
+}
+
+.comprobante-estado.emitido,
+.comprobante-estado.anulado,
+.estado-comprobante,
+.estado-pago,
+.estado-cuota,
+.estado-socio {
+    border: 1px solid rgba(27,91,120,0.08);
+}
+
+
+/* =========================================================
+   RESÚMENES
+   ========================================================= */
+
+.resumen-cuota {
+    background: linear-gradient(145deg, #FFFFFF, #F8F8F4);
+}
+
+.resumen-cuota-icono {
+    background: var(--comunidad-azul-claro) !important;
+    color: var(--comunidad-azul) !important;
+}
+
+.resumen-cuota strong,
+.resumen-linea strong {
+    color: var(--comunidad-azul-oscuro) !important;
+}
+
+.resumen-linea {
+    border-bottom-color: var(--borde) !important;
+}
+
+
+/* =========================================================
+   MODALES
+   ========================================================= */
+
+.modal {
+    background: rgba(18,61,82,0.48);
+    backdrop-filter: blur(7px);
+}
+
+.modal-contenido {
+    border: 1px solid rgba(255,255,255,0.72);
+    border-radius: 20px;
+    box-shadow: var(--sombra-fuerte);
+    overflow: hidden;
+}
+
+.modal-header {
+    background:
+        linear-gradient(135deg, rgba(231,241,244,0.96), rgba(255,255,255,0.98));
+    border-bottom-color: var(--borde);
+}
+
+.modal-header h2 {
+    color: var(--comunidad-azul-oscuro);
+}
+
+.modal-cerrar:hover {
+    background: var(--rojo-suave);
+    color: var(--rojo);
+}
+
+
+/* =========================================================
+   MENSAJES Y ESTADOS VACÍOS
+   ========================================================= */
+
+.mensaje-exito {
+    background: var(--verde-suave);
+    border-color: rgba(57,120,92,0.20);
+    color: #2E684E;
+}
+
+.mensaje-error {
+    background: var(--rojo-suave);
+    border-color: rgba(169,80,77,0.20);
+    color: #8E403D;
+}
+
+.mensaje-info {
+    background: var(--comunidad-azul-claro);
+    border-color: var(--comunidad-borde);
+    color: var(--comunidad-azul-oscuro);
+}
+
+.estado-vacio {
+    background: rgba(255,255,255,0.45);
+}
+
+.estado-vacio strong {
+    color: var(--comunidad-azul-oscuro);
+}
+
+
+/* =========================================================
+   CARGANDO
+   ========================================================= */
+
+.cargando::before {
+    border-color: #D5DFDC;
+    border-top-color: var(--comunidad-azul);
+}
+
+
+/* =========================================================
+   COMPROBANTES / VISTAS ESPECIALES
+   ========================================================= */
+
+.comprobante-copia,
+.comprobante-pagina {
+    border-color: var(--borde);
+}
+
+.comprobante-numero,
+.comprobante-dato,
+.info-impresiones {
+    border-color: var(--borde) !important;
+}
+
+.comprobante-identidad h1,
+.comprobante-identidad h2 {
+    color: var(--comunidad-azul-oscuro);
+}
+
+
+/* =========================================================
+   ANIMACIONES SUAVES
+   ========================================================= */
+
+.menu-item,
+.tarjeta,
+.tarjeta-financiera,
+.tarjeta-cuota,
+.panel-card,
+.boton,
+.boton-primario,
+.boton-secundario,
+.boton-accion {
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.22s ease,
+        background 0.22s ease,
+        border-color 0.22s ease,
+        color 0.22s ease;
+}
+
+
+/* =========================================================
+   RESPONSIVE GLOBAL
+   ========================================================= */
+
+@media (max-width: 750px) {
+    .sidebar {
+        box-shadow: none;
+    }
+
+    .topbar {
+        border-radius: 0 0 16px 16px;
+    }
+
+    .app::before {
+        width: 220px;
+        height: 180px;
+    }
+
+    .filtros-socios,
+    .filtros-cuotas,
+    .filtros-pagos,
+    .comprobantes-filtros {
+        border-radius: 14px;
+    }
+}
+
+@media (max-width: 600px) {
+    .topbar {
+        padding: 12px 14px;
+    }
+
+    .tarjeta-financiera,
+    .tarjeta,
+    .tarjeta-cuota,
+    .panel-card {
+        border-radius: 14px;
+    }
+}
+
+@media print {
+    .app::before,
+    .sidebar::before,
+    .sidebar::after,
+    .dashboard-header::after,
+    .tarjeta-financiera::after,
+    .menu-item.activo::after,
+    .titulo-seccion h3::before,
+    .panel-card-header h3::before {
+        display: none !important;
+    }
+}
